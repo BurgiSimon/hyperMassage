@@ -184,6 +184,18 @@ footer[data-theme] {
   border-top: 1px solid var(--line);
   color: var(--fg-soft);
 }
+.hero__touch {
+  display: none;
+}
+@media (hover: none) {
+  .hero__touch {
+    display: inline;
+    color: var(--accent);
+  }
+  .hero__coords {
+    display: none;
+  }
+}
 .hero__scroll {
   display: inline-flex;
   align-items: center;
@@ -227,7 +239,7 @@ footer[data-theme] {
     top: 64%;
     transform: translateX(-50%);
   }
-  .hero__foot > span:first-child {
+  .hero__foot > .hero__coords {
     display: none;
   }
 }
