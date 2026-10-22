@@ -115,5 +115,5 @@ function boot() {
     }
   })
 
-  console.log('%cZeit für dich.%c\nMassage Claudia Bürgi, Kestenholz – 078 224 91 97', 'font: italic 22px Georgia, serif; color: #c25a32', 'font: 13px sans-serif')
+  console.log('%cZeit für dich.%c\nMassage Claudia Bürgi, Kestenholz – 078 224 91 97', 'font: italic 22px Georgia, serif; color: #b04a26', 'font: 13px sans-serif')
 }
