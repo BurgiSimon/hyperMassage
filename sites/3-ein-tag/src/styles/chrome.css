@@ -20,6 +20,7 @@
 }
 /* without WebGL: sky gradient + the real ridge as a mask, coloured by the hour (day.js) */
 .scene__fallback {
+  --fb-ridge: url('/images/ridge.svg');
   position: absolute;
   inset: 0;
   background: linear-gradient(var(--fb-zen, #6f8fbf), var(--fb-hor, #e6cfb2) 80%);
@@ -118,7 +119,9 @@
   padding: 0 var(--m);
   color: var(--sky-ink);
   pointer-events: none;
-  transition: transform 0.7s var(--ease-out);
+  transition:
+    transform 0.7s var(--ease-out),
+    color 0.9s ease;
 }
 .header > * {
   pointer-events: auto;
@@ -556,4 +559,14 @@
     border-color: #b04a26;
     color: #fff;
   }
+  .dock__btn--solid:focus-visible {
+    outline-color: #1c1e24;
+  }
+}
+
+/* the sky's ink cross-fades only where it is used – a transition on :root would restyle the whole page */
+.brand,
+.clock,
+.header__actions {
+  transition: background-color 0.9s ease;
 }

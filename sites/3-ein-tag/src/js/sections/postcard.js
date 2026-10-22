@@ -70,10 +70,24 @@ export function initPostcard({ reduced, webgl }) {
     update()
   }, '200px')
   update()
-  new ResizeObserver(() => {
+  // repaint once the size has settled (not on every step of a window drag)
+  let sizeT = null
+  let lastW = 0
+  new ResizeObserver(([entry]) => {
+    const w = Math.round(entry.contentRect.width)
+    if (w === lastW) return
+    lastW = w
+    clearTimeout(sizeT)
+    sizeT = setTimeout(() => {
+      painted = null
+      paint()
+    }, 250)
+  }).observe(canvas)
+  // after a GPU reset the picture is painted again
+  document.addEventListener('scene:restored', () => {
     painted = null
     paint()
-  }).observe(canvas)
+  })
 
   form.addEventListener('submit', (e) => {
     e.preventDefault()

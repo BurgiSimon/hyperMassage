@@ -38,9 +38,6 @@
 }
 
 :root {
-  transition:
-    --sky-ink 0.9s ease,
-    --chrome-bg 0.9s ease;
   --paper: #f6f1e7;
   --paper-2: #efe8db;
   --ink: #1c1e24;

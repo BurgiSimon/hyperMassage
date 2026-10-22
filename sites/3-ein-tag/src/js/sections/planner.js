@@ -97,9 +97,9 @@ export function initPlanner({ day }) {
   }
   // a mouse moves the slot at once; a finger only after a sideways move (a vertical swipe scrolls the page)
   slot.addEventListener('pointerdown', (e) => {
-    const r = slot.getBoundingClientRect()
+    // (measured from the slot's real start – a short slot is drawn wider and may be shifted left)
     const tr = track.getBoundingClientRect()
-    drag = { grab: ((e.clientX - r.left) / tr.width) * SPAN, x: e.clientX, y: e.clientY, on: e.pointerType === 'mouse' }
+    drag = { grab: START + ((e.clientX - tr.left) / tr.width) * SPAN - state.start, x: e.clientX, y: e.clientY, on: e.pointerType === 'mouse' }
     slot.setPointerCapture(e.pointerId)
     if (drag.on) slot.classList.add('is-drag')
   })

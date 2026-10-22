@@ -184,7 +184,8 @@ export function initDay({ scene, reduced }) {
   }
   if (scene) {
     placePeaks()
-    window.addEventListener('resize', () => requestAnimationFrame(placePeaks))
+    // (after the scene has measured its new size – not on the window's resize event)
+    document.addEventListener('scene:resize', placePeaks)
     fontsReady().then(placePeaks)
   }
 
@@ -195,7 +196,8 @@ export function initDay({ scene, reduced }) {
     let dragging = false
     const isInteractive = (el) => el.closest('a, button, input, label, .peaks li')
     const setFromX = (x) => {
-      const hr = scene.hourFromX(x, live.override ?? live.hour)
+      // (the sun is drawn for today: search today's path, not the story day's)
+      const hr = scene.hourFromX(x, live.override ?? live.hour, today)
       live.override = hr
       heroLook = look(hr, today)
       shownMinute = -1
@@ -204,21 +206,17 @@ export function initDay({ scene, reduced }) {
       const isOpen = dayOpen && hr >= dayOpen[0] && hr < dayOpen[1]
       hintText.textContent = `${fmtTime(hr)} Uhr${dayOpen ? (isOpen ? ' · Praxis offen' : ' · Praxis geschlossen') : ''}`
     }
-    // a mouse grabs the sun at once; a finger only once it moves sideways (a vertical swipe just scrolls)
+    // the sun moves once the pointer does: a stray click changes nothing, and a finger
+    // only takes the sun when it moves sideways (a vertical swipe just scrolls)
     let start = null
     hero.addEventListener('pointerdown', (e) => {
       if (e.button > 0 || isInteractive(e.target) || window.scrollY > 40) return
-      start = { x: e.clientX, y: e.clientY }
-      if (e.pointerType !== 'mouse') return
-      dragging = true
-      hero.classList.add('is-dragging')
-      hero.setPointerCapture(e.pointerId)
-      setFromX(e.clientX)
+      start = { x: e.clientX, y: e.clientY, mouse: e.pointerType === 'mouse' }
     })
     hero.addEventListener('pointermove', (e) => {
       if (!dragging && start) {
         const dx = Math.abs(e.clientX - start.x)
-        if (dx < 8 || dx < Math.abs(e.clientY - start.y)) return
+        if (start.mouse ? Math.hypot(dx, e.clientY - start.y) < 4 : dx < 8 || dx < Math.abs(e.clientY - start.y)) return
         dragging = true
         hero.classList.add('is-dragging')
         hero.setPointerCapture(e.pointerId)
@@ -233,7 +231,22 @@ export function initDay({ scene, reduced }) {
     }
     hero.addEventListener('pointerup', end)
     hero.addEventListener('pointercancel', end)
-    if (canHover()) hero.setAttribute('data-cursor', 'Sonne ziehen')
+    // back to the real «now»
+    hero.addEventListener('dblclick', (e) => {
+      if (isInteractive(e.target) || live.override === null) return
+      live.override = null
+      heroLook = look(live.hour, today)
+      shownMinute = -1
+      update()
+      hintText.textContent = 'Zieh die Sonne über den Himmel'
+    })
+    hero.classList.add('can-drag')
+    // the cursor offers the sun only where it can be dragged
+    if (canHover()) {
+      const offer = () => (window.scrollY > 40 ? hero.removeAttribute('data-cursor') : hero.setAttribute('data-cursor', 'Sonne ziehen'))
+      offer()
+      window.addEventListener('scroll', offer, { passive: true })
+    }
   }
   const canDrag = !!(scene && hero && !reduced)
 

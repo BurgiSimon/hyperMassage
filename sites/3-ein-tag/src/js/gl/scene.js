@@ -97,7 +97,9 @@ void main() {
 
   const float PLAIN = -0.32;
   // the Jura, far to near so nearer ridges cover the ones behind
-  for (int b = 4; b >= 1; b--) {
+  // (pixels the ground plane will cover completely skip the ridges)
+  bool underGround = te < ridge(az, 0.0).x - aa;
+  for (int b = 4; b >= 1 && !underGround; b--) {
     vec2 rd = ridge(az, float(b));
     float km = rd.y;
     float h = rd.x;
@@ -387,6 +389,7 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
     state.view = camera()
     // resizing clears the canvas: paint straight away, or the next frame shows black
     if (!lost) draw()
+    canvas.dispatchEvent(new CustomEvent('scene:resize', { bubbles: true }))
   }
 
   const setHour = (hour, day = state.day) => {
@@ -450,13 +453,21 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
   let last = 0
   let acc = 0
   const overlays = new Set()
-  document.addEventListener('overlay', (e) => {
-    if (e.detail.open) overlays.add(e.detail.source)
-    else overlays.delete(e.detail.source)
-  })
+  // (a still scene – the postcard – needs none of these; destroy() removes them)
+  const listen = new AbortController()
+  const on = { signal: listen.signal, passive: true }
   let lastInput = performance.now()
-  for (const ev of ['pointermove', 'pointerdown', 'scroll', 'keydown', 'wheel', 'touchstart'])
-    window.addEventListener(ev, () => (lastInput = performance.now()), { passive: true })
+  if (!still) {
+    document.addEventListener(
+      'overlay',
+      (e) => {
+        if (e.detail.open) overlays.add(e.detail.source)
+        else overlays.delete(e.detail.source)
+      },
+      on,
+    )
+    for (const ev of ['pointermove', 'pointerdown', 'scroll', 'keydown', 'wheel', 'touchstart']) window.addEventListener(ev, () => (lastInput = performance.now()), on)
+  }
   let drewLast = false
   const frame = (t) => {
     raf = requestAnimationFrame(frame)
@@ -498,8 +509,10 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
   ro?.observe(canvas)
   resize()
   setHour(12)
-  if (!still) raf = requestAnimationFrame(frame)
-  document.addEventListener('visibilitychange', () => (state.visible = !document.hidden))
+  if (!still) {
+    raf = requestAnimationFrame(frame)
+    document.addEventListener('visibilitychange', () => (state.visible = !document.hidden), on)
+  }
 
   return {
     setHour,
@@ -534,18 +547,18 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
       return { x: state.w / 2 + (sunToView(L.sunAz, v) - v.azC) / degPx, y: state.h - (state.h * v.horizonY + L.sunEl / degPx) }
     },
     /** hour for a sun dragged to screen x */
-    hourFromX(x, current) {
+    hourFromX(x, current, day = state.day) {
       const v = state.view
       const degPx = v.fov / state.w
       const viewAz = v.azC + (x - state.w / 2) * degPx
       const realAz = 180 - ((viewAz - v.azC) / (v.fov * 0.42)) * 90
       // the sun's azimuth moves ~15° per hour around noon; search the day for the best match
       // (the azimuth table is built once per day – dragging only looks it up)
-      const key = `${state.day.y}-${state.day.m}-${state.day.d}`
+      const key = `${day.y}-${day.m}-${day.d}`
       if (azTable.key !== key) {
         azTable.key = key
         azTable.rows = []
-        for (let h = 4; h <= 22; h += 0.05) azTable.rows.push([h, sunPosition(dateAt(h, state.day)).az])
+        for (let h = 4; h <= 22; h += 0.05) azTable.rows.push([h, sunPosition(dateAt(h, day)).az])
       }
       let best = current
       let bestD = Infinity
@@ -562,9 +575,17 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
       setHour(state.hour, day)
     },
     render: draw,
+    /** a still scene: change the picture size without building a new context */
+    setSize(width, height) {
+      if (!still) return
+      still.width = width
+      still.height = height
+      resize()
+    },
     destroy() {
       cancelAnimationFrame(raf)
       ro?.disconnect()
+      listen.abort()
       gl.getExtension('WEBGL_lose_context')?.loseContext()
     },
   }
@@ -574,12 +595,14 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
 let stillCanvas = null
 let stillScene = null
 export function paintStill(target, hour, { day = STORY_DAY, azC = 322, fov = 64 } = {}) {
-  if (!stillCanvas || stillCanvas.width !== target.width || stillCanvas.height !== target.height) {
-    stillScene?.destroy()
+  if (!stillCanvas) {
     stillCanvas = document.createElement('canvas')
     stillScene = createScene(stillCanvas, { reduced: true, still: { width: target.width, height: target.height } })
+  } else if (stillScene && (stillCanvas.width !== target.width || stillCanvas.height !== target.height)) {
+    stillScene.setSize(target.width, target.height)
   }
-  if (!stillScene) return false
+  // (no picture while the GPU context is gone – the caller paints its plain sky)
+  if (!stillScene || stillScene.lost) return false
   stillScene.setHour(hour, day)
   const v = stillScene.view
   v.azC = azC

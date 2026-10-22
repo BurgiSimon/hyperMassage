@@ -178,6 +178,68 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
     await ctx.close()
   }
 
+  // ── regressions from the second review
+  {
+    // in winter time the dragged sun still lands under the pointer
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } })
+    await ctx.addInitScript(() => {
+      const delta = new Date('2026-11-10T11:00:00+01:00').getTime() - Date.now()
+      const R = Date
+      globalThis.Date = class extends R {
+        constructor(...a) {
+          a.length ? super(...a) : super(R.now() + delta)
+        }
+        static now() {
+          return R.now() + delta
+        }
+      }
+    })
+    const page = await ctx.newPage()
+    page.on('pageerror', (e) => errors.push(`winter: ${e.message}`))
+    await page.goto(base + '?debug', { waitUntil: 'networkidle' })
+    await wait(page, 5200)
+    await page.mouse.move(400, 300)
+    await page.mouse.down()
+    await page.mouse.move(1080, 300, { steps: 8 })
+    await page.mouse.up()
+    await wait(page, 400)
+    const sx = await page.evaluate(() => Math.round(window.__scene.sunScreen().x))
+    ok('winter time: the dragged sun follows the pointer', Math.abs(sx - 1080) < 40, `(sun at x=${sx})`)
+    // summit labels follow a resize
+    await page.setViewportSize({ width: 1920, height: 1080 })
+    await wait(page, 1200)
+    const off = await page.evaluate(() =>
+      Math.max(
+        0,
+        ...[...document.querySelectorAll('[data-peaks] li.is-on')].map((li) => Math.abs(parseFloat(li.style.left) - window.__scene.project(parseFloat(li.dataset.az), parseFloat(li.dataset.el)).x)),
+      ),
+    )
+    ok('summit labels follow a resize', off < 3, `(off by ${Math.round(off)} px)`)
+    // printing shows everything, not just what has been scrolled to
+    await page.emulateMedia({ media: 'print' })
+    const hidden = await page.evaluate(() => [...document.querySelectorAll('.faq details, .contact li, .tariff li')].filter((el) => getComputedStyle(el).opacity !== '1').length)
+    ok('print: content not yet scrolled to is printed', hidden === 0, `(${hidden} hidden)`)
+    await ctx.close()
+  }
+  {
+    // phone: a short slot at the end of the day stays put when nudged
+    const { ctx, page } = await open({ viewport: { width: 390, height: 844 } })
+    await jump(page, '#preise .planner', -80)
+    await page.click('label:has(input[name="p-dur"][value="30"])')
+    await page.focus('[data-p-slot]')
+    await page.keyboard.press('End')
+    await wait(page, 700)
+    const b = await page.evaluate(() => document.querySelector('[data-p-slot]').getBoundingClientRect().toJSON())
+    await page.mouse.move(b.x + b.width / 2, b.y + b.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(b.x + b.width / 2 + 2, b.y + b.height / 2, { steps: 2 })
+    await page.mouse.up()
+    await wait(page, 300)
+    const sum = await page.evaluate(() => document.querySelector('[data-p-summary]').textContent)
+    ok('planner: nudging the last short slot keeps its time', /18:30 – 19:00/.test(sum), `(${sum})`)
+    await ctx.close()
+  }
+
   // ── a finger on the hero scrolls; it only moves the sun when it moves sideways
   {
     const { ctx, page } = await open({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
@@ -279,13 +341,14 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
   {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 760 }, javaScriptEnabled: false })
     const page = await ctx.newPage()
-    await page.goto(base, { waitUntil: 'domcontentloaded' })
+    await page.goto(base, { waitUntil: 'load' })
     const st = await page.evaluate(() => ({
       links: [...document.querySelectorAll('[data-booking-open]')].every((a) => a.getAttribute('href') === '#kontakt'),
       loaderHidden: getComputedStyle(document.querySelector('[data-loader]')).display === 'none',
       planner: getComputedStyle(document.querySelector('.planner')).display === 'none',
+      ridge: /url/.test(getComputedStyle(document.querySelector('[data-scene-fallback]'), '::after').maskImage || getComputedStyle(document.querySelector('[data-scene-fallback]'), '::after').webkitMaskImage),
     }))
-    ok('without JavaScript: booking links lead to the contact section', st.links && st.loaderHidden && st.planner, JSON.stringify(st))
+    ok('without JavaScript: booking links lead to the contact section; the skyline silhouette shows', st.links && st.loaderHidden && st.planner && st.ridge, JSON.stringify(st))
     await ctx.close()
   }
   for (const path of ['impressum/', '404.html']) {

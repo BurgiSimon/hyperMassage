@@ -101,6 +101,16 @@ ul {
   outline-offset: 3px;
   border-radius: 6px;
 }
+/* a filled button's text colour would vanish against its surroundings: ring in ink, with a gap */
+.btn--solid:focus-visible {
+  outline-color: var(--ink);
+  box-shadow: 0 0 0 3px var(--paper);
+}
+.header .btn--solid:focus-visible,
+.hero .btn--solid:focus-visible {
+  outline-color: var(--sky-ink);
+  box-shadow: none;
+}
 
 .sr-only {
   position: absolute !important;
@@ -446,5 +456,44 @@ ul {
   }
   .page__card {
     box-shadow: none !important;
+  }
+  .skip-link,
+  .hero__greet {
+    display: none !important;
+  }
+  /* content the reveals have not shown yet, and halos meant for the sky */
+  [style*='opacity'] {
+    opacity: 1 !important;
+  }
+  [style*='transform'] {
+    transform: none !important;
+  }
+  * {
+    text-shadow: none !important;
+  }
+  /* paper is white: night colours and light ink go dark */
+  .page--night,
+  .footer {
+    --paper: #fff;
+    --paper-2: #f4f2ee;
+    --ink: #1c1e24;
+    --ink-soft: rgb(28 30 36 / 0.7);
+    --line: rgb(28 30 36 / 0.16);
+    --sun: #b04a26;
+    --sun-ink: #a3421f;
+    --on-sun: #1c1e24;
+  }
+  .hero,
+  .footer,
+  .footer * {
+    color: #1c1e24 !important;
+  }
+  .hero__card {
+    background: none !important;
+  }
+  /* backgrounds do not print: filled buttons become outlined */
+  .btn--solid {
+    color: #1c1e24 !important;
+    border: 1.5px solid #1c1e24;
   }
 }

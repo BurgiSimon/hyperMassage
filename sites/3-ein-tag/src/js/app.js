@@ -2,7 +2,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { qs, qsa, prefersReducedMotion } from './utils/helpers.js'
 import { initScroll, stopScroll, startScroll, initAnchors, releaseAllScrollLocks, scrollTo } from './core/scroll.js'
-import { runLoader, skylinePath } from './core/loader.js'
+import { runLoader } from './core/loader.js'
 import { initCursor } from './core/cursor.js'
 import { initHeader, initMenu } from './core/chrome.js'
 import { initBooking } from './core/booking.js'
@@ -34,14 +34,6 @@ export function initApp() {
   }
 }
 
-/** Without WebGL (or while its context is lost): the real skyline as a silhouette; day.js colours sky and land. */
-function paintFallback() {
-  const host = qs('[data-scene-fallback]')
-  if (!host) return
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300"><path d="${skylinePath(1000, 300)}"/></svg>`
-  host.style.setProperty('--fb-ridge', `url("data:image/svg+xml,${encodeURIComponent(svg)}")`)
-}
-
 function boot() {
   const reduced = prefersReducedMotion()
   const revisit = html.classList.contains('is-revisit')
@@ -60,7 +52,7 @@ function boot() {
   } catch (err) {
     console.warn(err)
   }
-  paintFallback()
+  // (without WebGL the silhouette in .scene__fallback stays; day.js colours it by the hour)
   if (scene) qs('.scene').classList.add('is-live')
 
   initCursor()
@@ -75,7 +67,7 @@ function boot() {
     qs('.scene').classList.add('is-live')
     day.refresh()
   })
-  if (new URLSearchParams(location.search).has('debug')) window.__day = day
+  if (new URLSearchParams(location.search).has('debug')) Object.assign(window, { __day: day, __scene: scene })
   initHeader()
   const menu = initMenu({ reduced })
   initAnchors(() => menu.close())

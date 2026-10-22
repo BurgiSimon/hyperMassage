@@ -140,9 +140,10 @@
     transform: translateX(6px);
   }
 }
-.js .hero {
+/* the sun can be dragged sideways; pages still scroll and pinch-zoom */
+.js .hero.can-drag {
   cursor: grab;
-  touch-action: pan-y;
+  touch-action: pan-y pinch-zoom;
 }
 .js .hero.is-dragging {
   cursor: grabbing;
@@ -186,7 +187,10 @@
   white-space: nowrap;
   color: var(--sky-ink);
   pointer-events: auto;
-  transition: opacity 0.4s;
+  transition:
+    opacity 0.4s,
+    color 0.9s ease,
+    background-color 0.9s ease;
 }
 .peaks li::after {
   content: '';
@@ -1320,4 +1324,15 @@
   .planner__day {
     margin-top: 34px;
   }
+}
+
+/* the sky's ink cross-fades only where it is used (see chrome.css) */
+.hero,
+.interlude {
+  transition: color 0.9s ease;
+}
+.hero__greet,
+.hero__card,
+.hero__hint {
+  transition: background-color 0.9s ease;
 }
