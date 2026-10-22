@@ -22,7 +22,8 @@ export function initVoucher({ reduced }) {
   const gift = qs('[data-poster-gift]', poster)
   const value = qs('[data-poster-value]', poster)
   const from = qs('[data-poster-from]', poster)
-  qs('[data-poster-no]', poster).textContent = `Nº ${String(new Date().getFullYear()).slice(2)}${String(Math.floor(Math.random() * 900) + 100)}`
+  // a preview, not a voucher: no serial number
+  qs('[data-poster-no]', poster).textContent = 'Muster'
 
   // binary-search the width axis until the name fits; shrink the size only as a last resort
   const fit = () => {
@@ -70,6 +71,7 @@ export function initVoucher({ reduced }) {
   form.addEventListener('input', update)
   new ResizeObserver(fit).observe(nameBox)
   fontsReady().then(fit)
+  document.fonts?.addEventListener('loadingdone', fit)
   update()
 
   form.addEventListener('submit', (e) => {

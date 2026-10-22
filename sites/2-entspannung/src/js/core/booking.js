@@ -57,6 +57,7 @@ export function initBooking({ reduced, beforeOpen }) {
     if (opt) el.value = opt.value
   }
 
+  let behind = []
   const open = (prefill = {}) => {
     if (isOpen) return
     isOpen = true
@@ -66,11 +67,15 @@ export function initBooking({ reduced, beforeOpen }) {
     else if (prefill.fromPrice && form.elements.service.value === 'Hot-Stone-Massage') select('service', 'Klassische Massage')
     if (prefill.dur) select('dur', prefill.dur)
     // replace a note we filled in earlier, never one the visitor wrote
-    if (prefill.note && note && (!note.value.trim() || note.value === autoNote)) {
+    // (an empty suggestion clears an earlier automatic note, too)
+    if (prefill.note !== undefined && note && (!note.value.trim() || note.value === autoNote)) {
       note.value = prefill.note
       autoNote = prefill.note
     }
     labelPrices()
+    // the page behind the sheet is out of reach while it is open
+    behind = qsa('header, main, footer, [data-dock]').map((el) => [el, el.inert])
+    behind.forEach(([el]) => (el.inert = true))
     root.inert = false
     root.classList.add('is-open')
     sizeAll()
@@ -101,6 +106,8 @@ export function initBooking({ reduced, beforeOpen }) {
     if (!isOpen) return
     isOpen = false
     root.inert = true
+    behind.forEach(([el, was]) => (el.inert = was))
+    behind = []
     document.dispatchEvent(new CustomEvent('overlay', { detail: { open: false, source: 'booking' } }))
     startScroll('booking')
     tl?.kill()

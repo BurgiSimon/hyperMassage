@@ -44,6 +44,7 @@ export function initServices({ reduced }) {
     const name = qs('[data-srow-name]', row)
     const gesture = GESTURES[row.dataset.gesture]
     body.inert = true
+    btn.setAttribute('aria-expanded', 'false') // (the HTML says "open" for visitors without JavaScript)
     let kin = null
     let started = 0
     const ctx = { focus: 0 }

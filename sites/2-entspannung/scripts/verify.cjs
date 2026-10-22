@@ -300,6 +300,116 @@ const wait = (p, ms) => p.waitForTimeout(ms)
     await ctx.close()
   }
 
+  // ── regressions from the second review
+  {
+    // the app's script fails to load → the static page right away, not after the 20 s net
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 760 } })
+    const page = await ctx.newPage()
+    await page.route('**/assets/main-*.js', (route) => route.fulfill({ status: 404, body: '' }))
+    await page.goto(base, { waitUntil: 'domcontentloaded' })
+    await wait(page, 2500)
+    const cls = await page.evaluate(() => document.documentElement.className)
+    ok('a missing script falls back to the static page at once', /\bno-js\b/.test(cls), `(${cls})`)
+    await ctx.close()
+  }
+  {
+    const { ctx, page } = await open({ viewport: { width: 1440, height: 900 } })
+    // keyboard focus brings the hidden header back
+    await page.mouse.move(700, 500)
+    for (let i = 0; i < 14; i++) {
+      await page.mouse.wheel(0, 400)
+      await wait(page, 80)
+    }
+    await wait(page, 1200)
+    const hidden = await page.evaluate(() => document.querySelector('.header').classList.contains('is-hidden'))
+    await page.keyboard.press('Tab')
+    await page.keyboard.press('Tab')
+    await wait(page, 1100)
+    const hdr = await page.evaluate(() => {
+      const a = document.activeElement
+      return { inHeader: !!a.closest('.header'), top: Math.round(a.getBoundingClientRect().top) }
+    })
+    ok('keyboard focus brings the hidden header back', hidden && hdr.inHeader && hdr.top >= 0, JSON.stringify({ hidden, ...hdr }))
+    // open menu: hidden nav links are out of the tab order, the header subline stays readable
+    await page.click('[data-menu-toggle]')
+    await wait(page, 1200)
+    let inNav = 0
+    for (let i = 0; i < 10; i++) {
+      await page.keyboard.press('Shift+Tab')
+      if (await page.evaluate(() => !!document.activeElement.closest('.header .nav'))) inNav++
+    }
+    const sub = await page.evaluate(() => getComputedStyle(document.querySelector('.brand__sub')).color)
+    ok('open menu: no invisible links in the tab order, light header text', inNav === 0 && /rgba?\(2[0-9]{2}/.test(sub), JSON.stringify({ inNav, sub }))
+    await page.keyboard.press('Escape')
+    await wait(page, 1200)
+    // on a computer the request goes out by e-mail
+    await page.click('.header [data-booking-open]')
+    await wait(page, 1200)
+    const send = await page.evaluate(() => ({
+      sms: getComputedStyle(document.querySelector('.madlib__sms')).display,
+      mail: getComputedStyle(document.querySelector('.madlib__mail')).display,
+      behind: document.querySelector('main').inert,
+    }))
+    ok('desktop: e-mail is the way to send; the page behind is inert', send.sms === 'none' && send.mail !== 'none' && send.behind, JSON.stringify(send))
+    await page.keyboard.press('Escape')
+    await wait(page, 1200)
+    // a suggestion from the "Und sonst?" chips alone clears an earlier automatic note
+    await jump(page, '#wo-drueckts')
+    await wait(page, 700)
+    await page.click('[data-zone="shoulders"]')
+    await page.click('[data-rec-cta]')
+    await wait(page, 1000)
+    await page.keyboard.press('Escape')
+    await wait(page, 1000)
+    await page.click('[data-zone="shoulders"]')
+    await page.click('[data-need="warm"]')
+    await page.click('[data-rec-cta]')
+    await wait(page, 1000)
+    const note = await page.evaluate(() => document.querySelector('[data-booking-note]').value)
+    ok('an empty suggestion clears the earlier automatic note', note === '', `(${JSON.stringify(note)})`)
+    await page.keyboard.press('Escape')
+    await wait(page, 1000)
+    // FAQ: closing and quickly reopening ends open
+    await jump(page, '#gut-zu-wissen')
+    await wait(page, 900)
+    await page.click('.qa summary')
+    await wait(page, 700)
+    await page.click('.qa summary')
+    await wait(page, 120)
+    await page.click('.qa summary')
+    await wait(page, 900)
+    ok('FAQ: close and reopen quickly ends open', await page.evaluate(() => document.querySelector('.qa').open))
+    await ctx.close()
+  }
+  {
+    // short screens: the hero buttons are on screen
+    const { ctx, page } = await open({ viewport: { width: 844, height: 390 }, isMobile: true, hasTouch: true })
+    const b = await page.evaluate(() => Math.max(...[...document.querySelectorAll('.hero .btn')].map((a) => a.getBoundingClientRect().bottom)))
+    ok('phone landscape: hero buttons visible', b <= 390, `(bottom ${Math.round(b)})`)
+    await ctx.close()
+  }
+  {
+    // a display font that arrives late: the welcome sentence and the voucher name are measured again
+    const ctx = await browser.newContext({ viewport: { width: 768, height: 1024 } })
+    const page = await ctx.newPage()
+    await page.route('**/fonts/anybody.woff2', async (route) => {
+      await new Promise((r) => setTimeout(r, 7000))
+      route.continue().catch(() => {})
+    })
+    await page.goto(base, { waitUntil: 'domcontentloaded' })
+    await wait(page, 10000)
+    const fit = await page.evaluate(() => {
+      const p = document.querySelector('[data-welcome]')
+      const w = p.getBoundingClientRect().width
+      const lines = [...p.querySelectorAll('.wl, .kline, [data-line]')]
+      const widest = Math.max(0, ...lines.map((l) => l.scrollWidth))
+      const name = document.querySelector('[data-poster-name]')
+      return { w: Math.round(w), widest: Math.round(widest), sw: document.documentElement.scrollWidth, name: name ? [Math.round(name.getBoundingClientRect().width), Math.round(name.parentElement.clientWidth)] : null }
+    })
+    ok('late display font: lines and voucher name re-fit', fit.widest <= fit.w + 2 && fit.sw <= 768 && (!fit.name || fit.name[0] <= fit.name[1] + 2), JSON.stringify(fit))
+    await ctx.close()
+  }
+
   ok('no JavaScript errors', errors.length === 0, errors.join(' | '))
   await browser.close()
   console.log(results.join('\n'))

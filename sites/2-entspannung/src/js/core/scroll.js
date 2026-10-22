@@ -68,10 +68,11 @@ export function initAnchors(onNavigate) {
     onNavigate?.()
     scrollTo(target, { offset: href === '#start' ? 0 : -8 })
     history.replaceState(null, '', href === '#start' ? location.pathname : href)
-    if (target !== 0) {
-      // move keyboard focus along with the scroll
-      if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1')
-      target.focus({ preventScroll: true })
+    // move keyboard focus along with the scroll (back to the top: to the hero)
+    const focusEl = target === 0 ? document.getElementById('start') : target
+    if (focusEl) {
+      if (!focusEl.hasAttribute('tabindex')) focusEl.setAttribute('tabindex', '-1')
+      focusEl.focus({ preventScroll: true })
     }
   })
 }

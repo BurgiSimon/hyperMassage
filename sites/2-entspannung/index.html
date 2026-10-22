@@ -49,6 +49,15 @@
           if (!d.classList.contains('app-booted')) d.classList.replace('js', 'no-js')
         }
         setTimeout(d.__fallback, 20000)
+        // …and at once if the app's script fails to load (Vite drops onerror attributes on the entry)
+        window.addEventListener(
+          'error',
+          function (e) {
+            var t = e.target
+            if (t && t.tagName === 'SCRIPT') d.__fallback()
+          },
+          true,
+        )
       })(document.documentElement)
     </script>
 
@@ -95,7 +104,7 @@
     <script type="application/ld+json">
       {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Wie vereinbare ich einen Termin?", "acceptedAnswer": {"@type": "Answer", "text": "Termine gibt es nur mit Voranmeldung. Ruf mich an unter 078 224 91 97 oder schreib mir eine SMS oder E-Mail an massage_buergi@ggs.ch. Wenn ich gerade behandle, sprich mir auf den Beantworter – ich melde mich gerne bei dir."}}, {"@type": "Question", "name": "Welche Massage passt zu mir?", "acceptedAnswer": {"@type": "Answer", "text": "Das besprechen wir kurz zu Beginn deines Termins. Ich nehme mir Zeit für deine Bedürfnisse und kombiniere die Techniken so, wie es dir guttut."}}, {"@type": "Question", "name": "Wie lange dauert eine Behandlung – und was kostet sie?", "acceptedAnswer": {"@type": "Answer", "text": "Du wählst zwischen 30, 45 und 60 Minuten. Der Tarif ist für alle Angebote gleich: CHF 45, 65 oder 85. Bei der Hot-Stone-Massage kommt ein Zuschlag von CHF 15 dazu."}}, {"@type": "Question", "name": "Wie kann ich bezahlen?", "acceptedAnswer": {"@type": "Answer", "text": "Bar oder mit TWINT."}}, {"@type": "Question", "name": "Übernimmt die Krankenkasse die Kosten?", "acceptedAnswer": {"@type": "Answer", "text": "Meine Massagen sind zurzeit nicht krankenkassenanerkannt."}}, {"@type": "Question", "name": "Kann ich eine Massage verschenken?", "acceptedAnswer": {"@type": "Answer", "text": "Sehr gerne – individuelle Gutscheine sind bei mir erhältlich. Stell dir deinen Gutschein auf dieser Seite zusammen oder frag mich direkt an."}}, {"@type": "Question", "name": "Wann ist die Praxis geöffnet?", "acceptedAnswer": {"@type": "Answer", "text": "Montag, Mittwoch und Donnerstag von 7:30 bis 19:00 Uhr, Dienstag von 8:00 bis 19:00 Uhr. Von Freitag bis Sonntag ist die Praxis geschlossen."}}, {"@type": "Question", "name": "Wo finde ich die Praxis?", "acceptedAnswer": {"@type": "Answer", "text": "In meiner kleinen Praxis im Eigenheim an der St. Peterstrasse 12 in 4703 Kestenholz."}}]}
     </script>
-    <script type="module" src="/src/main.js" onerror="document.documentElement.__fallback()"></script>
+    <script type="module" src="/src/main.js"></script>
   </head>
 
   <body>
@@ -227,8 +236,8 @@
           <div class="bodymap__intro">
             <h2 class="h2 kin" data-kin>Zeig mir, wo&nbsp;es zieht.</h2>
             <p class="lead">
-              Tippe an, wo du Spannung spürst. Ich schlage dir eine passende Behandlung vor – den Rest besprechen wir in
-              Ruhe zu Beginn deines Termins.
+              <span class="js-only">Tippe an, wo du Spannung spürst. Ich schlage dir eine passende Behandlung vor – den Rest
+              besprechen wir in Ruhe zu Beginn deines Termins.</span>
             </p>
             <div class="zones">
               <p class="label" id="zones-a">Hier spüre ich Spannung</p>
@@ -348,7 +357,7 @@
         <ol class="slist" data-services>
           <li class="srow" data-gesture="knead">
             <h3 class="srow__h">
-              <button class="srow__btn" type="button" aria-expanded="false" aria-controls="s-1" data-srow-btn>
+              <button class="srow__btn" type="button" aria-expanded="true" aria-controls="s-1" data-srow-btn>
                 <span class="srow__num label">01</span>
                 <span class="srow__name" data-srow-name>Klassische Massage</span>
                 <span class="srow__tag label">Ganz- oder Teilkörper</span>
@@ -365,7 +374,7 @@
           </li>
           <li class="srow" data-gesture="sink">
             <h3 class="srow__h">
-              <button class="srow__btn" type="button" aria-expanded="false" aria-controls="s-2" data-srow-btn>
+              <button class="srow__btn" type="button" aria-expanded="true" aria-controls="s-2" data-srow-btn>
                 <span class="srow__num label">02</span>
                 <span class="srow__name" data-srow-name>Nacken-Schultermassage</span>
                 <span class="srow__tag label">Halswirbelsäule</span>
@@ -382,7 +391,7 @@
           </li>
           <li class="srow" data-gesture="point">
             <h3 class="srow__h">
-              <button class="srow__btn" type="button" aria-expanded="false" aria-controls="s-3" data-srow-btn>
+              <button class="srow__btn" type="button" aria-expanded="true" aria-controls="s-3" data-srow-btn>
                 <span class="srow__num label">03</span>
                 <span class="srow__name" data-srow-name>Manuelle Schmerztherapie</span>
                 <span class="srow__tag label">Gezielte Griffe</span>
@@ -399,7 +408,7 @@
           </li>
           <li class="srow" data-gesture="swing">
             <h3 class="srow__h">
-              <button class="srow__btn" type="button" aria-expanded="false" aria-controls="s-4" data-srow-btn>
+              <button class="srow__btn" type="button" aria-expanded="true" aria-controls="s-4" data-srow-btn>
                 <span class="srow__num label">04</span>
                 <span class="srow__name" data-srow-name>Schwingkissen-Therapie</span>
                 <span class="srow__tag label">Tiefliegende Muskulatur</span>
@@ -416,7 +425,7 @@
           </li>
           <li class="srow" data-gesture="heat">
             <h3 class="srow__h">
-              <button class="srow__btn" type="button" aria-expanded="false" aria-controls="s-5" data-srow-btn>
+              <button class="srow__btn" type="button" aria-expanded="true" aria-controls="s-5" data-srow-btn>
                 <span class="srow__num label">05</span>
                 <span class="srow__name" data-srow-name>Hot-Stone-Massage</span>
                 <span class="srow__tag label">Warme Lavasteine</span>
@@ -446,7 +455,7 @@
             <h2 class="h2 kin" data-kin>Dreimal anspannen. Dreimal loslassen.</h2>
             <p class="lead">
               Eine kleine Übung aus der progressiven Muskelentspannung: Spanne eine Muskelgruppe ein paar Sekunden lang an –
-              und lass dann ganz bewusst los. Halte dazu den Knopf gedrückt.
+              und lass dann ganz bewusst los.<span class="js-only"> Halte dazu den Knopf gedrückt.</span>
             </p>
             <ol class="pmr__steps" data-pmr-steps>
               <li data-step="0"><span class="label">1</span> Hände zu Fäusten ballen</li>
@@ -478,7 +487,7 @@
         <div class="prices__grid">
           <div class="prices__intro">
             <h2 class="h2 kin" data-kin>Ein Tarif. Für alle Angebote.</h2>
-            <p class="lead">Du bestimmst nur die Zeit. Zieh am Regler – oder wähle die Dauer.</p>
+            <p class="lead">Du bestimmst nur die Zeit.<span class="js-only"> Zieh am Regler – oder wähle die Dauer.</span></p>
           </div>
 
           <div class="stretch" data-stretch>
@@ -572,7 +581,7 @@
               <div class="poster__in">
               <div class="poster__top">
                 <span>Gutschein</span>
-                <span data-poster-no>Nº 0001</span>
+                <span data-poster-no>Muster</span>
               </div>
               <p class="poster__for">Für</p>
               <p class="poster__name"><span data-poster-name>DICH</span></p>
@@ -784,7 +793,7 @@
       <div class="footer__cols">
         <div>
           <p class="label">Praxis</p>
-          <p>Massage Claudia Bürgi<br />St. Peterstrasse 12<br />4703 Kestenholz</p>
+          <p>Massage Claudia Bürgi<br />St.&nbsp;Peterstrasse&nbsp;12<br />4703&nbsp;Kestenholz</p>
         </div>
         <div>
           <p class="label">Kontakt</p>
@@ -796,7 +805,7 @@
         </div>
         <div>
           <p class="label">Öffnungszeiten</p>
-          <p>Mo, Mi, Do 7:30 – 19:00<br />Di 8:00 – 19:00<br />Fr – So geschlossen</p>
+          <p>Mo, Mi, Do 7:30&nbsp;–&nbsp;19:00<br />Di 8:00&nbsp;–&nbsp;19:00<br />Fr&nbsp;–&nbsp;So geschlossen</p>
         </div>
         <div class="footer__meta">
           <p class="label">Kestenholz, jetzt</p>
@@ -898,8 +907,8 @@
             <textarea name="note" rows="2" data-booking-note placeholder="z. B. wo es zieht oder wann es gar nicht passt"></textarea>
           </label>
           <div class="madlib__send">
-            <button class="btn btn--ink btn--lg" type="submit" data-send="sms" data-press><span>Per SMS senden</span></button>
-            <button class="btn btn--line btn--lg" type="submit" data-send="mail" data-press><span>Per E-Mail senden</span></button>
+            <button class="btn btn--ink btn--lg madlib__sms" type="submit" data-send="sms" data-press><span>Per SMS senden</span></button>
+            <button class="btn btn--line btn--lg madlib__mail" type="submit" data-send="mail" data-press><span>Per E-Mail senden</span></button>
           </div>
           <p class="small">
             Deine Nachricht öffnet sich in deinem SMS- bzw. E-Mail-Programm. Auf dieser Website wird nichts gespeichert.

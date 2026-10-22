@@ -235,6 +235,14 @@
     padding-bottom: calc(86px + env(safe-area-inset-bottom));
     min-height: 520px;
   }
+}
+/* short screens (phone landscape, big zoom): the pinned hero must still show its buttons */
+@media (max-height: 600px) {
+  .hero__sticky {
+    min-height: 0;
+  }
+}
+@media (max-width: 640px) {
   .hero__top span:first-child {
     grid-column: 1 / span 6;
   }
@@ -671,6 +679,10 @@
 .no-js .srow__body {
   grid-template-rows: 1fr;
 }
+.no-js .srow__plus,
+.no-js .js-only {
+  display: none;
+}
 .srow__inner {
   overflow: hidden;
   display: grid;
@@ -698,7 +710,7 @@
   margin-top: 22px;
   color: var(--fg-soft);
 }
-@media (hover: none) {
+@media (hover: none), (prefers-reduced-motion: reduce) {
   .services__hint {
     display: none;
   }
@@ -1083,6 +1095,21 @@
 @media (hover: hover) and (pointer: fine) {
   .vform__sms {
     display: none;
+  }
+}
+/* on a computer the request goes out by e-mail; SMS stays the first choice on phones */
+@media (hover: hover) and (pointer: fine) {
+  .madlib__sms {
+    display: none;
+  }
+  .madlib__mail {
+    background: var(--fg);
+    color: var(--bg);
+  }
+  .madlib__mail:hover {
+    background: var(--accent-ink);
+    border-color: var(--accent-ink);
+    color: var(--paper);
   }
 }
 .poster-wrap {
@@ -1628,7 +1655,8 @@
   stroke-width: 3;
   transform-box: fill-box;
   transform-origin: center;
-  animation: ring 2.8s var(--ease-out) infinite;
+  /* a few pulses when the map comes into view, then rest (SVG transforms are not composited) */
+  animation: ring 2.8s var(--ease-out) 3;
   animation-play-state: paused;
 }
 .visit__map.is-on .map .m-pin-ring {

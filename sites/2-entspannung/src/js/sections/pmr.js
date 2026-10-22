@@ -93,8 +93,13 @@ export function initPmr({ reduced }) {
       state.resting = false
       if (state.step < STEPS.length - 1) setStep(state.step + 1)
       else {
+        // the last step: that was it – finish instead of starting over
         state.done = true
         setStep(state.step)
+        status.textContent = 'Geschafft. So fühlt sich der Anfang einer Massage an.'
+        state.held = 0
+        fill.style.strokeDashoffset = C
+        return
       }
     }
     if (state.done) {

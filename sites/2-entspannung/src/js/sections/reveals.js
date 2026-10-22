@@ -104,6 +104,8 @@ export function initWelcome({ reduced }) {
   fontsReady().then(() => {
     run()
     onWidthChange(run)
+    // a late font changes every word's width: break the lines again
+    document.fonts?.addEventListener('loadingdone', run)
   })
 }
 

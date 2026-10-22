@@ -90,9 +90,15 @@
 .header.is-hidden {
   transform: translateY(-101%);
 }
+/* keyboard focus or the open menu always bring the header back */
+.header:focus-within,
+.menu-open .header {
+  transform: none;
+}
 .header[data-header-theme='ink'] {
   --bg: var(--ink);
   --fg: var(--paper);
+  --fg-soft: rgb(236 232 225 / 0.68);
   --line: rgb(236 232 225 / 0.17);
 }
 .header[data-header-theme='calm'] {
@@ -377,6 +383,7 @@
 .menu-open .header {
   --bg: var(--ink);
   --fg: var(--paper);
+  --fg-soft: rgb(236 232 225 / 0.68);
   background: transparent;
   backdrop-filter: none;
 }
@@ -385,6 +392,10 @@
 .menu-open .header .nav,
 .menu-open .header__status {
   opacity: 0;
+}
+/* (the menu lists the same links – keep the hidden ones out of the tab order) */
+.menu-open .header .nav {
+  visibility: hidden;
 }
 
 /* ───────────────────────── Booking sheet ───────────────────────── */
