@@ -53,7 +53,7 @@ export function initPlanner({ day }) {
     slotTime.textContent = from
     const isHot = hot.checked
     const price = PRICES[state.dur] + (isHot ? 15 : 0)
-    const text = `${DAY_NAMES[state.day]}, ${from} – ${to} · ${state.dur} Minuten${isHot ? ' Hot Stone' : ''} · CHF ${price}`
+    const text = `${DAY_NAMES[state.day]}, ${from} – ${to} · ${state.dur}\u00a0Minuten${isHot ? ' Hot Stone' : ''} · CHF\u00a0${price}`
     summary.textContent = text
     slot.setAttribute('aria-valuemin', lo)
     slot.setAttribute('aria-valuemax', hi)

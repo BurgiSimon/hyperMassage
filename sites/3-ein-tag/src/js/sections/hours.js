@@ -68,7 +68,7 @@ export function initHours() {
     const s = openStatus(now)
     status.textContent = s.text
     status.classList.toggle('is-open', s.open)
-    if (clock) clock.textContent = `${now.hour}:${String(now.minute).padStart(2, '0')}`
+    if (clock) clock.textContent = `${String(now.hour).padStart(2, '0')}:${String(now.minute).padStart(2, '0')}` // (like the header clock)
   }
   paint()
   setInterval(paint, 30000)

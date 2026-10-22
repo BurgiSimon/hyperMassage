@@ -37,7 +37,8 @@
 }
 .hero__line {
   display: block;
-  overflow: hidden;
+  /* the words rise from below: clip only the bottom edge, so their halo is not cut into boxes */
+  clip-path: inset(-0.6em -1em 0 -1em);
   padding: 0.04em 0.06em 0.1em 0;
 }
 .hero__line > span {
@@ -175,7 +176,7 @@
   left: 0;
   top: 0;
   display: none;
-  transform: translate(-50%, calc(-100% - 10px));
+  transform: translateY(-100%);
   padding: 4px 10px;
   border-radius: 99px;
   background: var(--chrome-bg);
@@ -195,7 +196,7 @@
 .peaks li::after {
   content: '';
   position: absolute;
-  left: 50%;
+  left: var(--lx, 50%);
   top: 100%;
   width: 1px;
   height: 10px;
@@ -372,7 +373,8 @@
 }
 .facts {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* (each fact gets the room its label needs; four in a row only where they fit) */
+  grid-template-columns: repeat(auto-fit, minmax(9.5em, 1fr));
   gap: 16px;
   margin-top: 18px;
   padding-top: 22px;
@@ -385,6 +387,7 @@
   text-transform: uppercase;
 }
 .facts dd {
+  white-space: nowrap;
   margin-top: 6px;
   font-family: var(--f-display);
   font-size: clamp(28px, 2.6vw, 40px);
@@ -787,7 +790,7 @@
   padding: 4.4cqw 4cqw 3.6cqw;
   display: grid;
   grid-template-rows: auto auto 1fr auto auto;
-  gap: 1.4cqw;
+  gap: 1.1cqw;
 }
 .postcard__stamp {
   position: absolute;
@@ -833,7 +836,7 @@
   transform: rotate(-14deg);
 }
 .postcard__to {
-  margin-top: 13cqw;
+  margin-top: 10cqw;
   font-family: var(--f-display);
   font-size: 2.2cqw;
   color: rgb(38 36 34 / 0.6);
@@ -870,6 +873,56 @@
 .no-js .postcard {
   display: none;
 }
+/* phones: picture over writing, so the back stays readable */
+@media (max-width: 520px) {
+  .postcard {
+    grid-template-columns: 1fr;
+    aspect-ratio: auto;
+  }
+  .postcard__front {
+    aspect-ratio: 16 / 10;
+    border-right: 0;
+    border-bottom: 1px dashed rgb(38 36 34 / 0.18);
+  }
+  .postcard__greet {
+    font-size: 7cqw;
+  }
+  .postcard__back {
+    padding: 6cqw 6cqw 5cqw;
+    gap: 2cqw;
+  }
+  .postcard__stamp {
+    width: 16cqw;
+    height: 19cqw;
+    font-size: 2.4cqw;
+  }
+  .postcard__stamp-val {
+    font-size: 4.2cqw;
+  }
+  .postcard__mark {
+    right: 15cqw;
+    width: 20cqw;
+    height: 20cqw;
+    font-size: 2cqw;
+  }
+  .postcard__to {
+    margin-top: 14cqw;
+  }
+  .postcard__to,
+  .postcard__from {
+    font-size: 3.8cqw;
+  }
+  .postcard__to span,
+  .postcard__from span {
+    font-size: 7cqw;
+  }
+  .postcard__msg {
+    font-size: 4.6cqw;
+  }
+  .postcard__addr {
+    font-size: 2.8cqw;
+  }
+}
 @media (max-width: 960px) {
   .gift {
     grid-template-columns: 1fr;
@@ -884,6 +937,8 @@
 
 /* FAQ */
 .faq {
+  /* (a question and its plus belong together – no 1000 px gap between them) */
+  max-width: 52rem;
   margin-top: clamp(28px, 4vw, 56px);
   border-top: 1px solid var(--line);
 }
@@ -891,6 +946,7 @@
   border-bottom: 1px solid var(--line);
 }
 .faq summary {
+  text-wrap: balance;
   list-style: none;
   display: flex;
   justify-content: space-between;
@@ -906,12 +962,16 @@
   display: none;
 }
 .faq summary::after {
-  content: '+';
+  content: '';
   flex: none;
-  font-family: var(--f-text);
-  font-size: 22px;
-  font-weight: 300;
+  align-self: center;
+  width: 18px;
+  height: 18px;
   color: var(--sun-ink);
+  /* a plus of two even bars (the text glyph was hairline-thin) */
+  background:
+    linear-gradient(currentColor, currentColor) center / 100% 1.5px no-repeat,
+    linear-gradient(currentColor, currentColor) center / 1.5px 100% no-repeat;
   transition: transform 0.5s var(--ease-out);
 }
 .faq details[open] summary::after {
@@ -1067,12 +1127,31 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+/* phones: a slim row per day – arc, day, hours – instead of seven tall tiles */
 @media (max-width: 520px) {
   .contact {
     grid-template-columns: 1fr;
   }
   .hours__days {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .hours__days li {
+    grid-template-columns: 56px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 16px 8px 12px;
+    text-align: left;
+  }
+  .hours__arc {
+    grid-row: 1;
+    grid-column: 1;
+  }
+  .hours__days li.is-closed .hours__arc {
+    visibility: hidden;
+  }
+  .hours__d {
+    font-size: 20px;
   }
 }
 
@@ -1335,4 +1414,40 @@
 .hero__card,
 .hero__hint {
   transition: background-color 0.9s ease;
+}
+
+/* phones: the landscape between the title and the card; both buttons in one thumb-high row */
+@media (max-width: 640px) {
+  .hero__inner {
+    min-height: 100svh;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  }
+  .hero__card {
+    margin-top: auto;
+    padding: 16px;
+    gap: 12px;
+    width: 100%;
+  }
+  .hero__lead {
+    font-size: 15.5px;
+  }
+  .hero__ctas {
+    flex-wrap: nowrap;
+    width: 100%;
+  }
+  .hero__ctas .btn {
+    --h: 50px;
+    flex: 1 1 0;
+    padding: 0 14px;
+    font-size: 15.5px;
+  }
+  .hero__hint {
+    bottom: auto;
+    top: calc(var(--header-h) + 8px);
+    left: auto;
+    right: var(--m);
+  }
 }

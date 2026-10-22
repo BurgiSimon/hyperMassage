@@ -98,6 +98,11 @@ export function initBooking({ reduced, beforeOpen }) {
     }
   })
 
+  // the browser's own message would say «Sie» – this site says «du»
+  const nameField = form.elements.name
+  nameField?.addEventListener('invalid', () => nameField.setCustomValidity(nameField.value.trim() ? '' : 'Wie heisst du? Dann kann ich dich zurückrufen.'))
+  nameField?.addEventListener('input', () => nameField.setCustomValidity(''))
+
   // Enter in a field: SMS on phones, e-mail on computers
   let implicit = false
   form.addEventListener('keydown', (e) => {

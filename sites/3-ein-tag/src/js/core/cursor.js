@@ -29,6 +29,7 @@ export function initCursor() {
   document.addEventListener('pointerover', (e) => {
     const t = e.target.closest?.(HOVER_SEL)
     el.classList.toggle('is-hover', !!t && !t.matches('.hero'))
+    el.classList.toggle('is-button', !!t?.matches('.btn, .dock__btn'))
     const text = t?.getAttribute('data-cursor')
     if (text) {
       label.textContent = text

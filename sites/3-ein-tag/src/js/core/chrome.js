@@ -16,8 +16,10 @@ export function initHeader() {
   const update = () => {
     const y = window.scrollY
     const vh = window.innerHeight
-    if (y > lastY + 4 && y > vh * 0.8 && !document.documentElement.classList.contains('menu-open')) header.classList.add('is-hidden')
-    else if (y < lastY - 4 || y < vh * 0.8) header.classList.remove('is-hidden')
+    // on computers the header (and its clock that follows the day) always stays; phones need the room
+    const phone = window.innerWidth <= 900
+    if (phone && y > lastY + 4 && y > vh * 0.8 && !document.documentElement.classList.contains('menu-open')) header.classList.add('is-hidden')
+    else if (!phone || y < lastY - 4 || y < vh * 0.8) header.classList.remove('is-hidden')
     lastY = y
     dock?.classList.toggle('is-visible', y > vh * 0.7 && !footerOn)
   }

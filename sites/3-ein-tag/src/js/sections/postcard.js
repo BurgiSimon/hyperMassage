@@ -9,7 +9,8 @@ const GIFTS = {
   60: { text: '60 Minuten Massage', value: 'CHF 85' },
   hotstone: { text: 'eine Hot-Stone-Massage (60 Minuten)', value: 'CHF 100' },
 }
-const MOODS = { 6.3: 'Morgen', 13: 'Mittag', 18.6: 'Abend', 22.5: 'Nacht' }
+// (morning just after sunrise, night in the first deep blue with the village lights on)
+const MOODS = { 8.15: 'Morgen', 13: 'Mittag', 18.6: 'Abend', 20.1: 'Nacht' }
 
 /** A postcard from Kestenholz – the picture is painted live from the landscape, at the chosen time of day. */
 export function initPostcard({ reduced, webgl }) {
@@ -42,7 +43,7 @@ export function initPostcard({ reduced, webgl }) {
       // no WebGL: a simple gradient sky
       const ctx = canvas.getContext('2d')
       const g = ctx.createLinearGradient(0, 0, 0, canvas.height)
-      const night = mood === '22.5'
+      const night = mood === '20.1'
       g.addColorStop(0, night ? '#0b1328' : '#5a7fb3')
       g.addColorStop(0.7, night ? '#1d2440' : '#e9c29b')
       g.addColorStop(0.71, night ? '#0a0d16' : '#4b5a45')
@@ -57,7 +58,7 @@ export function initPostcard({ reduced, webgl }) {
   const update = () => {
     const d = new FormData(form)
     to.textContent = String(d.get('to') || '').trim() || 'dich'
-    from.textContent = String(d.get('from') || '').trim() || '…'
+    from.textContent = String(d.get('from') || '').trim() || 'dir'
     const g = GIFTS[d.get('gift')] ?? GIFTS[60]
     gift.textContent = g.text
     value.textContent = g.value

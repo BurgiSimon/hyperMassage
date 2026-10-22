@@ -62,7 +62,11 @@ export function runLoader({ reduced, revisit }) {
     const tl = gsap.timeline()
     tl.to(ridge, { strokeDashoffset: 0, duration: min, ease: 'power2.inOut' }, 0)
     tl.to(clock, { m: 6 * 60 + 40, duration: min, ease: 'power1.inOut', onUpdate: paint }, 0)
-    tl.to(el, { background: 'linear-gradient(#141c38, #3c3a5c 60%, #b7787a)', duration: min, ease: 'none' }, 0)
+    // dawn: a second sky fades in (tweening one gradient into another flickers through transparent)
+    const dawn = document.createElement('div')
+    dawn.className = 'loader__dawn'
+    el.prepend(dawn)
+    tl.to(dawn, { opacity: 1, duration: min, ease: 'none' }, 0)
     tl.add(() => {
       tl.pause()
       ready.then(() => tl.resume())
@@ -73,6 +77,8 @@ export function runLoader({ reduced, revisit }) {
       el.classList.add('is-done')
       resolve()
     }, '-=0.3')
-    tl.to(el, { autoAlpha: 0, duration: 1.1, ease: 'power2.inOut', onComplete: () => el.remove() })
+    // the clock and the place name leave first, so they never fade across the title
+    tl.to([qs('.loader__count', el), qs('.loader__line', el)], { opacity: 0, y: -12, duration: 0.4, ease: 'power2.in' })
+    tl.to(el, { autoAlpha: 0, duration: 1.1, ease: 'power2.inOut', onComplete: () => el.remove() }, '-=0.15')
   })
 }

@@ -133,7 +133,8 @@ export function initDay({ scene, reduced }) {
   const paintStatus = () => {
     const n = zurichNow()
     const h = n.decimal
-    if (greet) greet.textContent = h >= 5 && h < 11 ? 'Guten Morgen aus Kestenholz' : h < 17 && h >= 11 ? 'Guten Tag aus Kestenholz' : h >= 17 && h < 22 ? 'Guten Abend aus Kestenholz' : 'Gute Nacht aus Kestenholz'
+    // (no «Gute Nacht» – that is a goodbye)
+    if (greet) greet.textContent = h >= 5 && h < 11 ? 'Guten Morgen aus Kestenholz' : h < 17 && h >= 11 ? 'Guten Tag aus Kestenholz' : h >= 17 ? 'Guten Abend aus Kestenholz' : 'Spät noch wach? Grüsse aus Kestenholz'
     const st = openStatus(n)
     if (statusText) statusText.textContent = st.text
     status?.classList.toggle('is-open', st.open)
@@ -162,25 +163,38 @@ export function initDay({ scene, reduced }) {
   }
   const placePeaks = () => {
     if (!scene || !peaks) return
-    const w = window.innerWidth
+    const W = window.innerWidth
     const items = qsa('li', peaks)
-    const boxes = blockers.map(boxOf)
-    const scrollY = window.scrollY
-    let lastX = -Infinity
+    peaks.classList.add('is-ready') // (labels must be displayable to be measured)
+    // everything in page coordinates (the labels live in the hero)
+    const sy = window.scrollY
+    const pad = 12
+    const taken = blockers.map(boxOf).map((r) => ({ l: r.left - pad, r: r.right + pad, t: r.top + sy - pad, b: r.bottom + sy + pad }))
+    const clash = (a) => taken.some((r) => a.l < r.r && a.r > r.l && a.t < r.b && a.b > r.t)
     items.forEach((li) => {
+      li.classList.remove('is-on')
       const p = scene.project(parseFloat(li.dataset.az), parseFloat(li.dataset.el))
-      // keep labels clear of the hero text
-      const hit = p && boxes.some((r) => p.x > r.left - 90 && p.x < r.right + 90 && p.y - scrollY > r.top - 16 && p.y - scrollY - 40 < r.bottom + 8)
-      const visible = p && !hit && p.x > 60 && p.x < w - 60 && p.y > window.innerHeight * 0.3
-      const crowded = p && p.x - lastX < (w < 640 ? 110 : 150)
-      li.classList.toggle('is-on', !!visible && !crowded)
-      if (visible && !crowded) {
-        li.style.left = `${p.x}px`
-        li.style.top = `${p.y - 6}px`
-        lastX = p.x
+      if (!p || p.x < 8 || p.x > W - 8 || p.y < window.innerHeight * 0.25) return
+      // measure the label, then try it centred over its summit, then nudged to either side
+      li.classList.add('is-on')
+      const lw = li.offsetWidth
+      const lh = li.offsetHeight
+      const bottom = p.y - 16
+      const box = (left) => ({ l: left, r: left + lw, t: bottom - lh, b: p.y })
+      const lo = 8
+      const hi = W - lw - 8
+      const tries = [p.x - lw / 2, p.x - 18, p.x - lw + 18].map((x) => Math.min(hi, Math.max(lo, x)))
+      const left = tries.find((x) => !clash(box(x)))
+      if (left === undefined) {
+        li.classList.remove('is-on')
+        return
       }
+      taken.push(box(left))
+      li.style.left = `${left}px`
+      li.style.top = `${bottom}px`
+      // the leader line still points at the summit
+      li.style.setProperty('--lx', `${(p.x - left).toFixed(1)}px`)
     })
-    peaks.classList.add('is-ready')
   }
   if (scene) {
     placePeaks()

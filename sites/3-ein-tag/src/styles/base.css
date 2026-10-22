@@ -30,6 +30,7 @@ html.lenis body {
 body {
   margin: 0;
   color: var(--ink);
+  font-variant-numeric: lining-nums; /* (no old-style figures next to prices and times) */
   font-family: var(--f-text);
   font-size: var(--fs-body);
   line-height: 1.55;
@@ -384,13 +385,18 @@ ul {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: radial-gradient(circle, #fff6e2 0 30%, rgb(255 196 140 / 0.65) 50%, rgb(255 170 110 / 0) 72%);
+  background: radial-gradient(circle, rgb(255 246 226 / 0.7) 0 22%, rgb(255 196 140 / 0.55) 50%, rgb(255 170 110 / 0) 72%);
   transform: scale(var(--s, 1));
   transition: transform 0.45s var(--ease-out), opacity 0.3s;
   mix-blend-mode: screen;
 }
 .cursor.is-hover .cursor__glow {
-  --s: 3.2;
+  --s: 1.8;
+  opacity: 0.45;
+}
+/* buttons have their own fill: the light steps aside instead of covering the label */
+.cursor.is-button .cursor__glow {
+  opacity: 0;
 }
 .cursor.is-down .cursor__glow {
   --s: 0.7;
@@ -495,5 +501,31 @@ ul {
   .btn--solid {
     color: #1c1e24 !important;
     border: 1.5px solid #1c1e24;
+  }
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+/* no lonely last words; German hyphenation in running text */
+p,
+li,
+dd {
+  text-wrap: pretty;
+}
+.page__lead,
+.about p,
+.treat p,
+.faq__a p {
+  hyphens: auto;
+  hyphenate-limit-chars: 8 4 4;
+}
+
+/* small phones: three choices fit in one row */
+@media (max-width: 420px) {
+  .choice label span {
+    padding: 0 13px;
+    font-size: 14.5px;
+    justify-content: center;
   }
 }

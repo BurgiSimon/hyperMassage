@@ -152,3 +152,10 @@
   font-size: var(--fs-lead);
   opacity: 0.85;
 }
+
+/* the 404 is a night page: the night's accent, dark text on it */
+.nf {
+  --sun: #e59a6c;
+  --sun-deep: #f0b089;
+  --on-sun: #161b2b;
+}

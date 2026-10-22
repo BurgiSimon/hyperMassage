@@ -106,7 +106,7 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
         return d[0] + d[1] + d[2]
       })
     const evening = await px()
-    await page.click('label:has(input[name="mood"][value="22.5"])')
+    await page.click('label:has(input[name="mood"][value="20.1"])')
     await wait(page, 600)
     const night = await px()
     ok('postcard paints the chosen time of day', night < evening - 60, `(${evening} → ${night})`)
@@ -211,7 +211,8 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
     const off = await page.evaluate(() =>
       Math.max(
         0,
-        ...[...document.querySelectorAll('[data-peaks] li.is-on')].map((li) => Math.abs(parseFloat(li.style.left) - window.__scene.project(parseFloat(li.dataset.az), parseFloat(li.dataset.el)).x)),
+        // (a label sits where its leader line points at the summit)
+        ...[...document.querySelectorAll('[data-peaks] li.is-on')].map((li) => Math.abs(parseFloat(li.style.left) + parseFloat(li.style.getPropertyValue('--lx')) - window.__scene.project(parseFloat(li.dataset.az), parseFloat(li.dataset.el)).x)),
       ),
     )
     ok('summit labels follow a resize', off < 3, `(off by ${Math.round(off)} px)`)

@@ -58,7 +58,7 @@ vec3 sky(float az, float el) {
   float daz = (az - uSun.x) * 0.9;
   float d = length(vec2(daz, (el - uSun.y) * 1.3));
   float glow = exp(-d / 26.0) * uGlowK;
-  float band = exp(-abs(el) / 7.0) * exp(-abs(daz) / 70.0) * uGlowK;
+  float band = exp(-abs(el) / 13.0) * exp(-abs(daz) / 100.0) * uGlowK;
   c = mix(c, uGlowCol, clamp(glow * 0.85 + band * 0.55, 0.0, 1.0));
   // the sun itself
   float disc = smoothstep(1.35, 1.05, d);
@@ -76,11 +76,14 @@ vec3 sky(float az, float el) {
     float mw = fbm(vec2(az * 0.05 + el * 0.04, el * 0.09 - az * 0.02)) * exp(-pow((el - 32.0 + (az - 330.0) * 0.25) / 14.0, 2.0));
     c += uNight * (vec3(1.0, 0.96, 0.9) * star * tw * smoothstep(0.0, 6.0, el) + vec3(0.25, 0.27, 0.38) * mw * 0.35);
   }
+  // town light from the Mittelland under the night sky
+  c += vec3(0.32, 0.2, 0.12) * uLights * 0.12 * exp(-max(el, 0.0) / 7.0);
   // clouds: soft streaks, lit from the sun side
   float cl = fbm(vec2(az * 0.045 + uTime * 0.004, el * 0.16 + 3.0)) ;
   cl = smoothstep(0.55 - uCloud * 0.25, 0.95, cl) * smoothstep(1.0, 9.0, el) * (1.0 - smoothstep(40.0, 70.0, el));
   vec3 cloudCol = mix(uHorizonCol * 1.05, uLightCol, 0.55) + uGlowCol * exp(-length(vec2(daz * 0.5, el - uSun.y)) / 40.0) * 0.4;
-  cloudCol = mix(cloudCol, uZenith * 1.4, uNight * 0.8);
+  // at night the clouds are dim and warm (lit from below by the villages), not grey smudges
+  cloudCol = mix(cloudCol, vec3(0.16, 0.13, 0.14), uNight * 0.85);
   c = mix(c, cloudCol, cl * 0.6);
   return c;
 }
@@ -99,6 +102,7 @@ void main() {
   // the Jura, far to near so nearer ridges cover the ones behind
   // (pixels the ground plane will cover completely skip the ridges)
   bool underGround = te < ridge(az, 0.0).x - aa;
+  float farTop = -10.0;
   for (int b = 4; b >= 1 && !underGround; b--) {
     vec2 rd = ridge(az, float(b));
     float km = rd.y;
@@ -126,8 +130,8 @@ void main() {
       float facing = clamp(0.5 + dh * sign(uSun.x - az) * 0.35 * exp(-below / 1.2), 0.15, 0.85);
       c *= (uLightCol * (0.45 + 0.55 * facing) + uZenith * 0.3) * uAmbient;
       // rim light along the crest when the sun is low
-      float rim = exp(-below / 0.1) * smoothstep(22.0, 0.0, uSun.y) * smoothstep(-5.0, 0.0, uSun.y);
-      c += uGlowCol * rim * exp(-abs(az - uSun.x) / 60.0) * 0.6;
+      float rim = exp(-below / 0.05) * smoothstep(22.0, 0.0, uSun.y) * smoothstep(-5.0, 0.0, uSun.y) * smoothstep(farTop, farTop + 0.1, h);
+      c += uGlowCol * rim * exp(-abs(az - uSun.x) / 25.0) * 0.5;
       // villages at the foot of the hills light up at night
       if (uLights > 0.01 && te < 0.5 && b <= 2) {
         vec2 lc = vec2(az * 3.2, te * 22.0);
@@ -144,6 +148,7 @@ void main() {
       c = mix(c, uFogCol * 1.08, clamp(mist, 0.0, 0.85));
       col = mix(col, c, smoothstep(h + aa, h - aa, te));
     }
+    farTop = max(farTop, h);
   }
 
   // a line of trees and farms at the near edge of the plain, in front of the hills
@@ -162,7 +167,7 @@ void main() {
   vec2 r0 = ridge(az, 0.0);
   if (te < r0.x + aa) {
     float ang = max(0.015, PLAIN - te + 0.02);
-    float d = 6.0 / tan(radians(ang));                // metres to that point
+    float d = 15.0 / tan(radians(ang));                // metres to that point (eye above the plain)
     float x = d * sin(radians(az - uAzC));
     // strips of fields: rows in depth, each row cut into parcels of its own width
     float rowLen = 70.0;
@@ -180,18 +185,18 @@ void main() {
     meadow = mix(meadow, vec3(0.18, 0.22, 0.14), edgeR * hedgeOn * 0.8);
     // close by, just grass
     vec3 grass = vec3(0.24, 0.32, 0.17) * (0.8 + 0.4 * fbm(vec2(x * 0.08, d * 0.3)));
-    meadow = mix(meadow, grass, smoothstep(320.0, 90.0, d));
+    meadow = mix(meadow, grass, smoothstep(160.0, 50.0, d));
     vec3 lit = meadow * (uLightCol * 0.8 + uZenith * 0.25) * uAmbient;
     float fog = 1.0 - exp(-d / mix(3000.0, 900.0, uHaze));
     vec3 ground = mix(lit, uFogCol, clamp(fog, 0.0, 0.9));
-    ground *= mix(1.0, 0.7, smoothstep(400.0, 40.0, d));   // the near ground lies in shade
+    ground *= mix(1.0, 0.85, smoothstep(400.0, 40.0, d));   // the near ground lies in shade
     if (uLights > 0.01 && d > 120.0) {
       vec2 lc = vec2(az * 1.6, log(d) * 9.0);
       vec2 id = floor(lc);
       float h = hash(id + 11.0);
       vec2 lp = (fract(lc) - 0.5 - (vec2(hash(id + 2.0), hash(id + 5.0)) - 0.5) * 0.6) * vec2(1.0, 2.2);
       float village = smoothstep(0.55, 0.72, noise(vec2(az * 0.22, 4.0))) * step(700.0, d) + 0.15 * step(0.97, h);
-      float on = step(0.82, h) * village * smoothstep(0.16, 0.0, length(lp));
+      float on = step(0.78, h) * village * smoothstep(0.22, 0.0, length(lp));
       ground += vec3(1.0, 0.74, 0.42) * on * (0.8 + 0.2 * sin(uTime * 2.0 + h * 50.0)) * uLights * 1.4;
     }
     col = mix(col, ground, smoothstep(r0.x + aa, r0.x - aa, te));
@@ -215,10 +220,10 @@ const hex = (h) => [parseInt(h.slice(1, 3), 16) / 255, parseInt(h.slice(3, 5), 1
 const KEYS = [
   { e: -18, zen: '#04060d', hor: '#0c1324', glow: '#151b33', k: 0.0, light: '#2c3656', amb: 0.2, fog: '#141c33', night: 1 },
   { e: -11, zen: '#081028', hor: '#1a2140', glow: '#2e2c50', k: 0.25, light: '#3a4466', amb: 0.26, fog: '#1c2440', night: 0.85 },
-  { e: -5, zen: '#172850', hor: '#5d5278', glow: '#d98468', k: 0.65, light: '#7a6a8c', amb: 0.36, fog: '#5c5478', night: 0.3 },
-  { e: -1, zen: '#2a4a80', hor: '#c98f7c', glow: '#ffab72', k: 1.0, light: '#f2a27c', amb: 0.52, fog: '#b48f90', night: 0.05 },
+  { e: -5, zen: '#172850', hor: '#5d5278', glow: '#d98468', k: 0.65, light: '#7a6a8c', amb: 0.26, fog: '#463f62', night: 0.3 },
+  { e: -1, zen: '#2a4a80', hor: '#d98f6c', glow: '#ffa060', k: 1.0, light: '#f2a27c', amb: 0.42, fog: '#9a7f8c', night: 0.05 },
   { e: 4, zen: '#456fa8', hor: '#eebf98', glow: '#ffcb94', k: 0.85, light: '#ffd0a0', amb: 0.72, fog: '#d4b8a6', night: 0 },
-  { e: 14, zen: '#4b7fbf', hor: '#c5d5e3', glow: '#fff0d6', k: 0.45, light: '#fff1de', amb: 0.92, fog: '#b9cbdb', night: 0 },
+  { e: 14, zen: '#4b7fbf', hor: '#cfd6dd', glow: '#ffe6c2', k: 0.5, light: '#ffe9cc', amb: 0.92, fog: '#c2cad3', night: 0 },
   { e: 40, zen: '#3a78c2', hor: '#bed6ed', glow: '#ffffff', k: 0.32, light: '#ffffff', amb: 1.0, fog: '#b4cbe2', night: 0 },
 ].map((k) => ({ ...k, zen: hex(k.zen), hor: hex(k.hor), glow: hex(k.glow), light: hex(k.light), fog: hex(k.fog) }))
 
@@ -297,7 +302,14 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
   horizon.bands.forEach((band, b) => {
     for (let i = 0; i < W; i++) {
       data[(b * W + i) * 2] = band.el[i] / 100
-      data[(b * W + i) * 2 + 1] = (band.dist[i] * 10) / 1000
+      // distance is box-averaged over ±1.5°: a jump between neighbouring samples would draw a seam
+      let sum = 0
+      let n = 0
+      for (let k = Math.max(0, i - 6); k <= Math.min(W - 1, i + 6); k++) {
+        sum += band.dist[k]
+        n++
+      }
+      data[(b * W + i) * 2 + 1] = ((sum / n) * 10) / 1000
     }
   })
 
@@ -356,7 +368,7 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
   const camera = () => {
     const aspect = state.w / state.h
     const fov = Math.min(150, Math.max(58, aspect * 72))
-    const horizonY = aspect < 0.8 ? 0.17 : 0.2
+    const horizonY = aspect < 0.8 ? 0.33 : 0.2
     const exag = aspect < 0.8 ? 2.6 : 2.2
     // keep the view inside the measured skyline (255° … 45°)
     const azC = Math.min(405 - fov / 2, Math.max(255 + fov / 2, aspect < 0.8 ? 318 : 328))
@@ -364,6 +376,12 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
   }
 
   // the real sun is south of us – fold its path into the northern view: east on the right, west on the left
+  // the ridges are drawn exaggerated, so a low sun is lifted with them (and meets the real sky higher up)
+  const skyEl = (el, v) => {
+    if (el <= 0) return el
+    const s = Math.min(1, el / 25)
+    return el * (v.exag + (1 - v.exag) * s * s * (3 - 2 * s))
+  }
   const sunToView = (az, view) => view.azC + ((180 - az) / 90) * (view.fov * 0.42)
 
   const resize = () => {
@@ -417,7 +435,7 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
     gl.uniform1f(U.uHorizon, v.horizonY)
     gl.uniform1f(U.uExag, v.exag)
     gl.uniform1f(U.uTime, state.time)
-    gl.uniform2f(U.uSun, sunToView(L.sunAz, v), L.sunEl)
+    gl.uniform2f(U.uSun, sunToView(L.sunAz, v), skyEl(L.sunEl, v))
     gl.uniform3fv(U.uZenith, L.zen)
     gl.uniform3fv(U.uHorizonCol, L.hor)
     gl.uniform3fv(U.uGlowCol, L.glow)
@@ -544,7 +562,7 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
       const v = state.view
       if (!L || !v) return null
       const degPx = v.fov / state.w
-      return { x: state.w / 2 + (sunToView(L.sunAz, v) - v.azC) / degPx, y: state.h - (state.h * v.horizonY + L.sunEl / degPx) }
+      return { x: state.w / 2 + (sunToView(L.sunAz, v) - v.azC) / degPx, y: state.h - (state.h * v.horizonY + skyEl(L.sunEl, v) / degPx) }
     },
     /** hour for a sun dragged to screen x */
     hourFromX(x, current, day = state.day) {

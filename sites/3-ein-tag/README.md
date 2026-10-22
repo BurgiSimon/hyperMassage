@@ -36,7 +36,7 @@ Header and text switch from dark to light ink as the sky gets dark.
 | 10:00 · Angebot | The five treatments. |
 | 12:30 · Preise | The tariff, plus a **planner**: pick a day, a duration and a start time on the opening-hours timeline in 15-minute steps. The sky in the background shows that hour. «So anfragen» fills in the booking request. |
 | 15:30 · Gutschein | A voucher **postcard** painted from the same landscape, at morning, noon, evening or night. Add a name and a message, then send the request as an e-mail or SMS. |
-| 17:30 · Gut zu wissen | Short answers to the usual questions, also published as FAQ structured data. |
+| 18:00 · Gut zu wissen | The sun sets behind the Jura. Short answers to the usual questions, also published as FAQ structured data. |
 | 19:00 · Kontakt | «Feierabend.» A tap-to-call number. The opening hours are drawn as sun arcs, with today and the current sun position marked. |
 | 21:30 · Anfahrt | Night falls and the village lights come on. A street map of Kestenholz drawn from OpenStreetMap data. |
 | Footer | «Gute Nacht.» under the stars. |
