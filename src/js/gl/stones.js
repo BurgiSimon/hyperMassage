@@ -209,6 +209,64 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
   glow.position.y = floorY + 0.01
   root.add(glow)
 
+  // warm air: a few motes drifting upwards like steam over hot stones
+  let motes = null
+  if (!reduced) {
+    const count = isSmall ? 70 : 150
+    const pos = new Float32Array(count * 3)
+    const seed = new Float32Array(count)
+    for (let i = 0; i < count; i++) {
+      pos[i * 3] = (Math.random() - 0.5) * 12
+      pos[i * 3 + 1] = (Math.random() - 0.5) * 10
+      pos[i * 3 + 2] = (Math.random() - 0.5) * 6
+      seed[i] = Math.random()
+    }
+    const g = new THREE.BufferGeometry()
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+    g.setAttribute('aSeed', new THREE.BufferAttribute(seed, 1))
+    motes = new THREE.Points(
+      g,
+      new THREE.ShaderMaterial({
+        transparent: true,
+        depthWrite: false,
+        blending: THREE.AdditiveBlending,
+        uniforms: {
+          uTime: time,
+          uHeat: { value: 0 },
+          uScale: { value: renderer.getPixelRatio() * 85 },
+          uColor: { value: new THREE.Color('#ffc9a0') },
+        },
+        vertexShader: /* glsl */ `
+          attribute float aSeed;
+          uniform float uTime;
+          uniform float uScale;
+          varying float vAlpha;
+          void main() {
+            vec3 p = position;
+            float speed = 0.12 + aSeed * 0.22;
+            p.y = mod(p.y + 5.0 + uTime * speed, 10.0) - 5.0;
+            p.x += sin(uTime * 0.25 + aSeed * 6.2831) * 0.35;
+            p.z += cos(uTime * 0.2 + aSeed * 12.0) * 0.25;
+            vec4 mv = modelViewMatrix * vec4(p, 1.0);
+            gl_Position = projectionMatrix * mv;
+            gl_PointSize = uScale * (0.35 + aSeed * 0.9) / -mv.z;
+            float edge = smoothstep(-5.0, -3.0, p.y) * (1.0 - smoothstep(2.5, 5.0, p.y));
+            vAlpha = edge * (0.25 + 0.75 * fract(aSeed * 7.31));
+          }`,
+        fragmentShader: /* glsl */ `
+          uniform vec3 uColor;
+          uniform float uHeat;
+          varying float vAlpha;
+          void main() {
+            float d = length(gl_PointCoord - 0.5);
+            float a = smoothstep(0.5, 0.0, d);
+            gl_FragColor = vec4(uColor, a * a * vAlpha * (0.26 + uHeat * 0.55));
+          }`,
+      }),
+    )
+    scene.add(motes)
+  }
+
   // layout
   const layout = () => {
     const w = canvas.clientWidth || window.innerWidth
@@ -362,6 +420,7 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
     shadow.material.uniforms.uOpacity.value = 0.55 * (1 - stones[0].intro) * (1 - state.scroll)
     glow.material.uniforms.uOpacity.value = avgHeat * 0.45 * (1 - state.scroll)
     rim.intensity = 0.5 + avgHeat * 3.2
+    if (motes) motes.material.uniforms.uHeat.value = avgHeat * (1 - state.scroll)
 
     renderer.render(scene, camera)
   }

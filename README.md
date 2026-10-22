@@ -5,6 +5,8 @@ Static build, no backend, no cookies, no tracking.
 
 ![Hero – Lass los.](docs/preview-hero.jpg)
 
+![Touch a stone and it warms up](docs/preview-touch.jpg)
+
 <details>
 <summary>All sections (desktop & mobile)</summary>
 
