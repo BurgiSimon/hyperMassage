@@ -38,7 +38,7 @@ Extras: smooth scrolling, theme colours that cross-fade between sections, custom
 optional procedural ambient sound («Klang», generated in the browser — no audio files), a booking drawer that
 composes an e-mail or SMS, chapter indicator, mobile action dock, `prefers-reduced-motion` support,
 cross-document view transitions, print styles, a breathing 404 page, device-tilt parallax on phones,
-adaptive WebGL quality and a still-image fallback when WebGL is unavailable.
+adaptive WebGL quality and a still image of the stones when WebGL or a graphics chip is unavailable.
 
 ## Business-first details
 
@@ -47,6 +47,7 @@ adaptive WebGL quality and a still-image fallback when WebGL is unavailable.
 - `HealthAndBeautyBusiness` JSON-LD with address, geo, opening hours, services, price range and payment.
 - Open Graph image, favicons, web manifest, `sitemap.xml`, `robots.txt`.
 - Fonts are self-hosted; the page makes **no third-party requests**.
+- Lighthouse (production build): desktop 100 / 96 / 100 / 100, mobile 84 / 96 / 100 / 100.
 
 ## Development
 

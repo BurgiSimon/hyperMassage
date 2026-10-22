@@ -163,7 +163,8 @@ export function initHero({ reduced }) {
           onComplete: () => (state.intro = true),
         },
       )
-      if (hint) gsap.fromTo(hint, { autoAlpha: 0 }, { autoAlpha: 1, duration: 1, delay: 1.1 })
+      // (a wipe, not a fade: the hint is never half-transparent text)
+      if (hint) gsap.fromTo(hint, { clipPath: 'inset(0% 100% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.1, delay: 1.1, ease: 'expo.out' })
     },
     get m() {
       return state.m

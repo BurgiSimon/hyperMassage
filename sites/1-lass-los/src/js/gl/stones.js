@@ -138,6 +138,13 @@ export function createStones(canvas, { reduced = false, onHover, onTap, onWarm }
   } catch (e) {
     return null
   }
+  // no GPU (a software renderer draws every frame on the CPU): the still picture of the stones is the kinder choice
+  const glx = renderer.getContext()
+  const dbg = glx.getExtension('WEBGL_debug_renderer_info')
+  if (dbg && /swiftshader|llvmpipe|software|basic render/i.test(String(glx.getParameter(dbg.UNMASKED_RENDERER_WEBGL)))) {
+    renderer.dispose()
+    return null
+  }
   // if the GPU drops the context (low memory, backgrounded tab), fall back to the still image
   canvas.addEventListener('webglcontextlost', (e) => {
     e.preventDefault()
