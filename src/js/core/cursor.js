@@ -101,7 +101,18 @@ export function initCursor() {
     setLabel(text)
   })
 
+  // after touching the hot stones the hand stays warm for a little while
+  const warmth = { v: 0 }
+  gsap.ticker.add((_, dt) => {
+    if (warmth.v <= 0.001) return
+    warmth.v = Math.max(0, warmth.v - dt / 9000)
+    el.style.setProperty('--warm', warmth.v.toFixed(3))
+  })
+
   api = {
+    warm(amount = 0.02) {
+      warmth.v = Math.min(1, warmth.v + amount)
+    },
     /** Force a label (e.g. while hovering a WebGL object). */
     label(text) {
       forcedLabel = text

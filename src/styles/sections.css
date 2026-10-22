@@ -1166,8 +1166,15 @@ footer[data-theme] {
 .vform__gifts legend {
   margin-bottom: 0.7rem;
 }
-.vform .btn {
-  justify-self: start;
+.vform__send {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+@media (hover: hover) and (pointer: fine) {
+  .vform__send [data-send='sms'] {
+    display: none;
+  }
 }
 .vform__hint {
   color: var(--fg-soft);

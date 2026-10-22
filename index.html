@@ -567,11 +567,16 @@
                 <label class="choice"><input type="radio" name="gift" value="60" checked /><span>60 Min.</span></label>
                 <label class="choice"><input type="radio" name="gift" value="hotstone" /><span>Hot Stone 60 Min.</span></label>
               </fieldset>
-              <button class="btn btn--dark" type="submit" data-magnetic data-reveal-fade>
-                <span data-roll>Gutschein anfragen</span>
-                <svg class="btn__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
-              </button>
-              <p class="vform__hint mono" data-reveal-fade>Öffnet dein E-Mail-Programm – nichts wird gespeichert.</p>
+              <div class="vform__send" data-reveal-fade>
+                <button class="btn btn--dark" type="submit" data-send="mail" data-magnetic>
+                  <span data-roll>Gutschein anfragen</span>
+                  <svg class="btn__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                </button>
+                <button class="btn btn--line" type="submit" data-send="sms">
+                  <span data-roll>Per SMS</span>
+                </button>
+              </div>
+              <p class="vform__hint mono" data-reveal-fade>Öffnet dein E-Mail- bzw. SMS-Programm – nichts wird gespeichert.</p>
             </form>
           </div>
 

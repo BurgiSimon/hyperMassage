@@ -2,6 +2,7 @@ import gsap from 'gsap'
 import { qs, onVisibility } from '../utils/helpers.js'
 
 const EMAIL = 'massage_buergi@ggs.ch'
+const PHONE = '+41782249197'
 const GIFTS = {
   30: { html: '30 Minuten<br><em>Massage</em>', text: '30 Minuten Massage', value: 'CHF 45' },
   45: { html: '45 Minuten<br><em>Massage</em>', text: '45 Minuten Massage', value: 'CHF 65' },
@@ -61,8 +62,18 @@ export function initVoucher({ reduced, emit }) {
     ]
       .filter((l) => l !== null)
       .join('\n')
-    const url = `mailto:${EMAIL}?subject=${encodeURIComponent('Anfrage Massagegutschein')}&body=${encodeURIComponent(body)}`
-    window.location.href = url
+    if (e.submitter?.dataset.send === 'sms') {
+      const sms = [
+        `Hallo Claudia, ich möchte gerne einen Gutschein bestellen: ${g.text} (${g.value})`,
+        recipient ? `Für: ${recipient}` : null,
+        sender ? `Von: ${sender}` : null,
+      ]
+        .filter(Boolean)
+        .join('\n')
+      window.location.href = `sms:${PHONE}?&body=${encodeURIComponent(sms)}`
+    } else {
+      window.location.href = `mailto:${EMAIL}?subject=${encodeURIComponent('Anfrage Massagegutschein')}&body=${encodeURIComponent(body)}`
+    }
     if (!reduced) gsap.fromTo(card, { y: 0 }, { y: -18, duration: 0.35, yoyo: true, repeat: 1, ease: 'power2.out' })
   })
 

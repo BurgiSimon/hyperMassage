@@ -109,7 +109,9 @@ function boot({ late }) {
         onTap: (idx) => {
           hint?.classList.add('is-done')
           emit('stone:tap', idx)
+          cursor()?.warm(0.25)
         },
+        onWarm: (dt) => cursor()?.warm(dt * 0.35),
       })
       if (!stones) document.body.classList.add('no-webgl')
       return stones?.ready

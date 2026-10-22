@@ -131,7 +131,7 @@ function studioEnvironment(renderer) {
   return tex
 }
 
-export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
+export function createStones(canvas, { reduced = false, onHover, onTap, onWarm } = {}) {
   let renderer
   try {
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' })
@@ -440,7 +440,10 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
 
       // heat: warms fast under the hand, cools slowly like real stone
       const want = i === hovered ? 1 : 0
-      if (want) s.heat += (1 - s.heat) * Math.min(1, heatDt * 2.4)
+      if (want) {
+        s.heat += (1 - s.heat) * Math.min(1, heatDt * 2.4)
+        onWarm?.(heatDt)
+      }
       else if (state.introDone || reduced) s.heat += (0 - s.heat) * Math.min(1, heatDt * 0.45)
       s.mesh.material.userData.heat.value = s.heat
       heatSum += s.heat

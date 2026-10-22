@@ -523,12 +523,16 @@ button:hover .roll__b {
     height: 6px;
     margin: -3px 0 0 -3px;
     border-radius: 50%;
-    background: var(--fg);
+    background: color-mix(in srgb, var(--clay-glow) calc(var(--warm) * 100%), var(--fg));
     transition:
       opacity 0.3s,
       transform 0.4s var(--ease-out);
   }
+  .cursor {
+    --warm: 0;
+  }
   .cursor__ring {
+    box-shadow: 0 0 calc(var(--warm) * 26px) calc(var(--warm) * 4px) rgb(227 129 90 / calc(var(--warm) * 0.55));
     position: absolute;
     display: grid;
     place-items: center;
