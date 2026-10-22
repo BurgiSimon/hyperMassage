@@ -178,6 +178,35 @@
   user-select: none;
 }
 .nf__text {
+  text-wrap: balance;
   font-size: var(--fs-lead);
   max-width: 22em;
+}
+
+.nf__brand {
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  margin-bottom: 12px;
+  font-family: var(--f-display);
+  font-weight: 760;
+  font-stretch: 78%;
+  font-size: 21px;
+  line-height: 1;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+.nf__brand span {
+  font-family: var(--f-text);
+  font-size: 11px;
+  font-weight: 500;
+  font-stretch: 100%;
+  letter-spacing: 0.06em;
+  color: var(--fg-soft);
+}
+.nf__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
 }

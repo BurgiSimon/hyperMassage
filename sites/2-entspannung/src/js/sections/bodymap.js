@@ -148,7 +148,8 @@ const PRICE = { 30: 45, 45: 65, 60: 85 }
 const list = (arr) => (arr.length < 2 ? arr.join('') : `${arr.slice(0, -1).join(', ')} und ${arr[arr.length - 1]}`)
 
 export function recommend(zones, needs) {
-  const names = zones.map((z) => ZONES[z].label)
+  // (inside a sentence: «oberer Rücken», not «Oberer Rücken»)
+  const names = zones.map((z) => ZONES[z].label.replace(/^(Oberer|Unterer) /, (m) => m.toLowerCase()))
   const acc = zones.map((z) => ZONES[z].acc)
   const where = acc.length ? ` – mit Fokus auf ${list(acc)}` : ''
   let service
@@ -200,6 +201,7 @@ export function initBodyMap({ reduced }) {
   const canvas = qs('[data-bodymap-canvas]', root)
   const tip = qs('[data-bodymap-tip]', root)
   const hint = qs('[data-bodymap-hint]', root)
+  if (hint && window.matchMedia('(hover: hover) and (pointer: fine)').matches) hint.textContent = 'Klicke auf den Körper'
   const result = qs('[data-bodymap-result]', root)
   const recTitle = qs('[data-rec-title]', root)
   const recText = qs('[data-rec-text]', root)

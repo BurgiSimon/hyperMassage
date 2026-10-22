@@ -319,8 +319,8 @@ ul {
   background: var(--tense);
   border-color: var(--tense);
   color: var(--ink);
-  font-stretch: 78%;
-  font-weight: 760;
+  /* (weight only: a narrower chip would make its neighbours jump) */
+  font-weight: 720;
 }
 .chip[aria-pressed='true']::before {
   background: currentColor;
@@ -333,10 +333,6 @@ ul {
 @media (hover: hover) {
   .chip:hover {
     border-color: var(--fg);
-    font-stretch: 118%;
-  }
-  .chip[aria-pressed='true']:hover {
-    font-stretch: 84%;
   }
 }
 
@@ -502,6 +498,10 @@ ul {
 
 /* ───────── cursor ───────── */
 
+[hidden] {
+  display: none !important;
+}
+
 .cursor {
   position: fixed;
   top: 0;
@@ -546,8 +546,9 @@ ul {
 .cursor.is-hover .cursor__label {
   min-width: 40px;
   height: 40px;
-  background: color-mix(in oklch, var(--tense) 30%, transparent);
-  backdrop-filter: blur(2px);
+  /* a ring, so the word under it stays sharp */
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--tense);
 }
 .cursor.has-label .cursor__label {
   min-width: 0;

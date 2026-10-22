@@ -1,7 +1,7 @@
 <svg class="map" xmlns="http://www.w3.org/2000/svg" viewBox="-1250 -1050 2500 2100" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
 <defs>
 <path id="map-label-0" d="M-247 -264L-214 -225 -187 -189 -125 -97"/>
-<path id="map-label-1" d="M205 111L293 40"/>
+<path id="map-label-1" d="M150 156L345 0"/>
 <path id="map-label-2" d="M397 395L511 423 616 455 674 474 827 531"/>
 <path id="map-label-3" d="M617 -466L624 -489 626 -506 621 -585 620 -685 626 -735 641 -796 658 -846 675 -882 711 -946 748 -1005 774 -1042"/>
 </defs>
@@ -232,6 +232,7 @@
 <text class="m-street" dy="-6"><textPath href="#map-label-3" startOffset="50%" text-anchor="middle">Gäustrasse</textPath></text>
 <path class="m-home" d="M-0 -7L7 1 -0 7 -7 -0 -0 -7Z"/>
 <g class="m-pin" transform="translate(-0 -1)">
-<circle class="m-pin-ring" r="18"/><circle class="m-pin-ring" r="18"/><circle class="m-pin-dot" r="9"/>
+<circle class="m-pin-ring" r="20"/><circle class="m-pin-ring" r="20"/><circle class="m-pin-dot" r="12"/>
+<g class="m-pin-label"><rect class="m-label-bg" x="22" y="-18" rx="18" width="190" height="36"/><text class="m-label" x="40" y="6">Praxis Bürgi</text></g>
 </g>
 </g></svg>

@@ -130,7 +130,7 @@
     <!-- ───────────────────────────── Header ───────────────────────────── -->
     <header class="header" data-header>
       <a class="brand" href="#start" data-scroll-to>
-        <span class="brand__name">Claudia Bürgi</span>
+        <span class="brand__name" data-label="Claudia Bürgi">Claudia Bürgi</span>
         <span class="brand__sub">Massage, Kestenholz</span>
       </a>
 
@@ -140,10 +140,10 @@
 
       <nav class="nav" aria-label="Hauptnavigation">
         <ul>
-          <li><a href="#wo-drueckts" data-scroll-to>Wo drückt’s?</a></li>
-          <li><a href="#angebot" data-scroll-to>Angebot</a></li>
-          <li><a href="#preise" data-scroll-to>Preise</a></li>
-          <li><a href="#kontakt" data-scroll-to>Kontakt</a></li>
+          <li><a href="#wo-drueckts" data-scroll-to data-label="Wo drückt’s?">Wo drückt’s?</a></li>
+          <li><a href="#angebot" data-scroll-to data-label="Angebot">Angebot</a></li>
+          <li><a href="#preise" data-scroll-to data-label="Preise">Preise</a></li>
+          <li><a href="#kontakt" data-scroll-to data-label="Kontakt">Kontakt</a></li>
         </ul>
       </nav>
 
@@ -158,7 +158,7 @@
           <span>Termin anfragen</span>
         </a>
         <button class="menu-btn" type="button" data-menu-toggle aria-expanded="false" aria-controls="menu">
-          <span class="menu-btn__text" data-menu-label>Index</span>
+          <span class="menu-btn__text" data-menu-label>Menü</span>
           <span class="menu-btn__lines" aria-hidden="true"><i></i><i></i></span>
         </button>
       </div>
@@ -236,7 +236,7 @@
           <div class="bodymap__intro">
             <h2 class="h2 kin" data-kin>Zeig mir, wo&nbsp;es zieht.</h2>
             <p class="lead">
-              <span class="js-only">Tippe an, wo du Spannung spürst. Ich schlage dir eine passende Behandlung vor – den Rest
+              <span class="js-only">Wähle, wo du Spannung spürst. Ich schlage dir eine passende Behandlung vor – den Rest
               besprechen wir in Ruhe zu Beginn deines Termins.</span>
             </p>
             <div class="zones">
@@ -302,12 +302,12 @@
           </figure>
 
           <div class="about__text">
-            <h2 class="h2 kin" data-kin>Zwei Hände. Eine kleine Praxis.</h2>
+            <h2 class="h2 kin" data-kin>Zwei Hände. Eine&nbsp;kleine&nbsp;Praxis.</h2>
             <p class="lead">Ich bin Claudia Bürgi – Berufsmasseurin mit eigener kleiner Praxis in Kestenholz.</p>
             <div class="about__cols">
               <p>
-                2004 habe ich meine Ausbildung zur Berufsmasseurin erfolgreich abgeschlossen und bin seither nebenberuflich
-                als Berufsmasseurin tätig. Seit dem Umzug in unser Eigenheim behandle ich meine Kundinnen und Kunden in
+                2004 habe ich meine Ausbildung zur Berufsmasseurin erfolgreich abgeschlossen und arbeite seither
+                nebenberuflich in meinem Beruf. Seit dem Umzug in unser Eigenheim behandle ich meine Kundinnen und Kunden in
                 meiner eigenen kleinen Praxis.
               </p>
               <p>
@@ -349,8 +349,8 @@
         <div class="services__intro">
           <h2 class="h2 kin" data-kin>Fünf Arten, Spannung zu&nbsp;lösen.</h2>
           <p class="lead">
-            Was zu dir passt, besprechen wir kurz zu Beginn deines Termins. Ich kombiniere die Techniken nach deinen
-            Bedürfnissen.
+            Jede Behandlung dauert 30, 45 oder 60&nbsp;Minuten – zum selben Tarif. Ich kombiniere die Techniken nach
+            deinen Bedürfnissen.
           </p>
         </div>
 
@@ -367,7 +367,7 @@
             <div class="srow__body" id="s-1" data-srow-body>
               <div class="srow__inner">
                 <p>Die bewährte Ganzkörper- oder Teilmassage: löst Verspannungen, fördert die Durchblutung und lässt dich abschalten.</p>
-                <p class="srow__meta label">30 · 45 · 60 Minuten — ab CHF 45</p>
+                <p class="srow__meta label">30 · 45 · 60 Minuten — ab CHF&nbsp;45</p>
                 <a class="btn btn--ink" href="#kontakt" data-booking-open data-service="Klassische Massage" data-press><span>Klassische Massage anfragen</span></a>
               </div>
             </div>
@@ -384,7 +384,7 @@
             <div class="srow__body" id="s-2" data-srow-body>
               <div class="srow__inner">
                 <p>Gezielte Behandlung der HWS-Zone – von Nacken und Schultern, dort, wo sich der Alltag gerne festsetzt.</p>
-                <p class="srow__meta label">30 · 45 · 60 Minuten — ab CHF 45</p>
+                <p class="srow__meta label">30 · 45 · 60 Minuten — ab CHF&nbsp;45</p>
                 <a class="btn btn--ink" href="#kontakt" data-booking-open data-service="Nacken-Schultermassage" data-press><span>Nacken-Schultermassage anfragen</span></a>
               </div>
             </div>
@@ -401,7 +401,7 @@
             <div class="srow__body" id="s-3" data-srow-body>
               <div class="srow__inner">
                 <p>Punktgenaue Grifftechniken bei muskulären Schmerzen, abgestimmt auf dein Empfinden.</p>
-                <p class="srow__meta label">30 · 45 · 60 Minuten — ab CHF 45</p>
+                <p class="srow__meta label">30 · 45 · 60 Minuten — ab CHF&nbsp;45</p>
                 <a class="btn btn--ink" href="#kontakt" data-booking-open data-service="Manuelle Schmerztherapie" data-press><span>Schmerztherapie anfragen</span></a>
               </div>
             </div>
@@ -418,7 +418,7 @@
             <div class="srow__body" id="s-4" data-srow-body>
               <div class="srow__inner">
                 <p>Sanfte Schwingungen lockern die tiefliegende Muskulatur und bringen den Körper ins Gleichgewicht.</p>
-                <p class="srow__meta label">30 · 45 · 60 Minuten — ab CHF 45</p>
+                <p class="srow__meta label">30 · 45 · 60 Minuten — ab CHF&nbsp;45</p>
                 <a class="btn btn--ink" href="#kontakt" data-booking-open data-service="Schwingkissen-Therapie" data-press><span>Schwingkissen-Therapie anfragen</span></a>
               </div>
             </div>
@@ -435,7 +435,7 @@
             <div class="srow__body" id="s-5" data-srow-body>
               <div class="srow__inner">
                 <p>Eine äusserst entspannende Ganzkörpermassage, die mit Hilfe von warmen Lavasteinen ausgeführt wird.</p>
-                <p class="srow__meta label">Tarif nach Dauer + Zuschlag CHF 15</p>
+                <p class="srow__meta label">Tarif nach Dauer + Zuschlag CHF&nbsp;15</p>
                 <a class="btn btn--ink" href="#kontakt" data-booking-open data-service="Hot-Stone-Massage" data-dur="60" data-press><span>Hot Stone anfragen</span></a>
               </div>
             </div>
@@ -455,7 +455,7 @@
             <h2 class="h2 kin" data-kin>Dreimal anspannen. Dreimal loslassen.</h2>
             <p class="lead">
               Eine kleine Übung aus der progressiven Muskelentspannung: Spanne eine Muskelgruppe ein paar Sekunden lang an –
-              und lass dann ganz bewusst los.<span class="js-only"> Halte dazu den Knopf gedrückt.</span>
+              und lass dann ganz bewusst los.
             </p>
             <ol class="pmr__steps" data-pmr-steps>
               <li data-step="0"><span class="label">1</span> Hände zu Fäusten ballen</li>
@@ -486,7 +486,7 @@
         </div>
         <div class="prices__grid">
           <div class="prices__intro">
-            <h2 class="h2 kin" data-kin>Ein Tarif. Für alle Angebote.</h2>
+            <h2 class="h2 kin" data-kin>Ein Tarif. Für&nbsp;alle Angebote.</h2>
             <p class="lead">Du bestimmst nur die Zeit.<span class="js-only"> Zieh am Regler – oder wähle die Dauer.</span></p>
           </div>
 
@@ -505,16 +505,16 @@
 
             <fieldset class="seg">
               <legend class="sr-only">Dauer wählen</legend>
-              <label class="seg__opt"><input type="radio" name="dur" value="30" /><span>30 Min.</span><b>CHF 45</b></label>
-              <label class="seg__opt"><input type="radio" name="dur" value="45" /><span>45 Min.</span><b>CHF 65</b></label>
-              <label class="seg__opt"><input type="radio" name="dur" value="60" checked /><span>60 Min.</span><b>CHF 85</b></label>
+              <label class="seg__opt"><input type="radio" name="dur" value="30" /><span>30 Min.</span><b>CHF&nbsp;45</b></label>
+              <label class="seg__opt"><input type="radio" name="dur" value="45" /><span>45 Min.</span><b>CHF&nbsp;65</b></label>
+              <label class="seg__opt"><input type="radio" name="dur" value="60" checked /><span>60 Min.</span><b>CHF&nbsp;85</b></label>
             </fieldset>
 
             <div class="prices__row">
               <label class="switch">
                 <input type="checkbox" data-hotstone />
                 <span class="switch__ui" aria-hidden="true"></span>
-                <span>Als Hot-Stone-Massage <b>+ CHF 15</b></span>
+                <span>Als Hot-Stone-Massage <b><span class="plus">+</span>&nbsp;CHF&nbsp;15</b></span>
               </label>
               <p class="sr-only" aria-live="polite" data-price-live></p>
               <p class="prices__total">
@@ -526,7 +526,7 @@
             <ul class="prices__notes">
               <li>Barzahlung oder TWINT</li>
               <li>Zurzeit nicht krankenkassenanerkannt</li>
-              <li>Zuschlag von CHF 15 bei Hot-Stone-Massage</li>
+              <li>Zuschlag von CHF&nbsp;15 bei Hot-Stone-Massage</li>
             </ul>
             <a class="btn btn--ink btn--lg" href="#kontakt" data-booking-open data-booking-from-price data-press
               ><span data-price-cta>60 Minuten anfragen</span></a
@@ -559,10 +559,10 @@
               </label>
               <fieldset class="seg seg--wrap">
                 <legend class="label">Geschenk</legend>
-                <label class="seg__opt"><input type="radio" name="gift" value="30" /><span>30 Min.<span class="sr-only"> · CHF 45</span></span></label>
-                <label class="seg__opt"><input type="radio" name="gift" value="45" /><span>45 Min.<span class="sr-only"> · CHF 65</span></span></label>
-                <label class="seg__opt"><input type="radio" name="gift" value="60" checked /><span>60 Min.<span class="sr-only"> · CHF 85</span></span></label>
-                <label class="seg__opt"><input type="radio" name="gift" value="hotstone" /><span>Hot Stone<span class="sr-only"> · 60 Minuten, CHF 100</span></span></label>
+                <label class="seg__opt"><input type="radio" name="gift" value="30" /><span>30 Min.<span class="sr-only"> · CHF&nbsp;45</span></span></label>
+                <label class="seg__opt"><input type="radio" name="gift" value="45" /><span>45 Min.<span class="sr-only"> · CHF&nbsp;65</span></span></label>
+                <label class="seg__opt"><input type="radio" name="gift" value="60" checked /><span>60 Min.<span class="sr-only"> · CHF&nbsp;85</span></span></label>
+                <label class="seg__opt"><input type="radio" name="gift" value="hotstone" /><span>Hot Stone<span class="sr-only"> · 60 Minuten, CHF&nbsp;100</span></span></label>
               </fieldset>
               <div class="vform__send">
                 <button class="btn btn--ink btn--lg" type="submit" data-send="mail" data-press><span>Gutschein anfragen</span></button>
@@ -587,7 +587,7 @@
               <p class="poster__name"><span data-poster-name>DICH</span></p>
               <div class="poster__gift">
                 <p data-poster-gift>60 Minuten Massage</p>
-                <p class="poster__value" data-poster-value>CHF 85</p>
+                <p class="poster__value" data-poster-value>CHF&nbsp;85</p>
               </div>
               <div class="poster__bottom">
                 <span>Von <b data-poster-from>…</b></span>
@@ -635,8 +635,8 @@
               <summary><span class="qa__q">Wie lange dauert eine Behandlung – und was kostet sie?</span><span class="qa__icon" aria-hidden="true"></span></summary>
               <div class="qa__a">
                 <p>
-                  Du wählst zwischen 30, 45 und 60 Minuten. Der Tarif ist für alle Angebote gleich: CHF 45, 65 oder 85. Bei
-                  der Hot-Stone-Massage kommt ein Zuschlag von CHF 15 dazu.
+                  Du wählst zwischen 30, 45 und 60 Minuten. Der Tarif ist für alle Angebote gleich: CHF&nbsp;45, 65 oder 85. Bei
+                  der Hot-Stone-Massage kommt ein Zuschlag von CHF&nbsp;15 dazu.
                 </p>
               </div>
             </details>
@@ -682,13 +682,18 @@
           <p class="sec__num label">09</p>
           <p class="sec__label label">Termin &amp; Kontakt</p>
         </div>
-        <h2 class="h2 kin contact__h" data-kin>Ruf an. Oder schreib mir.</h2>
+        <h2 class="h2 kin contact__h" data-kin>Ruf an. Oder&nbsp;schreib&nbsp;mir.</h2>
         <a class="bignum" href="tel:+41782249197" data-bignum aria-label="Anrufen: 078 224 91 97">
           <span class="bignum__in" data-bignum-in aria-hidden="true">078&nbsp;224&nbsp;91&nbsp;97</span>
         </a>
 
         <div class="contact__grid">
           <ul class="contact__actions">
+            <li>
+              <a class="cact cact--book" href="#kontakt" data-booking-open data-press>
+                <span class="label">Anfrage</span><span class="cact__v">Termin anfragen →</span>
+              </a>
+            </li>
             <li>
               <a class="cact" href="tel:+41782249197" data-press>
                 <span class="label">Anrufen</span><span class="cact__v">078&nbsp;224&nbsp;91&nbsp;97</span>
@@ -822,7 +827,7 @@
     <!-- ───────────────────────────── Menu ───────────────────────────── -->
     <div class="menu" id="menu" data-menu inert>
       <div class="menu__inner" data-lenis-prevent>
-        <nav aria-label="Index">
+        <nav aria-label="Menü">
           <ol class="menu__list">
             <li><a href="#willkommen" data-scroll-to data-menu-link><span class="label">01</span><span class="menu__w">Willkommen</span></a></li>
             <li><a href="#wo-drueckts" data-scroll-to data-menu-link><span class="label">02</span><span class="menu__w">Wo drückt’s?</span></a></li>
@@ -864,20 +869,20 @@
             Hallo Claudia, ich hätte gerne einen Termin für eine
             <span class="slot"
               ><select name="service" aria-label="Behandlung">
-                <option>Klassische Massage</option>
-                <option>Nacken-Schultermassage</option>
-                <option>Manuelle Schmerztherapie</option>
-                <option>Schwingkissen-Therapie</option>
-                <option>Hot-Stone-Massage</option>
-                <option value="">Massage – was passt, besprechen wir</option>
+                <option value="Klassische Massage">klassische Massage</option>
+                <option value="Nacken-Schultermassage">Nacken-Schultermassage</option>
+                <option value="Manuelle Schmerztherapie">manuelle Schmerztherapie</option>
+                <option value="Schwingkissen-Therapie">Schwingkissen-Therapie</option>
+                <option value="Hot-Stone-Massage">Hot-Stone-Massage</option>
+                <option value="">Massage nach Absprache</option>
               </select></span
             >
             von
             <span class="slot"
               ><select name="dur" aria-label="Dauer">
-                <option value="30">30 Minuten (CHF 45)</option>
-                <option value="45">45 Minuten (CHF 65)</option>
-                <option value="60" selected>60 Minuten (CHF 85)</option>
+                <option value="30">30 Minuten (CHF&nbsp;45)</option>
+                <option value="45">45 Minuten (CHF&nbsp;65)</option>
+                <option value="60" selected>60 Minuten (CHF&nbsp;85)</option>
               </select></span
             >. Am liebsten an einem
             <span class="slot"

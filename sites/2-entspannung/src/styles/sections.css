@@ -294,6 +294,7 @@
   font-family: var(--f-display);
   font-weight: 220;
   font-stretch: 140%;
+  line-height: 0.9; /* (its wide letters must not open the line spacing) */
   color: var(--calm-deep);
   letter-spacing: -0.01em;
 }
@@ -491,6 +492,26 @@
   .bodymap__stage {
     aspect-ratio: 4 / 5;
     max-height: 80svh;
+  }
+  /* phones: heading → body → chips → suggestion, so the answer sits right under the choice */
+  .bodymap__intro {
+    display: contents;
+  }
+  .bodymap__intro > * {
+    grid-column: 1 / -1;
+  }
+  .bodymap__intro > .h2,
+  .bodymap__intro > .lead {
+    order: 1;
+  }
+  .bodymap__stage {
+    order: 2;
+  }
+  .bodymap__intro > .zones {
+    order: 3;
+  }
+  .bodymap__result {
+    order: 4;
   }
 }
 
@@ -918,6 +939,11 @@
   line-height: 1;
   max-width: 7em;
 }
+/* the moment to let go: the word must be read, not felt */
+.pmr.is-letgo .pmr__btn-label {
+  font-stretch: 100%;
+  font-weight: 800;
+}
 .pmr__status {
   min-height: 3em;
   max-width: 24em;
@@ -1258,11 +1284,40 @@
   .poster-wrap {
     position: relative;
     top: 0;
-    order: -1;
-    margin-bottom: 24px;
   }
   .poster {
-    --pw: min(100%, 420px);
+    --pw: min(100%, 340px);
+  }
+  /* phones and tablets: the poster sits between the names and the gift, in view while typing */
+  .voucher__intro,
+  .vform {
+    display: contents;
+  }
+  .voucher__intro > *,
+  .vform > * {
+    grid-column: 1 / -1;
+  }
+  .voucher__intro > .h2 {
+    order: 1;
+  }
+  .voucher__intro > .lead {
+    order: 2;
+  }
+  .vform > .field {
+    order: 3;
+  }
+  .poster-wrap {
+    order: 4;
+  }
+  .vform > .seg {
+    order: 5;
+  }
+  .vform > .vform__send {
+    order: 6;
+  }
+  .vform > .small,
+  .voucher__intro > .nojs-note {
+    order: 7;
   }
 }
 
@@ -1274,7 +1329,7 @@
   gap: var(--gap);
 }
 .faq__intro {
-  grid-column: 1 / span 4;
+  grid-column: 1 / span 5;
   display: grid;
   gap: 24px;
   align-content: start;
@@ -1284,8 +1339,12 @@
   color: var(--fg-soft);
 }
 .faq__list {
-  grid-column: 6 / span 7;
+  grid-column: 7 / -1;
   border-top: 1.5px solid var(--ink);
+}
+/* (the heading stays inside its column) */
+.faq__intro .h2 {
+  --fs-rest: 100%;
 }
 .qa {
   border-bottom: 1px solid var(--line);
@@ -1310,15 +1369,14 @@
   font-stretch: 96%;
   transition: font-stretch 0.7s var(--ease-spring), font-weight 0.7s var(--ease-spring);
 }
+/* (weight only: wider letters would re-wrap the question and push the list) */
 @media (hover: hover) {
   .qa summary:hover .qa__q {
-    font-stretch: 118%;
     font-weight: 420;
   }
 }
 .qa[open] .qa__q {
   font-weight: 720;
-  font-stretch: 84%;
 }
 .qa__icon {
   position: relative;
@@ -1732,6 +1790,10 @@
 .map .m-label-bg {
   fill: var(--ink);
 }
+.map .m-pin-label .m-label {
+  font-size: 22px;
+  letter-spacing: 0.01em;
+}
 @media (max-width: 960px) {
   .visit__text,
   .visit__map {
@@ -1840,9 +1902,6 @@
   text-decoration: underline;
 }
 @media (max-width: 860px) {
-  .footer {
-    padding-bottom: calc(96px + env(safe-area-inset-bottom));
-  }
   .footer__cols {
     grid-template-columns: 1fr 1fr;
     row-gap: 32px;
@@ -1890,4 +1949,56 @@
 .pmr__cue span {
   font-stretch: clamp(50%, calc(136% - var(--press) * 86%), 150%);
   font-weight: clamp(100, calc(260 + var(--press) * 640), 900);
+}
+
+/* About: two columns only where each has room for a decent line */
+@media (max-width: 1180px) {
+  .about__cols {
+    grid-template-columns: 1fr;
+  }
+}
+/* body text: German hyphenation, balanced short lines */
+.about__cols p,
+.lead,
+.qa__a p,
+.srow__inner p {
+  hyphens: auto;
+  hyphenate-limit-chars: 10 4 4;
+}
+.qa__q,
+.about__sign {
+  text-wrap: balance;
+}
+.madlib .small,
+.vform .small {
+  max-width: 62ch;
+}
+@media (max-width: 560px) {
+  .madlib__send .btn,
+  .vform__send .btn {
+    flex: 1 1 100%;
+  }
+}
+@media (max-width: 420px) {
+  .footer__cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* (Anybody draws «+» as a dot at this size) */
+.plus {
+  font-family: var(--f-text);
+  font-weight: 600;
+}
+
+/* the request sheet, first in the list of ways to reach me */
+.cact--book .cact__v {
+  color: var(--accent);
+}
+
+/* phones: the big numbers line up even when one label wraps */
+@media (max-width: 720px) {
+  .fact dt {
+    min-height: 2.6em;
+  }
 }

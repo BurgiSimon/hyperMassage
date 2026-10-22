@@ -47,7 +47,8 @@ export function runLoader({ reduced, revisit }) {
   }
   gsap.ticker.add(draw)
 
-  const min = revisit ? 0.7 : 1.7
+  // (a booking site: the string is pulled taut quickly)
+  const min = revisit ? 0.6 : 1.1
   return new Promise((resolve) => {
     const tl = gsap.timeline()
     tl.to(state, { p: 0.86, duration: min, ease: 'power2.inOut' })
@@ -55,15 +56,15 @@ export function runLoader({ reduced, revisit }) {
       tl.pause()
       ready.then(() => tl.resume())
     })
-    tl.to(state, { p: 1, duration: 0.45, ease: 'power3.out' })
-    tl.to({}, { duration: revisit ? 0.15 : 0.35 })
+    tl.to(state, { p: 1, duration: 0.35, ease: 'power3.out' })
+    tl.to({}, { duration: revisit ? 0.1 : 0.15 })
     tl.add(() => {
       el.classList.add('is-done')
       resolve()
     })
     tl.to(el, {
       clipPath: 'inset(0% 0% 100% 0%)',
-      duration: 1.1,
+      duration: 0.9,
       ease: 'expo.inOut',
       onComplete: () => {
         gsap.ticker.remove(draw)

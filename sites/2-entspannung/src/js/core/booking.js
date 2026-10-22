@@ -164,13 +164,19 @@ export function initBooking({ reduced, beforeOpen }) {
   })
   // (a blocked Enter submit – e.g. the name still empty – must not decide the next click)
   form.addEventListener('pointerdown', () => (implicit = false))
+  // the browser's own message would say «Sie» – this site says «du»
+  const nameField = form.elements.name
+  nameField?.addEventListener('invalid', () => nameField.setCustomValidity(nameField.value.trim() ? '' : 'Wie heisst du? Dann kann ich dich zurückrufen.'))
+  nameField?.addEventListener('input', () => nameField.setCustomValidity(''))
   form.addEventListener('submit', (e) => {
     e.preventDefault()
     const viaEnter = implicit
     implicit = false
     if (!form.reportValidity()) return
     const d = new FormData(form)
-    const service = d.get('service') || 'Massage (was passt, besprechen wir zusammen)'
+    const service = d.get('service')
+    // (the sentence uses the option's text: «eine klassische Massage», «eine Massage nach Absprache»)
+    const serviceText = form.elements.service.selectedOptions[0]?.textContent.trim() || 'Massage nach Absprache'
     const dur = Number(d.get('dur'))
     const price = PRICES[dur] + (service === 'Hot-Stone-Massage' ? HOTSTONE : 0)
     const name = String(d.get('name') || '').trim()
@@ -178,7 +184,7 @@ export function initBooking({ reduced, beforeOpen }) {
     const extra = String(d.get('note') || '').trim()
     const day = d.get('day')
     const when = `${day === 'beliebigen Tag' ? 'an einem beliebigen Tag' : `an einem ${day}`}, ${d.get('time')}`
-    const sentence = `Hallo Claudia, ich hätte gerne einen Termin für eine ${service} von ${dur} Minuten (CHF ${price}). Am liebsten ${when}.`
+    const sentence = `Hallo Claudia, ich hätte gerne einen Termin für eine ${serviceText} von ${dur} Minuten (CHF ${price}). Am liebsten ${when}.`
     const body = [
       sentence,
       '',

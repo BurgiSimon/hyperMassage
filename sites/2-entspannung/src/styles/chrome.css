@@ -124,6 +124,27 @@
   text-transform: uppercase;
   transition: font-stretch 0.8s var(--ease-spring), font-weight 0.8s var(--ease-spring);
 }
+/* relaxed letters are wider: a hidden twin keeps the room for them, so nothing next to them moves */
+.brand__name,
+.nav a {
+  display: inline-grid;
+}
+.brand__name::after,
+.nav a::after {
+  content: attr(data-label);
+  grid-area: 1 / 1;
+  visibility: hidden;
+  height: 0;
+  overflow: hidden;
+}
+.brand__name::after {
+  font-stretch: 112%;
+  font-weight: 420;
+}
+.nav a::after {
+  font-stretch: 124%;
+  font-weight: 360;
+}
 .brand__sub {
   font-size: 11px;
   font-weight: 500;
@@ -134,8 +155,8 @@
 }
 @media (hover: hover) {
   .brand:hover .brand__name {
-    font-stretch: 130%;
-    font-weight: 300;
+    font-stretch: 112%;
+    font-weight: 420;
   }
 }
 
@@ -145,6 +166,13 @@
   gap: 8px;
   color: var(--fg-soft);
   justify-self: start;
+  white-space: nowrap;
+}
+/* a crowded header: the status steps back (it is in the contact section too) */
+@media (min-width: 1181px) and (max-width: 1360px) {
+  .header__status {
+    display: none;
+  }
 }
 .dot {
   width: 8px;
@@ -191,7 +219,8 @@
   font-weight: 560;
   font-stretch: 96%;
   text-decoration: none;
-  display: inline-block;
+  display: inline-grid;
+  vertical-align: top;
   transition: font-stretch 0.7s var(--ease-spring), font-weight 0.7s var(--ease-spring);
 }
 .nav a.is-active {
@@ -563,10 +592,51 @@
   max-width: 760px;
 }
 
-/* ───────────────────────── Mobile dock ───────────────────────── */
+/* ───────────────────────── Dock (phones) / request pill (computers) ───────────────────────── */
 
 .dock {
   display: none;
+}
+/* computers: while the header is away, a small request pill waits bottom right */
+@media (min-width: 861px) {
+  .dock {
+    position: fixed;
+    right: var(--m);
+    bottom: calc(18px + env(safe-area-inset-bottom));
+    z-index: 400;
+    display: block;
+    transform: translateY(160%);
+    visibility: hidden;
+    transition:
+      transform 0.7s var(--ease-out),
+      visibility 0s 0.7s;
+  }
+  .dock.is-visible {
+    transform: none;
+    visibility: visible;
+    transition: transform 0.7s var(--ease-out);
+  }
+  .dock__btn:not(.dock__btn--ink) {
+    display: none;
+  }
+  .dock__btn--ink {
+    display: inline-flex;
+    align-items: center;
+    min-height: 48px;
+    padding: 0 24px;
+    border-radius: 99px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--f-display);
+    font-weight: 640;
+    font-size: 15.5px;
+    text-decoration: none;
+    box-shadow: 0 14px 36px -14px rgb(18 18 18 / 0.55);
+    transition: background-color 0.3s;
+  }
+  .dock__btn--ink:hover {
+    background: var(--accent-ink);
+  }
 }
 @media (max-width: 860px) {
   .dock {

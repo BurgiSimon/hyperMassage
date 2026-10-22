@@ -41,7 +41,8 @@ export function initPmr({ reduced }) {
       li.classList.toggle('is-done', j < i || state.done)
     })
     cue.textContent = state.done ? 'Locker' : STEPS[i].cue
-    if (!state.done) status.textContent = `Schritt ${i + 1} von 3: ${STEPS[i].short}. Halte den Knopf gedrückt.`
+    if (!state.done) status.textContent = `Schritt ${i + 1} von 3: ${STEPS[i].short}.`
+    root.classList.remove('is-letgo')
     label.textContent = state.done ? 'Nochmals' : 'Gedrückt halten'
   }
 
@@ -55,6 +56,9 @@ export function initPmr({ reduced }) {
         state.prompted = true
         status.textContent = 'Und jetzt: loslassen.'
         label.textContent = 'Loslassen'
+        // the moment to let go: one clear word, set wide and light
+        cue.textContent = 'Los'
+        root.classList.add('is-letgo')
         vibrate([30, 60, 30])
       }
     }
@@ -121,7 +125,7 @@ export function initPmr({ reduced }) {
   const release = (silent = false) => {
     if (!state.holding) return
     state.holding = false
-    root.classList.remove('is-holding')
+    root.classList.remove('is-holding', 'is-letgo')
     state.target = 0
     clearTimeout(state.buzz)
     vibrate(0)

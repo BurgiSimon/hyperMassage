@@ -22,6 +22,7 @@ export function initCursor() {
       el.classList.add('has-label')
     } else {
       el.classList.remove('has-label')
+      label.textContent = '' // (or the dot keeps the width of the last word)
     }
   }
 

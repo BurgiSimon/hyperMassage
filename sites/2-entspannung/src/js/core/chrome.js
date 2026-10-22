@@ -17,9 +17,11 @@ export function initHeader() {
 
   let max = 1
   let heroEnd = 0
+  let heroSpan = 1
   const measure = () => {
     max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight)
     heroEnd = hero ? hero.offsetHeight - window.innerHeight * 0.4 : 0
+    heroSpan = Math.max(1, (hero?.offsetHeight || 0) - window.innerHeight)
   }
   measure()
   ScrollTrigger.addEventListener('refresh', measure)
@@ -29,23 +31,31 @@ export function initHeader() {
   let footerVisible = false
   const update = () => {
     const y = window.scrollY
-    header.classList.toggle('is-scrolled', y > 30)
+    // (in the hero the stage has its own rule – no second line under the header)
+    header.classList.toggle('is-scrolled', y > heroEnd)
     const down = y > lastY + 2
     const up = y < lastY - 2
     if (down && y > heroEnd && !document.documentElement.classList.contains('menu-open')) header.classList.add('is-hidden')
     else if (up || y < heroEnd) header.classList.remove('is-hidden')
     lastY = y
-    dock?.classList.toggle('is-visible', y > window.innerHeight * 0.6 && !footerVisible)
+    // phones: the dock once the hero (and its own buttons) has passed; computers: while the header is away
+    const phone = window.innerWidth <= 860
+    dock?.classList.toggle('is-visible', y > heroEnd && !footerVisible && (phone || header.classList.contains('is-hidden')))
   }
   window.addEventListener('scroll', update, { passive: true })
   update()
 
-  // the tension gauge: 100 % at the top of the page, 0 % at the very bottom
+  // the tension gauge: the hero lets go of the first 40 %, the rest of the page of the other 60 %
+  let lastT = ''
   gsap.ticker.add(() => {
-    const t = 1 - clamp(window.scrollY / max)
+    const y = window.scrollY
+    const t = y < heroSpan ? 1 - 0.4 * (y / heroSpan) : 0.6 * (1 - clamp((y - heroSpan) / Math.max(1, max - heroSpan)))
+    const ts = t.toFixed(3)
+    if (ts === lastT) return
+    lastT = ts
+    header.style.setProperty('--t', ts)
+    if (fill) fill.parentElement.style.setProperty('--t', ts)
     const pct = Math.round(t * 100)
-    header.style.setProperty('--t', t.toFixed(3))
-    if (fill) fill.parentElement.style.setProperty('--t', t.toFixed(3))
     if (num && pct !== shown) {
       num.textContent = pct
       shown = pct
@@ -117,7 +127,7 @@ export function initMenu({ reduced }) {
     open = state
     behind.forEach((el) => (el.inert = open))
     btn.setAttribute('aria-expanded', String(open))
-    label.textContent = open ? 'Schliessen' : 'Index'
+    label.textContent = open ? 'Schliessen' : 'Menü'
     document.documentElement.classList.toggle('menu-open', open)
     document.dispatchEvent(new CustomEvent('overlay', { detail: { open, source: 'menu' } }))
     tl?.kill()

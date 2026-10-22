@@ -45,6 +45,8 @@ export function initHero({ reduced }) {
   const ease = (x) => x * x * (3 - 2 * x)
 
   let lastFont = 0
+  let narrow = window.innerWidth <= 640
+  window.addEventListener('resize', () => (narrow = window.innerWidth <= 640), { passive: true })
   const render = (dt) => {
     state.t += dt
     // pointer kneading
@@ -87,14 +89,21 @@ export function initHero({ reduced }) {
       const jy = amp * noise(state.t * 11, l.seed + 4.1)
       l.node.style.transform = `translate(${jx.toFixed(2)}px, calc(${(l.intro.y * 100).toFixed(2)}% + ${jy.toFixed(2)}px))`
     }
-    inner.style.color = `color-mix(in oklch, var(--tense-text), var(--ink) ${(smoothstep(0.1, 0.75, m) * 100).toFixed(1)}%)`
-    inner.style.letterSpacing = `${(-0.02 + 0.03 * m).toFixed(4)}em`
+    // the red holds, then falls cleanly to ink (no long muddy middle)
+    inner.style.color = `color-mix(in oklab, var(--tense-text), var(--ink) ${(smoothstep(0.45, 0.8, m) * 100).toFixed(1)}%)`
+    // clenched letters keep a hair of air between them, so the word stays readable
+    inner.style.letterSpacing = `${(0.015 - 0.005 * m).toFixed(4)}em`
+
+    // phones: the clenched word also stands tall (it has a whole stage to fill) and settles as it relaxes
+    const tall = narrow && !reduced ? 1 + (1 - m) * 1.2 : 1
+    const tallStr = tall > 1.001 ? `scaleY(${tall.toFixed(3)})` : ''
+    if (inner.style.transform !== tallStr) inner.style.transform = tallStr
 
     // fit the word to the stage: full width, but never taller than the room it has
     const fs = parseFloat(inner.style.fontSize) || 100
     const w = inner.getBoundingClientRect().width
     const avail = word.clientWidth * 0.985
-    const maxByHeight = (title.clientHeight * 0.98) / 0.8
+    const maxByHeight = (title.clientHeight * 0.98) / 0.8 / tall
     if (w) {
       const next = Math.min((fs * avail) / w, maxByHeight)
       if (Math.abs(next - lastFont) > 0.1) {

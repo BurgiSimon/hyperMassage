@@ -4,6 +4,7 @@ import { qs, qsa, clamp } from '../utils/helpers.js'
 const PRICES = { 30: 45, 45: 65, 60: 85 }
 const HOTSTONE = 15
 const STOPS = [30, 45, 60]
+const nearestStop = (v) => STOPS.reduce((b, m) => (Math.abs(m / 60 - v) < Math.abs(b / 60 - v) ? m : b), 60)
 
 /** Time is the only variable: stretch the bar, and the word «Minuten» stretches with it. */
 export function initPrices({ reduced }) {
@@ -27,9 +28,10 @@ export function initPrices({ reduced }) {
     track.style.setProperty('--v', v.toFixed(4))
     // 30 min → clenched, 60 min → wide open
     const r = clamp((v - 0.5) / 0.5)
-    word.style.fontStretch = `${(50 + r * 100).toFixed(1)}%`
-    word.style.fontWeight = (820 - r * 600).toFixed(0)
-    minEl.textContent = Math.round(v * 60)
+    word.style.fontStretch = `${(56 + r * 94).toFixed(1)}%`
+    word.style.fontWeight = (760 - r * 540).toFixed(0)
+    // the word stretches continuously; the number shows the duration you will get
+    minEl.textContent = nearestStop(v)
   }
 
   const commit = (minutes, animate = true) => {
@@ -68,8 +70,11 @@ export function initPrices({ reduced }) {
     const v = clamp((e.clientX - rect.left) / rect.width, 0.5, 1)
     gsap.killTweensOf(state)
     paint(v)
-    const nearest = STOPS.reduce((b, m) => (Math.abs(m / 60 - v) < Math.abs(b / 60 - v) ? m : b), 60)
+    const nearest = nearestStop(v)
     priceEl.textContent = PRICES[nearest] + (hot?.checked ? HOTSTONE : 0)
+    // segments and request follow while dragging, so the panel never contradicts itself
+    radios.forEach((r) => (r.checked = Number(r.value) === nearest))
+    ctaLabel.textContent = hot?.checked ? `${nearest} Min. Hot Stone anfragen` : `${nearest} Minuten anfragen`
     return nearest
   }
   track.addEventListener('pointerdown', (e) => {

@@ -2,11 +2,13 @@ import gsap from 'gsap'
 import { qs, fontsReady } from '../utils/helpers.js'
 import { EMAIL, PHONE } from '../core/booking.js'
 
+// (non-breaking spaces keep «60 Minuten» and «CHF 85» together on the poster)
+const plain = (t) => t.replace(/\u00a0/g, ' ')
 const GIFTS = {
-  30: { text: '30 Minuten Massage', value: 'CHF 45' },
-  45: { text: '45 Minuten Massage', value: 'CHF 65' },
-  60: { text: '60 Minuten Massage', value: 'CHF 85' },
-  hotstone: { text: 'Hot-Stone-Massage, 60 Minuten', value: 'CHF 100' },
+  30: { text: '30\u00a0Minuten Massage', value: 'CHF\u00a045' },
+  45: { text: '45\u00a0Minuten Massage', value: 'CHF\u00a065' },
+  60: { text: '60\u00a0Minuten Massage', value: 'CHF\u00a085' },
+  hotstone: { text: 'Hot-Stone-Massage, 60\u00a0Minuten', value: 'CHF\u00a0100' },
 }
 
 /**
@@ -30,11 +32,12 @@ export function initVoucher({ reduced }) {
     const avail = nameBox.clientWidth
     if (!avail) return
     nameEl.style.fontSize = ''
-    let lo = 50
+    // (never narrower than 58 % nor heavier than 780: a long name must stay legible)
+    let lo = 58
     let hi = 150
     const setAxes = (st) => {
       nameEl.style.fontStretch = `${st}%`
-      nameEl.style.fontWeight = Math.round(900 - ((st - 50) / 100) * 640)
+      nameEl.style.fontWeight = Math.round(780 - ((st - 50) / 100) * 520)
     }
     for (let i = 0; i < 9; i++) {
       const mid = (lo + hi) / 2
@@ -81,7 +84,7 @@ export function initVoucher({ reduced }) {
     const to = String(d.get('to') || '').trim()
     const sender = String(d.get('from') || '').trim()
     if (e.submitter?.dataset.send === 'sms') {
-      const sms = [`Hallo Claudia, ich möchte gerne einen Gutschein bestellen: ${g.text} (${g.value})`, to ? `Für: ${to}` : null, sender ? `Von: ${sender}` : null]
+      const sms = [`Hallo Claudia, ich möchte gerne einen Gutschein bestellen: ${plain(g.text)} (${plain(g.value)})`, to ? `Für: ${to}` : null, sender ? `Von: ${sender}` : null]
         .filter(Boolean)
         .join('\n')
       window.location.href = `sms:${PHONE}?&body=${encodeURIComponent(sms)}`
@@ -91,7 +94,7 @@ export function initVoucher({ reduced }) {
         '',
         'Ich möchte gerne einen Massagegutschein bestellen:',
         '',
-        `• Geschenk: ${g.text} (${g.value})`,
+        `• Geschenk: ${plain(g.text)} (${plain(g.value)})`,
         to ? `• Für: ${to}` : null,
         sender ? `• Von: ${sender}` : null,
         '',

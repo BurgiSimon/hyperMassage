@@ -72,15 +72,15 @@
   --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 
   /* the page relaxes as you move down: every section carries its own --srel */
-  --accent: color-mix(in oklch, var(--tense), var(--calm) calc(var(--srel) * 100%));
-  --accent-ink: color-mix(in oklch, #d42d0b, var(--calm-deep) calc(var(--srel) * 100%));
+  --accent: color-mix(in oklab, var(--tense), var(--calm) calc(var(--srel) * 100%));
+  --accent-ink: color-mix(in oklab, #d42d0b, var(--calm-deep) calc(var(--srel) * 100%));
 }
 
 .sec,
 .footer,
 .hero {
-  --accent: color-mix(in oklch, var(--tense), var(--calm) calc(var(--srel) * 100%));
-  --accent-ink: color-mix(in oklch, #d42d0b, var(--calm-deep) calc(var(--srel) * 100%));
+  --accent: color-mix(in oklab, var(--tense), var(--calm) calc(var(--srel) * 100%));
+  --accent-ink: color-mix(in oklab, #d42d0b, var(--calm-deep) calc(var(--srel) * 100%));
 }
 
 [data-theme='ink'] {
