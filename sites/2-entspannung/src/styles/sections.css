@@ -437,6 +437,37 @@
 .bodymap__result.is-empty [data-rec-cta] {
   display: none;
 }
+/* wide screens: the suggestion sits under the body, text left, actions right */
+@media (min-width: 1081px) {
+  .bodymap__intro {
+    grid-row: 1 / span 2;
+  }
+  .bodymap__stage {
+    grid-row: 1;
+  }
+  .bodymap__result {
+    grid-column: 5 / -1;
+    grid-row: 2;
+    align-self: start;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: clamp(24px, 3vw, 48px);
+    padding: 26px 30px;
+  }
+  .bodymap__result > * {
+    grid-column: 1;
+  }
+  .bodymap__result > .bodymap__actions {
+    grid-column: 2;
+    grid-row: 2 / span 2;
+    align-self: center;
+    margin-top: 0;
+  }
+  .bodymap__result > .bodymap__small {
+    grid-column: 2;
+    grid-row: 4;
+    text-align: right;
+  }
+}
 @media (max-width: 1080px) {
   .bodymap__intro,
   .bodymap__result {
