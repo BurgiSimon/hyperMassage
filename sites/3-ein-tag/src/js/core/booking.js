@@ -30,6 +30,8 @@ export function initBooking({ reduced, beforeOpen }) {
     lastFocus = document.activeElement
     beforeOpen?.()
     if (pre.service !== undefined) check('service', pre.service)
+    // a plain appointment from the planner: keep the chosen treatment, unless that was Hot Stone
+    else if (pre.notHot && form.elements.service.value === 'Hot-Stone-Massage') check('service', '')
     if (pre.dur) check('dur', pre.dur)
     if (pre.when) when.value = pre.when
     // the page behind the dialog is out of reach while it is open
@@ -71,7 +73,7 @@ export function initBooking({ reduced, beforeOpen }) {
     const t = e.target.closest('[data-booking-open]')
     if (t) {
       e.preventDefault()
-      open({ service: t.dataset.service, dur: t.dataset.dur, when: t.dataset.when })
+      open({ service: t.dataset.service, dur: t.dataset.dur, when: t.dataset.when, notHot: 'notHot' in t.dataset })
       return
     }
     if (isOpen && e.target.closest('[data-booking-close]')) close()
@@ -99,8 +101,10 @@ export function initBooking({ reduced, beforeOpen }) {
   // Enter in a field: SMS on phones, e-mail on computers
   let implicit = false
   form.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && e.target.matches('input')) implicit = true
+    if (e.key === 'Enter' || e.key === ' ') implicit = e.key === 'Enter' && e.target.matches('input')
   })
+  // (a blocked Enter submit – e.g. the name still empty – must not decide the next click)
+  form.addEventListener('pointerdown', () => (implicit = false))
   form.addEventListener('submit', (e) => {
     e.preventDefault()
     const viaEnter = implicit

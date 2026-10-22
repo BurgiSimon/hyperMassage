@@ -43,14 +43,15 @@ export function fontsReady(timeout = 3500) {
 }
 
 /** Current wall-clock time in Kestenholz (Europe/Zurich). */
+let nowFmt
 export function zurichNow() {
-  const fmt = new Intl.DateTimeFormat('en-GB', {
+  const fmt = (nowFmt ??= new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Europe/Zurich',
     weekday: 'short',
     hour: '2-digit',
     minute: '2-digit',
     hourCycle: 'h23',
-  })
+  }))
   const parts = Object.fromEntries(fmt.formatToParts(new Date()).map((p) => [p.type, p.value]))
   const days = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }
   const hour = parseInt(parts.hour, 10)

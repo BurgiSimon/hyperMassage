@@ -13,7 +13,7 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-padding-top: 24px;
-  background: var(--page-bg, #a9bdd3);
+  background: #a9bdd3; /* (day.js tints it with the sky) */
 }
 
 html.lenis,
@@ -193,14 +193,14 @@ ul {
 }
 .btn--solid {
   background: var(--sun);
-  color: #fff;
+  color: var(--on-sun, #fff);
 }
 .btn--ghost {
   border: 1.5px solid currentColor;
 }
 @media (hover: hover) {
   .btn--ghost:hover {
-    color: #fff;
+    color: var(--on-sun, #fff);
     border-color: var(--sun-deep);
   }
 }

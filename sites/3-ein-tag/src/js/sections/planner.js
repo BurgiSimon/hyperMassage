@@ -61,7 +61,14 @@ export function initPlanner({ day }) {
     slot.setAttribute('aria-valuetext', `${DAY_NAMES[state.day]} ${from} bis ${to}`)
     cta.dataset.when = `${DAY_NAMES[state.day]}, ${from} – ${to} Uhr`
     cta.dataset.dur = state.dur
-    cta.dataset.service = isHot ? 'Hot-Stone-Massage' : 'Klassische Massage'
+    // only Hot Stone changes the treatment; otherwise the visitor's choice stays
+    if (isHot) {
+      cta.dataset.service = 'Hot-Stone-Massage'
+      delete cta.dataset.notHot
+    } else {
+      delete cta.dataset.service
+      cta.dataset.notHot = ''
+    }
   }
 
   qsa('input[name="p-day"]', root).forEach((r) => r.addEventListener('change', () => r.checked && ((state.day = Number(r.value)), render(), announce())))
@@ -80,6 +87,7 @@ export function initPlanner({ day }) {
     releaseT = setTimeout(() => day?.preview(null), 1400)
   }
   const fromPointer = (e) => {
+    if (!drag.on) return
     const r = track.getBoundingClientRect()
     const m = START + ((e.clientX - r.left) / r.width) * SPAN - drag.grab
     const [lo, hi] = range()
@@ -87,25 +95,48 @@ export function initPlanner({ day }) {
     render()
     preview(state.start + state.dur / 2)
   }
+  // a mouse moves the slot at once; a finger only after a sideways move (a vertical swipe scrolls the page)
   slot.addEventListener('pointerdown', (e) => {
     const r = slot.getBoundingClientRect()
     const tr = track.getBoundingClientRect()
-    drag = { grab: ((e.clientX - r.left) / tr.width) * SPAN }
+    drag = { grab: ((e.clientX - r.left) / tr.width) * SPAN, x: e.clientX, y: e.clientY, on: e.pointerType === 'mouse' }
     slot.setPointerCapture(e.pointerId)
-    slot.classList.add('is-drag')
+    if (drag.on) slot.classList.add('is-drag')
   })
+  // the track: a click or a tap (no swipe) puts the slot there
+  let tap = null
   track.addEventListener('pointerdown', (e) => {
     if (e.target.closest('[data-p-slot]')) return
-    drag = { grab: state.dur / 2 }
+    tap = { x: e.clientX, y: e.clientY }
+  })
+  track.addEventListener('pointerup', (e) => {
+    if (!tap || e.target.closest('[data-p-slot]')) return
+    const still = Math.hypot(e.clientX - tap.x, e.clientY - tap.y) < 8
+    tap = null
+    if (!still) return
+    drag = { grab: state.dur / 2, on: true }
     fromPointer(e)
     drag = null
     endPreview()
+    announce()
   })
-  slot.addEventListener('pointermove', (e) => drag && fromPointer(e))
+  track.addEventListener('pointercancel', () => (tap = null))
+  slot.addEventListener('pointermove', (e) => {
+    if (!drag) return
+    if (!drag.on) {
+      const dx = Math.abs(e.clientX - drag.x)
+      if (dx < 6 || dx < Math.abs(e.clientY - drag.y)) return
+      drag.on = true
+      slot.classList.add('is-drag')
+    }
+    fromPointer(e)
+  })
   const end = () => {
     if (!drag) return
+    const moved = drag.on
     drag = null
     slot.classList.remove('is-drag')
+    if (!moved) return
     endPreview()
     announce()
   }

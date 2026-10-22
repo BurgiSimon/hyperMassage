@@ -44,9 +44,13 @@ export function sunPosition(date, lat = LAT, lon = LON) {
   return { az, el }
 }
 
+// formatters are expensive to build: make each one once
+let fmtFull, fmtDay, fmtHour
+const parts = (fmt, date) => Object.fromEntries(fmt.formatToParts(date).map((x) => [x.type, x.value]))
+
 /** Offset of Europe/Zurich from UTC in hours on a given day. */
 export function zurichOffset(date = new Date()) {
-  const parts = new Intl.DateTimeFormat('en-GB', {
+  fmtFull ??= new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Europe/Zurich',
     hourCycle: 'h23',
     year: 'numeric',
@@ -54,37 +58,33 @@ export function zurichOffset(date = new Date()) {
     day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',
-  }).formatToParts(date)
-  const p = Object.fromEntries(parts.map((x) => [x.type, x.value]))
+  })
+  const p = parts(fmtFull, date)
   const asUTC = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute)
   return Math.round((asUTC - date.getTime()) / 3600000)
 }
 
 /** Today's date in Kestenholz as {y, m, d}. */
 export function zurichDay(date = new Date()) {
-  const p = Object.fromEntries(
-    new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Zurich', year: 'numeric', month: '2-digit', day: '2-digit' })
-      .formatToParts(date)
-      .map((x) => [x.type, x.value]),
-  )
+  fmtDay ??= new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Zurich', year: 'numeric', month: '2-digit', day: '2-digit' })
+  const p = parts(fmtDay, date)
   return { y: +p.year, m: +p.month, d: +p.day }
 }
 
 /** A Date for a local Kestenholz hour (decimal) on a given day. */
+const offsets = new Map()
 export function dateAt(hour, day = zurichDay()) {
-  const probe = new Date(Date.UTC(day.y, day.m - 1, day.d, 12))
-  const off = zurichOffset(probe)
+  const key = `${day.y}-${day.m}-${day.d}`
+  if (!offsets.has(key)) offsets.set(key, zurichOffset(new Date(Date.UTC(day.y, day.m - 1, day.d, 12))))
+  const off = offsets.get(key)
   const h = ((hour % 24) + 24) % 24
   return new Date(Date.UTC(day.y, day.m - 1, day.d, 0, 0) + (h - off) * 3600000)
 }
 
 /** Current decimal hour in Kestenholz. */
 export function nowHour(date = new Date()) {
-  const p = Object.fromEntries(
-    new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Zurich', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
-      .formatToParts(date)
-      .map((x) => [x.type, x.value]),
-  )
+  fmtHour ??= new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Zurich', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+  const p = parts(fmtHour, date)
   return +p.hour + +p.minute / 60
 }
 

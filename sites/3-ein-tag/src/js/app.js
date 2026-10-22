@@ -34,12 +34,12 @@ export function initApp() {
   }
 }
 
-/** Without WebGL: the real skyline as layered SVG over a soft gradient. */
+/** Without WebGL (or while its context is lost): the real skyline as a silhouette; day.js colours sky and land. */
 function paintFallback() {
   const host = qs('[data-scene-fallback]')
   if (!host) return
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300" preserveAspectRatio="none"><defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6f8fbf"/><stop offset="0.75" stop-color="#ecc9a4"/></linearGradient></defs><rect width="1000" height="300" fill="url(#s)"/><path d="${skylinePath(1000, 300)}" fill="#3f4b3e"/></svg>`
-  host.style.backgroundImage = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 300"><path d="${skylinePath(1000, 300)}"/></svg>`
+  host.style.setProperty('--fb-ridge', `url("data:image/svg+xml,${encodeURIComponent(svg)}")`)
 }
 
 function boot() {
@@ -60,17 +60,26 @@ function boot() {
   } catch (err) {
     console.warn(err)
   }
+  paintFallback()
   if (scene) qs('.scene').classList.add('is-live')
-  else paintFallback()
 
   initCursor()
   const hero = prepareHero({ reduced })
   const day = initDay({ scene, reduced })
+  // the GPU may drop the scene for a moment: show the silhouette meanwhile
+  canvas.addEventListener('scene:lost', () => {
+    qs('.scene').classList.remove('is-live')
+    day.refresh()
+  })
+  canvas.addEventListener('scene:restored', () => {
+    qs('.scene').classList.add('is-live')
+    day.refresh()
+  })
   if (new URLSearchParams(location.search).has('debug')) window.__day = day
   initHeader()
   const menu = initMenu({ reduced })
   initAnchors(() => menu.close())
-  initBooking({ reduced, beforeOpen: () => menu.close() })
+  const booking = initBooking({ reduced, beforeOpen: () => menu.close() })
 
   const run = (fn) => {
     try {
@@ -106,7 +115,9 @@ function boot() {
     ScrollTrigger.refresh()
     day.refresh()
     day.showHint?.()
-    if (location.hash) {
+    // a link to /#termin opens the request dialog
+    if (location.hash === '#termin') booking.open()
+    else if (location.hash) {
       const target = document.getElementById(decodeURIComponent(location.hash.slice(1)))
       if (target) scrollTo(target, { immediate: true, offset: -8 })
     }

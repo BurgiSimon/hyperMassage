@@ -20,7 +20,7 @@ export function initDay({ scene, reduced }) {
   const clockLabel = qs('[data-clock-label]')
   const clock = qs('[data-scene-clock]')
   const hero = qs('.hero')
-  const today = zurichDay()
+  let today = zurichDay()
 
   const live = { hour: nowHour(), override: null }
   let heroLook = look(live.hour, today)
@@ -43,7 +43,27 @@ export function initDay({ scene, reduced }) {
 
   // CSS colours that read well on the current sky
   let lastInk = ''
+  let lastBg = ''
+  const fallback = qs('[data-scene-fallback]')
+  const rgb = (c) => `rgb(${c.map((v) => Math.round(v * 255)).join(' ')})`
+  const paintFallbackSky = (L) => {
+    // (only while there is no live scene – the layer sits behind the canvas otherwise)
+    if (!fallback || (scene && !scene.lost)) return
+    const k = 0.2 + 0.8 * L.amb
+    const land = [0.2, 0.27, 0.19].map((v, i) => v * k * 0.75 + L.fog[i] * 0.25 * k)
+    fallback.style.setProperty('--fb-zen', rgb(L.zen))
+    fallback.style.setProperty('--fb-hor', rgb(L.hor))
+    fallback.style.setProperty('--fb-land', rgb(land))
+  }
   const paintChrome = (L) => {
+    paintFallbackSky(L)
+    // page background and browser bar follow the sky (a plain property on <html>: no restyle cascade)
+    const zen = `rgb(${L.zen.map((v) => Math.round(v * 31) * 8).join(',')})`
+    if (zen !== lastBg) {
+      lastBg = zen
+      html.style.backgroundColor = zen
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', zen)
+    }
     // dark or light ink – never a grey in between (CSS cross-fades the switch)
     const t = L.skyLum > 0.5 ? 1 : 0
     const c = t ? INK_DARK : INK_LIGHT
@@ -52,10 +72,8 @@ export function initDay({ scene, reduced }) {
       lastInk = ink
       html.style.setProperty('--sky-ink', ink)
       html.style.setProperty('--sky-ink-soft', `rgb(${c.join(' ')} / 0.72)`)
-      html.style.setProperty('--chrome-bg', t ? 'rgb(246 241 231 / 0.62)' : 'rgb(16 21 36 / 0.42)')
-      const zen = `rgb(${L.zen.map((v) => Math.round(v * 255)).join(',')})`
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', zen)
-      html.style.setProperty('--page-bg', zen)
+      // (dark pills stay dense: light cards scroll under the header in the evening)
+      html.style.setProperty('--chrome-bg', t ? 'rgb(246 241 231 / 0.62)' : 'rgb(16 21 36 / 0.8)')
     }
   }
 
@@ -65,8 +83,11 @@ export function initDay({ scene, reduced }) {
     if (minute === shownMinute) return
     shownMinute = minute
     clockTime.textContent = fmtTime(minute / 60, true)
-    clockLabel.textContent = isLive ? `${partOfDay(hour)} · jetzt` : partOfDay(hour)
-    const open = isLive ? openStatus().open && live.override === null : hour >= 7.5 && hour < 19
+    const now = isLive && live.override === null
+    clockLabel.textContent = now ? `${partOfDay(hour)} · jetzt` : partOfDay(hour)
+    // the story day is a Thursday; a dragged sun is today at that hour
+    const span = isLive ? HOURS[zurichNow().day] : HOURS[4]
+    const open = now ? openStatus().open : !!span && hour >= span[0] && hour < span[1]
     clock.classList.toggle('is-open', open)
   }
 
@@ -93,7 +114,6 @@ export function initDay({ scene, reduced }) {
     }
     scene?.setLook(L, hour)
     paintChrome(L)
-    html.style.setProperty('--night', L.night.toFixed(3))
     current.look = L
     current.hour = hour
   }
@@ -106,25 +126,29 @@ export function initDay({ scene, reduced }) {
     update()
   })
   window.addEventListener('scroll', update, { passive: true })
-  // keep «now» current
-  setInterval(() => {
-    live.hour = nowHour()
-    if (live.override === null) {
-      heroLook = look(live.hour, today)
-      update()
-    }
-  }, 60000)
-
   // greeting and opening status in the hero
   const greet = qs('[data-greeting]')
   const statusText = qs('[data-status-text]')
   const status = qs('.hero__status')
-  const n = zurichNow()
-  const h = n.decimal
-  if (greet) greet.textContent = h >= 5 && h < 11 ? 'Guten Morgen aus Kestenholz' : h < 17 && h >= 11 ? 'Guten Tag aus Kestenholz' : h >= 17 && h < 22 ? 'Guten Abend aus Kestenholz' : 'Gute Nacht aus Kestenholz'
-  const s = openStatus(n)
-  if (statusText) statusText.textContent = s.text
-  status?.classList.toggle('is-open', s.open)
+  const paintStatus = () => {
+    const n = zurichNow()
+    const h = n.decimal
+    if (greet) greet.textContent = h >= 5 && h < 11 ? 'Guten Morgen aus Kestenholz' : h < 17 && h >= 11 ? 'Guten Tag aus Kestenholz' : h >= 17 && h < 22 ? 'Guten Abend aus Kestenholz' : 'Gute Nacht aus Kestenholz'
+    const st = openStatus(n)
+    if (statusText) statusText.textContent = st.text
+    status?.classList.toggle('is-open', st.open)
+  }
+  paintStatus()
+
+  // keep «now» current (also across midnight)
+  setInterval(() => {
+    live.hour = nowHour()
+    today = zurichDay()
+    paintStatus()
+    shownMinute = -1
+    if (live.override === null) heroLook = look(live.hour, today)
+    update()
+  }, 60000)
 
   // panorama labels on the real summits
   const peaks = qs('[data-peaks]')
@@ -176,7 +200,7 @@ export function initDay({ scene, reduced }) {
       heroLook = look(hr, today)
       shownMinute = -1
       update()
-      const dayOpen = HOURS[n.day]
+      const dayOpen = HOURS[zurichNow().day]
       const isOpen = dayOpen && hr >= dayOpen[0] && hr < dayOpen[1]
       hintText.textContent = `${fmtTime(hr)} Uhr${dayOpen ? (isOpen ? ' · Praxis offen' : ' · Praxis geschlossen') : ''}`
     }
@@ -216,7 +240,19 @@ export function initDay({ scene, reduced }) {
   return {
     /** after the loader: offer the sun to drag */
     showHint() {
-      if (hint && canDrag) gsap.to(hint, { opacity: 1, duration: 1, delay: 1.6 })
+      if (!hint || !canDrag) return
+      // only where it has room: never over the hero card or its buttons
+      const h = hint.getBoundingClientRect()
+      const c = qs('.hero__card')?.getBoundingClientRect()
+      if (c && h.top < c.bottom + 8 && h.bottom > c.top - 8 && h.left < c.right && h.right > c.left) return
+      gsap.to(hint, { opacity: 1, duration: 1, delay: 1.6 })
+      // once the visitor scrolls on, the hint has done its job
+      const onScroll = () => {
+        if (window.scrollY < 120) return
+        gsap.to(hint, { opacity: 0, duration: 0.6, overwrite: true })
+        window.removeEventListener('scroll', onScroll)
+      }
+      window.addEventListener('scroll', onScroll, { passive: true })
     },
     get look() {
       return current.look

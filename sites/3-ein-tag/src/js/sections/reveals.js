@@ -39,7 +39,8 @@ export function initReveals({ reduced }) {
   ScrollTrigger.batch(els, {
     start: 'top 90%',
     once: true,
-    onEnter: (batch) => gsap.to(batch, { opacity: 1, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.06, overwrite: true, clearProps: 'transform' }),
+    // (clear the inline opacity afterwards, so CSS states such as closed days apply again)
+    onEnter: (batch) => gsap.to(batch, { opacity: 1, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.06, overwrite: true, clearProps: 'opacity,transform' }),
   })
   // good night
   const night = qs('.footer__night')

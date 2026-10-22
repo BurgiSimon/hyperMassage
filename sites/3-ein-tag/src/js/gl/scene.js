@@ -275,6 +275,8 @@ export function mixLook(a, b, t) {
 // ───────────── renderer ─────────────
 
 export function createScene(canvas, { reduced = false, onLook, still = null } = {}) {
+  const azTable = { key: '', rows: [] }
+  let lost = false
   const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'low-power', preserveDrawingBuffer: !!still })
   if (!gl) return null
 
@@ -285,27 +287,8 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
     if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s))
     return s
   }
-  let prog
-  try {
-    prog = gl.createProgram()
-    gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT))
-    gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG))
-    gl.linkProgram(prog)
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog))
-  } catch (err) {
-    console.warn('scene shader failed', err)
-    return null
-  }
-  gl.useProgram(prog)
 
-  const buf = gl.createBuffer()
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf)
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW)
-  const loc = gl.getAttribLocation(prog, 'p')
-  gl.enableVertexAttribArray(loc)
-  gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0)
-
-  // ridge texture: one row per distance band, R = elevation angle (deg), G = distance (km)
+  // ridge texture data: one row per distance band, R = elevation angle (deg), G = distance (km)
   const W = horizon.count
   // half floats filter linearly everywhere in WebGL2 (32-bit floats need an extension)
   const data = new Float32Array(W * 5 * 2)
@@ -315,22 +298,48 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
       data[(b * W + i) * 2 + 1] = (band.dist[i] * 10) / 1000
     }
   })
-  const tex = gl.createTexture()
-  gl.bindTexture(gl.TEXTURE_2D, tex)
-  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG16F, W, 5, 0, gl.RG, gl.FLOAT, data)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
 
   const U = {}
-  for (const n of ['uRidge', 'uRes', 'uAzC', 'uFov', 'uHorizon', 'uExag', 'uTime', 'uSun', 'uZenith', 'uHorizonCol', 'uGlowCol', 'uLightCol', 'uFogCol', 'uGlowK', 'uAmbient', 'uNight', 'uHaze', 'uLights', 'uCloud', 'uSeed'])
-    U[n] = gl.getUniformLocation(prog, n)
-  gl.uniform1i(U.uRidge, 0)
-  gl.uniform1f(U.uSeed, 3.7)
-  gl.uniform1f(U.uCloud, 0.45)
+  /** program, triangle, texture, uniforms – again after a lost context comes back */
+  const setup = () => {
+    let prog
+    try {
+      prog = gl.createProgram()
+      gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT))
+      gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG))
+      gl.linkProgram(prog)
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog))
+    } catch (err) {
+      console.warn('scene shader failed', err)
+      return false
+    }
+    gl.useProgram(prog)
 
-  const state = { hour: 12, day: STORY_DAY, look: null, w: 0, h: 0, scale: 0.6, dirty: true, time: 0, visible: true, view: null, quality: 1, idleFps: 12 }
+    const buf = gl.createBuffer()
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf)
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW)
+    const loc = gl.getAttribLocation(prog, 'p')
+    gl.enableVertexAttribArray(loc)
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0)
+
+    const tex = gl.createTexture()
+    gl.bindTexture(gl.TEXTURE_2D, tex)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RG16F, W, 5, 0, gl.RG, gl.FLOAT, data)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+
+    for (const n of ['uRidge', 'uRes', 'uAzC', 'uFov', 'uHorizon', 'uExag', 'uTime', 'uSun', 'uZenith', 'uHorizonCol', 'uGlowCol', 'uLightCol', 'uFogCol', 'uGlowK', 'uAmbient', 'uNight', 'uHaze', 'uLights', 'uCloud', 'uSeed'])
+      U[n] = gl.getUniformLocation(prog, n)
+    gl.uniform1i(U.uRidge, 0)
+    gl.uniform1f(U.uSeed, 3.7)
+    gl.uniform1f(U.uCloud, 0.45)
+    return true
+  }
+  if (!setup()) return null
+
+  const state = { hour: 12, day: STORY_DAY, look: null, w: 0, h: 0, scale: 0.6, dirty: true, time: 0, visible: true, view: null, quality: 1, idleFps: 12, maxFps: 60 }
 
   // a software renderer (no GPU) draws synchronously and slowly: start small there
   const dbg = gl.getExtension('WEBGL_debug_renderer_info')
@@ -376,7 +385,8 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
     canvas.height = Math.max(2, Math.round(r.height * dpr * state.scale))
     gl.viewport(0, 0, canvas.width, canvas.height)
     state.view = camera()
-    state.dirty = true
+    // resizing clears the canvas: paint straight away, or the next frame shows black
+    if (!lost) draw()
   }
 
   const setHour = (hour, day = state.day) => {
@@ -418,18 +428,21 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
     const t0 = performance.now()
     gl.drawArrays(gl.TRIANGLES, 0, 3)
     state.dirty = false
-    // if drawing itself is slow (CPU-bound renderer), lower the resolution and the idle frame rate
-    const cost = performance.now() - t0
-    slowFrames = cost > 14 ? slowFrames + 1 : Math.max(0, slowFrames - 1)
+    // a CPU-bound renderer is slow right here
+    noteCost(performance.now() - t0)
+  }
+  // too slow → lower the resolution and the frame rates (a few times at most)
+  let slowFrames = 0
+  const noteCost = (ms) => {
+    slowFrames = ms > 14 ? slowFrames + 1 : Math.max(0, slowFrames - 1)
     if (slowFrames > 6 && state.quality > 0.3 && !still) {
       slowFrames = 0
       state.quality *= 0.75
       state.idleFps = state.idleFps > 4 ? state.idleFps / 2 : 0
-      state.maxFps = Math.max(8, (state.maxFps || 60) / 2)
+      state.maxFps = Math.max(8, state.maxFps / 2)
       resize()
     }
   }
-  let slowFrames = 0
 
   // clouds drift slowly and stars twinkle: ~12 fps is plenty when nothing else changes;
   // changes (scrolling, dragging the sun) draw right away. Under an overlay it rests.
@@ -441,27 +454,45 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
     if (e.detail.open) overlays.add(e.detail.source)
     else overlays.delete(e.detail.source)
   })
+  let lastInput = performance.now()
+  for (const ev of ['pointermove', 'pointerdown', 'scroll', 'keydown', 'wheel', 'touchstart'])
+    window.addEventListener(ev, () => (lastInput = performance.now()), { passive: true })
+  let drewLast = false
   const frame = (t) => {
     raf = requestAnimationFrame(frame)
-    const dt = Math.min(0.1, (t - last) / 1000 || 0)
+    const gap = t - last
+    const dt = Math.min(0.1, gap / 1000 || 0)
     last = t
     if (!state.visible) return
-    if (!reduced && !overlays.size) state.time += dt
+    // drawing on consecutive frames and still missing frames: the GPU is the bottleneck
+    if (drewLast && gap > 0 && gap < 200) noteCost(gap > 34 ? 20 : 0)
+    drewLast = false
+    const resting = t - lastInput > 30000
+    if (!reduced && !overlays.size && !resting) state.time += dt
     acc += dt
-    const idle = !reduced && !overlays.size && state.idleFps > 0 && acc > 1 / state.idleFps
-    if ((state.dirty && acc >= 1 / (state.maxFps || 120)) || idle) {
+    const idle = !reduced && !overlays.size && !resting && state.idleFps > 0 && acc > 1 / state.idleFps
+    if ((state.dirty && acc >= 1 / state.maxFps - 0.002) || idle) {
       acc = 0
       draw()
+      drewLast = true
     }
   }
 
-  let lost = false
+  // a lost GPU context (driver reset, a tab long in the background) comes back without a reload
   canvas.addEventListener('webglcontextlost', (e) => {
     e.preventDefault()
     lost = true
     cancelAnimationFrame(raf)
+    canvas.dispatchEvent(new CustomEvent('scene:lost', { bubbles: true }))
   })
-  canvas.addEventListener('webglcontextrestored', () => window.location.reload())
+  canvas.addEventListener('webglcontextrestored', () => {
+    if (!setup()) return
+    lost = false
+    resize()
+    draw()
+    if (!still) raf = requestAnimationFrame(frame)
+    canvas.dispatchEvent(new CustomEvent('scene:restored', { bubbles: true }))
+  })
 
   const ro = still ? null : new ResizeObserver(resize)
   ro?.observe(canvas)
@@ -509,10 +540,16 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
       const viewAz = v.azC + (x - state.w / 2) * degPx
       const realAz = 180 - ((viewAz - v.azC) / (v.fov * 0.42)) * 90
       // the sun's azimuth moves ~15° per hour around noon; search the day for the best match
+      // (the azimuth table is built once per day – dragging only looks it up)
+      const key = `${state.day.y}-${state.day.m}-${state.day.d}`
+      if (azTable.key !== key) {
+        azTable.key = key
+        azTable.rows = []
+        for (let h = 4; h <= 22; h += 0.05) azTable.rows.push([h, sunPosition(dateAt(h, state.day)).az])
+      }
       let best = current
       let bestD = Infinity
-      for (let h = 4; h <= 22; h += 0.05) {
-        const { az } = sunPosition(dateAt(h, state.day))
+      for (const [h, az] of azTable.rows) {
         const d = Math.abs(az - realAz)
         if (d < bestD) {
           bestD = d

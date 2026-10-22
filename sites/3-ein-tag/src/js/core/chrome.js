@@ -78,7 +78,8 @@ export function initMenu({ reduced }) {
     }
     if (e.key === 'Tab') {
       const header = qs('[data-header]')
-      const f = [...qsa('a[href], button', header).filter((el) => el.offsetParent !== null), ...qsa('a[href]', menu)]
+      const shown = (el) => el.offsetParent !== null
+      const f = [...qsa('a[href], button', header).filter(shown), ...qsa('a[href], button', menu).filter(shown)]
       const i = f.indexOf(document.activeElement)
       if (e.shiftKey && i <= 0) {
         e.preventDefault()

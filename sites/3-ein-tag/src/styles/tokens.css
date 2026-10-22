@@ -46,8 +46,9 @@
   --ink: #1c1e24;
   --ink-soft: rgb(28 30 36 / 0.68);
   --line: rgb(28 30 36 / 0.14);
-  --sun: #c25a32; /* Abendrot – the one accent colour */
-  --sun-deep: #a6461f;
+  --sun: #b04a26; /* Abendrot – the one accent colour (white text on it ≥ 4.5:1) */
+  --sun-deep: #8f3a1c;
+  --sun-ink: #a3421f; /* the accent as small text on paper */
   --night: #141a2a;
   --night-2: #1d2539;
   --star: #f3e9d4;
@@ -86,5 +87,7 @@
   --line: rgb(239 231 214 / 0.16);
   --sun: #e59a6c;
   --sun-deep: #f0b089;
+  --sun-ink: #e59a6c;
+  --on-sun: #161b2b; /* light accent at night: dark text on it */
   --ok: #8fdcae;
 }

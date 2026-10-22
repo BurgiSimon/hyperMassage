@@ -18,10 +18,19 @@
 .scene.is-live .scene__canvas {
   opacity: 1;
 }
+/* without WebGL: sky gradient + the real ridge as a mask, coloured by the hour (day.js) */
 .scene__fallback {
   position: absolute;
   inset: 0;
-  background-size: 100% 100%;
+  background: linear-gradient(var(--fb-zen, #6f8fbf), var(--fb-hor, #e6cfb2) 80%);
+}
+.scene__fallback::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--fb-land, #3f4b3e);
+  -webkit-mask: var(--fb-ridge) bottom center / max(100%, 150vh) auto no-repeat;
+  mask: var(--fb-ridge) bottom center / max(100%, 150vh) auto no-repeat;
 }
 .scene.is-live .scene__fallback {
   opacity: 0;
@@ -258,7 +267,7 @@
     display: none;
   }
 }
-@media (max-width: 560px) {
+@media (max-width: 660px) {
   .header {
     gap: 6px;
   }
@@ -372,7 +381,7 @@
   margin: 0 0 14px -2px;
   border: 1px solid rgb(244 236 220 / 0.3);
 }
-@media (max-width: 560px) {
+@media (max-width: 660px) {
   .header .sound {
     display: none;
   }
@@ -543,8 +552,8 @@
     border: 1.5px solid rgb(28 30 36 / 0.25);
   }
   .dock__btn--solid {
-    background: #c25a32;
-    border-color: #c25a32;
+    background: #b04a26;
+    border-color: #b04a26;
     color: #fff;
   }
 }

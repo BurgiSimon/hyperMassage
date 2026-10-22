@@ -19,7 +19,8 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
     const ctx = await b.newContext({ viewport: { width: 1280, height: 760 }, ...opts })
     const page = await ctx.newPage()
     page.on('pageerror', (e) => errors.push(`${url}: ${e.message}`))
-    await page.goto(url + (url.includes('?') ? '&' : '?') + 'debug', { waitUntil: 'networkidle' })
+    const [u, hash] = url.split('#')
+    await page.goto(u + (u.includes('?') ? '&' : '?') + 'debug' + (hash ? `#${hash}` : ''), { waitUntil: 'networkidle' })
     await wait(page, 5200)
     return { ctx, page }
   }
@@ -53,7 +54,8 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
     ok('the clock follows the scroll through the day', times[0] === '10:00' && times[1] === '15:30' && times[2] === '21:30', times.join(' → '))
     await wait(page, 1500) // the ink cross-fades
     const ink = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--sky-ink').trim())
-    ok('light ink on the night sky', /244|rgb\(2[34]\d/.test(ink), `(${ink})`)
+    const cascade = await page.evaluate(() => document.documentElement.style.getPropertyValue('--night'))
+    ok('light ink on the night sky; no per-scroll restyle of the page', /244|rgb\(2[34]\d/.test(ink) && cascade === '', `(${ink})`)
 
     // drag the sun in the hero
     await page.evaluate(() => window.__lenis.scrollTo(0, { immediate: true }))
@@ -124,6 +126,58 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
     await ctx.close()
   }
 
+  // ── regressions from the first review
+  {
+    const { ctx, page } = await open()
+    // the planner keeps the treatment chosen before (only Hot Stone changes it)
+    await jump(page, '#angebot .treat:nth-child(2)')
+    await page.click('.treat:nth-child(2) [data-booking-open]')
+    await wait(page, 1100)
+    await page.keyboard.press('Escape')
+    await wait(page, 1300)
+    await jump(page, '#preise .planner', -120)
+    await page.click('[data-from-planner]')
+    await wait(page, 1100)
+    const svc = await page.evaluate(() => document.querySelector('[data-booking] input[name="service"]:checked')?.value)
+    ok('planner request keeps the chosen treatment', svc === 'Nacken-Schultermassage', `(${svc})`)
+    await page.keyboard.press('Escape')
+    await wait(page, 1300)
+    // a lost GPU context comes back without a reload (typed input survives)
+    await jump(page, '#gutschein .gift')
+    await page.fill('input[name="to"]', 'Anna')
+    const gone = await page.evaluate(async () => {
+      const ext = document.querySelector('[data-scene]').getContext('webgl2').getExtension('WEBGL_lose_context')
+      ext.loseContext()
+      await new Promise((r) => setTimeout(r, 400))
+      const during = document.querySelector('.scene').classList.contains('is-live')
+      ext.restoreContext()
+      await new Promise((r) => setTimeout(r, 1200))
+      return { during, after: document.querySelector('.scene').classList.contains('is-live'), name: document.querySelector('input[name="to"]').value }
+    })
+    ok('WebGL context loss: silhouette meanwhile, scene back, no reload', !gone.during && gone.after && gone.name === 'Anna', JSON.stringify(gone))
+    await ctx.close()
+  }
+  {
+    // /#termin opens the request dialog
+    const { ctx, page } = await open({}, base + '#termin')
+    const st = await page.evaluate(() => document.querySelector('[data-booking]').classList.contains('is-open'))
+    ok('a link to /#termin opens the dialog', st)
+    await ctx.close()
+  }
+  {
+    // small phone: the drag hint never covers the hero card
+    const { ctx, page } = await open({ viewport: { width: 375, height: 667 }, isMobile: true, hasTouch: true })
+    const st = await page.evaluate(() => {
+      const h = document.querySelector('[data-sun-hint]')
+      const a = h.getBoundingClientRect()
+      const c = document.querySelector('.hero__card').getBoundingClientRect()
+      const overlap = a.top < c.bottom && a.bottom > c.top && a.left < c.right && a.right > c.left
+      return { shown: getComputedStyle(h).opacity !== '0', overlap, events: getComputedStyle(h).pointerEvents }
+    })
+    ok('small phone: the hint stays off the hero card', !(st.shown && st.overlap) && st.events === 'none', JSON.stringify(st))
+    await ctx.close()
+  }
+
   // ── a finger on the hero scrolls; it only moves the sun when it moves sideways
   {
     const { ctx, page } = await open({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
@@ -165,6 +219,7 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
       [375, 667],
       [390, 844],
       [414, 896],
+      [600, 900],
       [844, 390],
       [768, 1024],
       [1024, 768],
@@ -214,7 +269,7 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
     const { ctx, page } = await open({}, base, noGL)
     const st = await page.evaluate(() => ({
       live: document.querySelector('.scene').classList.contains('is-live'),
-      fallback: getComputedStyle(document.querySelector('[data-scene-fallback]')).backgroundImage.startsWith('url('),
+      fallback: getComputedStyle(document.querySelector('[data-scene-fallback]')).getPropertyValue('--fb-ridge').includes('url('),
       unlocked: document.documentElement.style.overflow === '',
     }))
     ok('without WebGL: painted skyline instead, page works', !st.live && st.fallback && st.unlocked, JSON.stringify(st))
