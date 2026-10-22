@@ -1,0 +1,21 @@
+{
+  "name": "massage-buergi-entspannung",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Massagepraxis Claudia Bürgi, Kestenholz – «Entspannung», kinetic typography website",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "gsap": "^3.15.0",
+    "lenis": "^1.3.27"
+  },
+  "devDependencies": {
+    "@fontsource-variable/anybody": "^5.3.0",
+    "@fontsource-variable/mona-sans": "^5.3.0",
+    "vite": "^8.3.5"
+  }
+}
