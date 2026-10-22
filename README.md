@@ -26,9 +26,10 @@ The whole site is built around three ideas from the practice itself: **touch, wa
 | Ankommen | The welcome sentence lights up word by word as you read it. |
 | Über mich | Claudia's portrait in an arch frame, her story in her own words, animated facts. |
 | Angebot | A pinned horizontal journey through the five treatments. Each has its own generative line drawing: tension lines that release under the cursor, the seven cervical vertebrae, a single pressure point, gentle oscillation, rising heat over warm stones. |
-| Atempause | A guided one-minute breathing exercise (4 s in · 2 s hold · 6 s out). |
-| Preise | A clock face: the arc *is* the length of your treatment. Toggle Hot Stone for the surcharge. |
+| Atempause | A guided one-minute breathing exercise (4 s in · 2 s hold · 6 s out). While it runs, the rest of the interface steps back. |
+| Preise | A clock face: the arc *is* the length of your treatment. Toggle Hot Stone and the arc turns to ember. |
 | Gutschein | Build a voucher live — names, gift and value appear on a tilting card with a foil sheen. The request opens as a prepared e-mail. |
+| Gut zu wissen | Short answers to the usual questions (booking, duration & price, payment, health insurance, vouchers, hours, location) — also as FAQ structured data. |
 | Kontakt | Huge tap-to-call number, all contact options, opening hours as tiny timelines with *today* and *now* highlighted (Europe/Zurich time). |
 | Anfahrt | A custom-drawn street map of Kestenholz from OpenStreetMap data — no Google embed, no tracking. |
 | Footer | A giant wordmark whose letters soften and swell under the cursor, plus the local time in Kestenholz. |
@@ -36,7 +37,8 @@ The whole site is built around three ideas from the practice itself: **touch, wa
 Extras: smooth scrolling, theme colours that cross-fade between sections, custom cursor, magnetic buttons,
 optional procedural ambient sound («Klang», generated in the browser — no audio files), a booking drawer that
 composes an e-mail or SMS, chapter indicator, mobile action dock, `prefers-reduced-motion` support,
-cross-document view transitions, print styles.
+cross-document view transitions, print styles, a breathing 404 page, device-tilt parallax on phones,
+adaptive WebGL quality and a still-image fallback when WebGL is unavailable.
 
 ## Business-first details
 
@@ -78,8 +80,11 @@ When something changes, update it in these places:
 
 - `scripts/build-map.py <extract.osm>` — rebuilds `src/images/map-kestenholz.svg` from an OpenStreetMap
   extract (`https://api.openstreetmap.org/api/0.6/map?bbox=7.7380,47.2755,7.7670,47.2915`).
-- `scripts/render-assets.cjs` — with `npm run preview` running, renders the favicons, the share image
-  (`public/og-image.jpg`) and the stone poster used when WebGL is unavailable.
+- `scripts/render-assets.cjs` (`npm run assets`) — with `npm run preview` running, renders the favicons, the
+  share image (`public/og-image.jpg`) and the stone poster used when WebGL is unavailable.
+- `scripts/build-fonts.py` — slims the Fraunces variable fonts to the axes the site uses (≈ 50 % smaller).
+- `scripts/verify.cjs` (`npm run verify`) — browser checks for the drawer, menu, focus handling and scroll locks.
+- `public/_headers` — cache and security headers for Netlify / Cloudflare Pages (ignored elsewhere).
 
 ## Structure
 
