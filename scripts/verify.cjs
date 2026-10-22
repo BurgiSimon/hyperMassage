@@ -69,6 +69,16 @@ const ok = (name, cond, info = '') => results.push(`${cond ? 'PASS' : 'FAIL'}  $
     await page.waitForTimeout(900)
     const y2 = await page.evaluate(() => window.scrollY)
     ok('page scrolls again after drawer closes', y2 > 100, `(scrollY ${y2})`)
+    // keyboard focus inside the pinned horizontal services track lands in view
+    await page.evaluate(() => window.scrollTo(0, 0))
+    await page.waitForTimeout(800)
+    await page.evaluate(() => document.querySelector('.service--cta a').focus())
+    await page.waitForTimeout(1500)
+    const r = await page.evaluate(() => {
+      const b = document.querySelector('.service--cta a').getBoundingClientRect()
+      return { l: b.left, r: b.right, t: b.top, b: b.bottom, w: innerWidth, h: innerHeight }
+    })
+    ok('focused services CTA is in view', r.l >= 0 && r.r <= r.w && r.t >= 0 && r.b <= r.h, `(${Math.round(r.l)}, ${Math.round(r.t)})`)
     await page.close()
   }
   // mobile touch: drawer must scroll by swiping

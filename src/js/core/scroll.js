@@ -24,6 +24,11 @@ export function initScroll({ smooth = true } = {}) {
 export const getLenis = () => lenis
 
 export function scrollTo(target, opts = {}) {
+  if (typeof target === 'number') {
+    if (lenis) lenis.scrollTo(target, { duration: 1.6, easing: (t) => 1 - Math.pow(1 - t, 4), ...opts })
+    else window.scrollTo({ top: target, behavior: opts.immediate ? 'auto' : 'smooth' })
+    return
+  }
   const el = typeof target === 'string' ? document.querySelector(target) : target
   if (lenis) {
     lenis.scrollTo(el ?? 0, { duration: 1.6, easing: (t) => 1 - Math.pow(1 - t, 4), ...opts })

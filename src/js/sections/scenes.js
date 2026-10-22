@@ -1,7 +1,7 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { qs, qsa, splitChars } from '../utils/helpers.js'
-import { getLenis } from '../core/scroll.js'
+import { getLenis, scrollTo } from '../core/scroll.js'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -200,7 +200,19 @@ export function initServices({ reduced = false } = {}) {
         },
       )
     })
-    return () => gsap.set(track, { clearProps: 'transform' })
+    // keyboard users: bring a focused card into view by scrolling to its spot on the journey
+    const onFocus = (e) => {
+      const card = e.target.closest('.service')
+      const st = tween.scrollTrigger
+      if (!card || !st) return
+      const progress = Math.min(1, Math.max(0, (card.offsetLeft - window.innerWidth * 0.2) / distance()))
+      scrollTo(st.start + (st.end - st.start) * progress, { immediate: true })
+    }
+    track.addEventListener('focusin', onFocus)
+    return () => {
+      track.removeEventListener('focusin', onFocus)
+      gsap.set(track, { clearProps: 'transform' })
+    }
   })
 
   mm.add('(max-width: 1023px)', () => {

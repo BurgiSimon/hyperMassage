@@ -707,6 +707,8 @@ footer[data-theme] {
   }
   .services__viewport {
     overflow: hidden;
+    /* clip (unlike hidden) cannot be scrolled by focus() – the track moves only by transform */
+    overflow: clip;
   }
   .services__track {
     display: flex;
