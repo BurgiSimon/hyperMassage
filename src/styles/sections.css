@@ -1891,3 +1891,124 @@ footer[data-theme] {
     display: none;
   }
 }
+
+/* ═════════════════════════ FAQ ═════════════════════════ */
+.faq {
+  padding-block: var(--section-y) 0;
+}
+.faq__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: clamp(2.5rem, 7vw, 8rem);
+  align-items: start;
+}
+.faq__head {
+  position: sticky;
+  top: calc(var(--header-h) + 3vh);
+}
+.faq__intro {
+  max-width: 26rem;
+  margin: 2rem 0;
+  color: var(--fg-soft);
+}
+.faq__item {
+  border-top: 1px solid var(--line);
+}
+.faq__item:last-child {
+  border-bottom: 1px solid var(--line);
+}
+.faq__q {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem 0;
+  list-style: none;
+  cursor: pointer;
+}
+.faq__q::-webkit-details-marker {
+  display: none;
+}
+.faq__q:focus-visible {
+  outline-offset: 2px;
+}
+.faq__num {
+  color: var(--accent);
+}
+.faq__text {
+  font-family: var(--font-serif);
+  font-size: clamp(1.35rem, 2vw, 1.9rem);
+  font-weight: 340;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  font-variation-settings:
+    'SOFT' 100,
+    'WONK' 0;
+  transition: transform 0.6s var(--ease-out);
+}
+.faq__q:hover .faq__text {
+  transform: translateX(0.4rem);
+}
+.faq__icon {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  transition:
+    transform 0.6s var(--ease-out),
+    background-color 0.4s,
+    border-color 0.4s;
+}
+.faq__icon i {
+  position: absolute;
+  width: 0.85rem;
+  height: 1.5px;
+  background: var(--fg);
+  transition: background-color 0.4s;
+}
+.faq__icon i:last-child {
+  transform: rotate(90deg);
+}
+.faq__item[open] .faq__icon {
+  transform: rotate(45deg);
+  background: var(--fg);
+  border-color: var(--fg);
+}
+.faq__item[open] .faq__icon i {
+  background: var(--bg);
+}
+.faq__a {
+  overflow: hidden;
+}
+.faq__a p {
+  max-width: 40rem;
+  padding: 0 3.6rem 1.75rem 4rem;
+  color: var(--fg-soft);
+}
+.faq__a a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-decoration-color: var(--line);
+  text-underline-offset: 3px;
+}
+@media (max-width: 900px) {
+  .faq__grid {
+    grid-template-columns: 1fr;
+  }
+  .faq__head {
+    position: relative;
+    top: 0;
+  }
+}
+@media (max-width: 560px) {
+  .faq__q {
+    grid-template-columns: 2.1rem minmax(0, 1fr) auto;
+    gap: 0.75rem;
+  }
+  .faq__a p {
+    padding: 0 0 1.5rem 2.85rem;
+  }
+}

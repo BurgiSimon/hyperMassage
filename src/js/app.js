@@ -22,6 +22,7 @@ import { initVoucher } from './sections/voucher.js'
 import { initHours, initClock, initBigNumber } from './sections/contact.js'
 import { initWordmark } from './sections/footer.js'
 import { initMap } from './sections/map.js'
+import { initFaq } from './sections/faq.js'
 import { initSignets } from './gl/signets.js'
 import { createAmbient } from './audio/ambient.js'
 
@@ -104,6 +105,7 @@ export function initApp() {
   initBreath({ reduced, emit })
   initPrices({ emit })
   initVoucher({ reduced, emit })
+  initFaq({ reduced, emit })
   initMap({ reduced })
 
   if (reduced) {
