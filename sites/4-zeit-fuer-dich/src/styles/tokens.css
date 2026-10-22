@@ -1,0 +1,189 @@
+/* ───────────────────────── Fonts (self-hosted, OFL) ─────────────────────────
+   Fraunces keeps its SOFT axis: headlines go from sharp and tense to soft and relaxed. */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 250 900;
+  src: url('/fonts/fraunces.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 250 900;
+  src: url('/fonts/fraunces-italic.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('/fonts/geist.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('/fonts/geist-mono.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Serif Fallback';
+  src: local('Georgia'), local('Times New Roman');
+  size-adjust: 104%;
+  ascent-override: 92%;
+}
+
+/* ───────────────────────── Animatable theme colours ───────────────────────── */
+@property --bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #f1e9dd;
+}
+@property --fg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1d1916;
+}
+@property --fg-soft {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgb(29 25 22 / 0.68);
+}
+@property --line {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgb(29 25 22 / 0.14);
+}
+@property --accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #a8471f;
+}
+@property --accent-ink {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #8f3b19;
+}
+@property --on-accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #fff;
+}
+@property --surface {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgb(29 25 22 / 0.045);
+}
+@property --sky-ink {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1d1916;
+}
+
+:root {
+  /* palette: linen and sand by day, basalt and clay for the warm moments */
+  --linen: #f1e9dd;
+  --linen-2: #e9dfcf;
+  --sand: #e6d9c5;
+  --sand-2: #dccbb2;
+  --ink: #1d1916;
+  --ink-soft: rgb(29 25 22 / 0.68);
+  --clay: #a8471f; /* white text on it: 5.9 : 1 */
+  --clay-deep: #8f3b19; /* as text on linen and sand: ≥ 5.3 : 1 */
+  --clay-bg: #9c4320;
+  --ember: #e3815a;
+  --ember-hot: #ff9d5c;
+  --basalt: #17130f;
+  --basalt-2: #221c17;
+  --sage: #6f8a6c;
+  --night: #121827;
+
+  /* set live by the landscape: text colour that reads on the current sky */
+  --sky-ink: #1d1916;
+  --sky-ink-soft: rgb(29 25 22 / 0.72);
+  --chrome-bg: rgb(241 233 221 / 0.66);
+
+  --f-serif: 'Fraunces', 'Serif Fallback', Georgia, serif;
+  --f-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --fs-hero: clamp(4.4rem, 15.2vw, 16.5rem);
+  --fs-display: clamp(2.55rem, 5.6vw, 6.3rem);
+  --fs-display-md: clamp(2.2rem, 3.7vw, 4.1rem);
+  --fs-statement: clamp(1.85rem, 3.9vw, 4.25rem);
+  --fs-lead: clamp(1.12rem, 0.98rem + 0.55vw, 1.48rem);
+  --fs-body: clamp(1rem, 0.95rem + 0.2vw, 1.125rem);
+  --fs-label: 0.72rem;
+
+  --m: max(clamp(18px, 3.4vw, 56px), env(safe-area-inset-left), env(safe-area-inset-right));
+  --section-y: clamp(6rem, 12vw, 11rem);
+  --header-h: 78px;
+  --radius: 22px;
+  --radius-lg: clamp(26px, 3vw, 44px);
+  --max: 1520px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* the default (linen) theme */
+  --bg: var(--linen);
+  --fg: var(--ink);
+  --fg-soft: rgb(29 25 22 / 0.68);
+  --line: rgb(29 25 22 / 0.14);
+  --accent: var(--clay);
+  --accent-ink: var(--clay-deep);
+  --on-accent: #fff;
+  --surface: rgb(29 25 22 / 0.045);
+}
+
+/* Themes. Without JS each section paints its own; with JS the sheet takes the
+   theme of the section in view, so every colour cross-fades as you scroll. */
+.no-js .sec[data-theme='sand'],
+.js .sheet[data-active-theme='sand'] {
+  --bg: var(--sand);
+  --surface: rgb(29 25 22 / 0.05);
+}
+.no-js .sec[data-theme='basalt'],
+.js .sheet[data-active-theme='basalt'],
+.theme-basalt {
+  --bg: var(--basalt);
+  --fg: #efe6d8;
+  --fg-soft: rgb(239 230 216 / 0.68);
+  --line: rgb(239 230 216 / 0.16);
+  --accent: var(--ember);
+  --accent-ink: #ee9a74;
+  --on-accent: var(--basalt);
+  --surface: rgb(239 230 216 / 0.05);
+}
+.no-js .sec[data-theme='clay'],
+.js .sheet[data-active-theme='clay'] {
+  --bg: var(--clay-bg);
+  --fg: #fbf3ea;
+  --fg-soft: rgb(251 243 234 / 0.88);
+  --line: rgb(251 243 234 / 0.3);
+  --accent: #fbf3ea;
+  --accent-ink: #fbf3ea;
+  --on-accent: var(--clay-bg);
+  --surface: rgb(251 243 234 / 0.08);
+}
+
+.js .sheet {
+  transition:
+    --bg 0.9s var(--ease-in-out),
+    --fg 0.9s var(--ease-in-out),
+    --fg-soft 0.9s var(--ease-in-out),
+    --line 0.9s var(--ease-in-out),
+    --accent 0.9s var(--ease-in-out),
+    --accent-ink 0.9s var(--ease-in-out),
+    --on-accent 0.9s var(--ease-in-out),
+    --surface 0.9s var(--ease-in-out);
+}
+
+@media (max-width: 720px) {
+  :root {
+    --header-h: 64px;
+    --radius: 18px;
+  }
+}
