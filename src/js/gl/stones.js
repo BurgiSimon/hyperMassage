@@ -289,8 +289,9 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
     const STACK_W = 3.1
     const aspect = w / h
     const phone = aspect < 0.62
-    const heightShare = phone ? 0.28 : portrait ? 0.36 : 0.55
-    const centreY = phone ? 0.39 : portrait ? 0.43 : 0.475
+    const short = h < 780
+    const heightShare = phone ? (short ? 0.245 : 0.28) : portrait ? 0.36 : 0.55
+    const centreY = phone ? (short ? 0.375 : 0.39) : portrait ? 0.43 : 0.475
     const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
     let visibleH = STACK_H / heightShare
     visibleH = Math.max(visibleH, STACK_W / (0.62 * camera.aspect))
