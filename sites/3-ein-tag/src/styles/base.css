@@ -1,0 +1,446 @@
+@view-transition {
+  navigation: auto;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-padding-top: 24px;
+  background: #1b2233;
+}
+
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--f-text);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: clip;
+  background: transparent;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+h1,
+h2,
+h3,
+p,
+ol,
+ul,
+dl,
+dd,
+figure,
+blockquote {
+  margin: 0;
+}
+
+ol,
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+::selection {
+  background: var(--sun);
+  color: #fff;
+}
+
+[tabindex='-1']:focus {
+  outline: none;
+}
+
+:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
+  padding: 10px 18px;
+  border-radius: 99px;
+  background: var(--paper);
+  color: var(--ink);
+  transform: translateY(-160%);
+  transition: transform 0.3s var(--ease-out);
+}
+.skip-link:focus {
+  transform: none;
+}
+
+.tnum {
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.small {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+/* ───────── buttons ───────── */
+
+.btn {
+  --h: 48px;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--h);
+  padding: 0 calc(var(--h) * 0.5);
+  border-radius: 99px;
+  font-family: var(--f-text);
+  font-weight: 560;
+  font-size: 15.5px;
+  letter-spacing: 0.005em;
+  line-height: 1.1;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  isolation: isolate;
+  transition: color 0.4s var(--ease-out), border-color 0.4s, transform 0.5s var(--ease-out);
+  -webkit-tap-highlight-color: transparent;
+}
+.btn span {
+  position: relative;
+  z-index: 1;
+}
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle at var(--bx, 50%) var(--by, 120%), var(--sun-deep) 0 40%, transparent 41%);
+  background-size: 260% 260%;
+  background-position: center;
+  transform: scale(0);
+  transform-origin: var(--bx, 50%) var(--by, 100%);
+  transition: transform 0.7s var(--ease-out);
+}
+@media (hover: hover) {
+  .btn:hover::before {
+    transform: scale(1);
+  }
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn--lg {
+  --h: 58px;
+  font-size: 16.5px;
+}
+.btn--solid {
+  background: var(--sun);
+  color: #fff;
+}
+.btn--ghost {
+  border: 1.5px solid currentColor;
+}
+@media (hover: hover) {
+  .btn--ghost:hover {
+    color: #fff;
+    border-color: var(--sun-deep);
+  }
+}
+
+/* ───────── choices, fields, toggles ───────── */
+
+.choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+.choice legend {
+  width: 100%;
+  padding: 0;
+  margin-bottom: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.choice label {
+  position: relative;
+  cursor: pointer;
+}
+.choice input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.choice label span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 99px;
+  border: 1.5px solid var(--line);
+  background: color-mix(in srgb, var(--paper) 60%, transparent);
+  font-weight: 520;
+  font-size: 15px;
+  transition: background-color 0.35s var(--ease-out), border-color 0.35s, color 0.35s;
+}
+@media (hover: hover) {
+  .choice label:hover span {
+    border-color: var(--ink-soft);
+  }
+}
+.choice input:checked + span {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--paper);
+}
+.choice input:focus-visible + span {
+  outline: 2px solid var(--sun);
+  outline-offset: 2px;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  min-width: 0;
+}
+.field > span {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.field input,
+.field textarea {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  border-bottom: 1.5px solid var(--line);
+  background: transparent;
+  padding: 8px 0 10px;
+  font-family: var(--f-display);
+  font-style: italic;
+  font-size: clamp(22px, 1.7vw, 28px);
+  line-height: 1.2;
+  border-radius: 0;
+  transition: border-color 0.3s;
+}
+.field textarea {
+  font-family: var(--f-text);
+  font-style: normal;
+  font-size: 17px;
+  resize: vertical;
+}
+.field input::placeholder,
+.field textarea::placeholder {
+  color: var(--ink-soft);
+  opacity: 0.6;
+}
+.field input:focus,
+.field textarea:focus {
+  outline: none;
+  border-bottom-color: var(--sun);
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  position: relative;
+  font-weight: 520;
+}
+.toggle input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.toggle__ui {
+  width: 48px;
+  height: 28px;
+  border-radius: 99px;
+  background: var(--line);
+  position: relative;
+  transition: background-color 0.3s;
+}
+.toggle__ui::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.2);
+  transition: transform 0.5s var(--ease-out);
+}
+.toggle input:checked + .toggle__ui {
+  background: var(--sun);
+}
+.toggle input:checked + .toggle__ui::after {
+  transform: translateX(20px);
+}
+.toggle input:focus-visible + .toggle__ui {
+  outline: 2px solid var(--sun);
+  outline-offset: 3px;
+}
+
+/* ───────── cursor: a small warm light ───────── */
+
+.cursor {
+  display: none;
+}
+.has-cursor .cursor {
+  display: block;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 900;
+  pointer-events: none;
+}
+.cursor__glow {
+  position: absolute;
+  left: -7px;
+  top: -7px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff6e2 0 30%, rgb(255 196 140 / 0.65) 50%, rgb(255 170 110 / 0) 72%);
+  transform: scale(var(--s, 1));
+  transition: transform 0.45s var(--ease-out), opacity 0.3s;
+  mix-blend-mode: screen;
+}
+.cursor.is-hover .cursor__glow {
+  --s: 3.2;
+}
+.cursor.is-down .cursor__glow {
+  --s: 0.7;
+}
+.cursor.is-hidden .cursor__glow,
+.cursor.is-hidden .cursor__label {
+  opacity: 0;
+}
+.cursor__label {
+  position: absolute;
+  left: 18px;
+  top: 14px;
+  padding: 5px 12px;
+  border-radius: 99px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 560;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.3s, transform 0.4s var(--ease-out);
+}
+.cursor.has-label .cursor__label {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@media print {
+  .scene,
+  .loader,
+  .cursor,
+  .header,
+  .menu,
+  .booking,
+  .dock,
+  .interlude,
+  .peaks,
+  .hero__hint,
+  .postcard,
+  .planner__day,
+  .visit__map {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  .page__card {
+    box-shadow: none !important;
+  }
+}
