@@ -18,6 +18,26 @@ export function initBooking({ reduced, beforeOpen }) {
   let isOpen = false
   let lastFocus = null
   let tl = null
+  gsap.set(panel, { yPercent: 102 })
+
+  // the blanks in the sentence are only as wide as what's written in them
+  const ruler = document.createElement('span')
+  ruler.setAttribute('aria-hidden', 'true')
+  ruler.style.cssText = 'position:absolute;visibility:hidden;white-space:pre;left:-9999px;top:0'
+  form.appendChild(ruler)
+  const autosize = (el) => {
+    const cs = getComputedStyle(el)
+    // (the `font` shorthand serialises to "" when font-stretch is a percentage)
+    for (const k of ['fontFamily', 'fontSize', 'fontWeight', 'fontStretch', 'fontStyle', 'letterSpacing']) ruler.style[k] = cs[k]
+    const text = el.tagName === 'SELECT' ? el.options[el.selectedIndex]?.textContent || '' : el.value || el.placeholder
+    ruler.textContent = text
+    const extra = el.tagName === 'SELECT' ? 1.35 : 0.4
+    el.style.width = `${Math.ceil(ruler.getBoundingClientRect().width + parseFloat(cs.fontSize) * extra)}px`
+  }
+  const slots = qsa('.slot select, .slot input', form)
+  const sizeAll = () => slots.forEach(autosize)
+  slots.forEach((el) => el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => autosize(el)))
+  window.addEventListener('resize', sizeAll)
 
   const select = (name, value) => {
     const el = form.elements[name]
@@ -37,6 +57,7 @@ export function initBooking({ reduced, beforeOpen }) {
     if (prefill.note && note && !note.value.trim()) note.value = prefill.note
     root.inert = false
     root.classList.add('is-open')
+    sizeAll()
     document.dispatchEvent(new CustomEvent('overlay', { detail: { open: true, source: 'booking' } }))
     stopScroll('booking')
     panel.scrollTop = 0

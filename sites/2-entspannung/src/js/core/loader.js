@@ -1,5 +1,5 @@
 import gsap from 'gsap'
-import { qs } from '../utils/helpers.js'
+import { qs, fontsReady } from '../utils/helpers.js'
 
 /**
  * A slack string is pulled taut while the page loads («Spannung 0 → 100 %»),
@@ -12,7 +12,7 @@ export function runLoader({ reduced, revisit }) {
   const count = qs('[data-loader-count]', el)
 
   const ready = Promise.all([
-    document.fonts?.ready ?? Promise.resolve(),
+    fontsReady(),
     new Promise((r) => (document.readyState === 'complete' ? r() : window.addEventListener('load', r, { once: true }))),
   ])
 

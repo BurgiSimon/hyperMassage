@@ -214,8 +214,9 @@ export function initBodyMap({ reduced }) {
   const INK = css.getPropertyValue('--ink').trim() || '#121212'
   const TENSE = css.getPropertyValue('--tense').trim() || '#ff4521'
   const BG = css.getPropertyValue('--paper-2').trim() || '#e3ded5'
+  const CALM = css.getPropertyValue('--calm-deep').trim() || '#5544d0'
 
-  const zones = Object.fromEntries(ZONE_KEYS.map((k) => [k, { on: false, t: 0, target: 0, vel: 0, rubbed: false, glow: 0 }]))
+  const zones = Object.fromEntries(ZONE_KEYS.map((k) => [k, { on: false, t: 0, target: 0, vel: 0, rubbed: false }]))
   const state = { w: 0, h: 0, dpr: 1, portrait: false, visible: false, hover: null, px: -1, py: -1, time: 0, lastPx: 0, lastPy: 0 }
 
   const resize = () => {
@@ -258,23 +259,25 @@ export function initBodyMap({ reduced }) {
 
   const heightAt = (u, v, t) => {
     let hgt = sample(field.base, u, v)
-    if (hgt <= 0) return { hgt: 0, k: 0 }
+    if (hgt <= 0) return { hgt: 0, k: 0, calm: 0 }
     // breathing: the back rises and falls
     const tor = sample(field.torso, u, v)
     hgt *= 1 + tor * 0.06 * Math.sin(t * 1.1)
     let k = 0
+    let calm = 0
     for (const key of ZONE_KEYS) {
       const z = zones[key]
-      if (z.t < 0.01 && z.glow < 0.01) continue
+      if (z.t < 0.01 && !(z.on && z.rubbed)) continue
       const wgt = zoneWeight(key, u, v)
       if (!wgt) continue
       k = Math.max(k, z.t * wgt)
+      if (z.on && z.rubbed) calm = Math.max(calm, wgt * (1 - z.t))
       if (z.t > 0.01) {
         // knots: restless, crumpled lines
         hgt += z.t * wgt * 0.0085 * (Math.sin(u * 105 + t * 3.2) * Math.cos(v * 92 - t * 2.4) + Math.sin(u * 190 - t * 5.5) * 0.35)
       }
     }
-    return { hgt, k }
+    return { hgt, k, calm }
   }
 
   function draw() {
@@ -285,16 +288,17 @@ export function initBodyMap({ reduced }) {
     ctx.fillStyle = BG
     ctx.fillRect(0, 0, w, h)
     const step = state.portrait ? 3 : 4
-    const hoverKey = state.hover
     for (let i = 0; i < L.lines; i++) {
       const by = L.baseY(i)
       const pts = []
       const ks = []
+      const cs = []
       for (let x = L.x0 - step; x <= L.x1 + step; x += step) {
         const [u, v] = L.xToBody(x, i)
-        const { hgt, k } = heightAt(u, v, time)
+        const { hgt, k, calm } = heightAt(u, v, time)
         pts.push(x, by - hgt * L.lift)
         ks.push(k)
+        cs.push(calm)
       }
       // occlude the lines behind
       ctx.beginPath()
@@ -325,11 +329,19 @@ export function initBodyMap({ reduced }) {
       ctx.strokeStyle = TENSE
       ctx.lineWidth = 2.2
       ctx.stroke()
-    }
-    // hover: outline the zone softly
-    if (hoverKey) {
-      const z = zones[hoverKey]
-      z.glow = Math.min(1, z.glow + 0.1)
+      // released knots glow calm
+      run = false
+      ctx.beginPath()
+      for (let p = 0, q = 0; p < pts.length; p += 2, q++) {
+        if (cs[q] > 0.25) {
+          if (!run) ctx.moveTo(pts[p], pts[p + 1])
+          else ctx.lineTo(pts[p], pts[p + 1])
+          run = true
+        } else run = false
+      }
+      ctx.strokeStyle = CALM
+      ctx.lineWidth = 2
+      ctx.stroke()
     }
   }
 
@@ -408,7 +420,8 @@ export function initBodyMap({ reduced }) {
     const c = cursor()
     if (key !== state.hover) {
       state.hover = key
-      c?.label(key ? (zones[key].on ? `${ZONES[key].label} · reiben` : ZONES[key].label) : null)
+      const z = key && zones[key]
+      c?.label(key ? (z.on ? `${ZONES[key].label} · ${z.rubbed ? 'gelöst' : 'reiben'}` : ZONES[key].label) : null)
     }
     if (key) {
       // with a custom cursor the label rides on the cursor; on touch a small tag appears
@@ -421,10 +434,11 @@ export function initBodyMap({ reduced }) {
       // rubbing a knot slowly lets it go
       const speed = Math.hypot(px - state.lastPx, py - state.lastPy)
       const z = zones[key]
-      if (z.on && speed > 2 && (e.pointerType === 'mouse' || downAt)) {
-        z.target = Math.max(0.12, z.target - speed * 0.0016)
+      if (z.on && !z.rubbed && speed > 2 && (e.pointerType === 'mouse' || downAt)) {
+        z.target = Math.max(0.12, z.target - speed * 0.0026)
         if (z.target <= 0.13 && !z.rubbed) {
           z.rubbed = true
+          z.target = 0
           if (c) c.label(`${ZONES[key].label} · gelöst`)
           else tip.textContent = `${ZONES[key].label} – gelöst`
         }
@@ -473,7 +487,6 @@ export function initBodyMap({ reduced }) {
       z.vel += a * dt
       z.t = clamp(z.t + z.vel * dt, 0, 1.2)
       if (Math.abs(z.t - z.target) > 0.002 || Math.abs(z.vel) > 0.002) moving = true
-      z.glow = Math.max(0, z.glow - dt * 2)
     }
     draw()
     // keep breathing while visible; when reduced, stop as soon as everything settled

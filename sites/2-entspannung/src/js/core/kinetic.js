@@ -54,14 +54,13 @@ export function splitKinetic(el) {
 
 /** Group inline items into explicit line boxes based on where the browser broke them. */
 export function lockLines(container, items) {
+  // a new line starts wherever an item is not to the right of the one before it
   const lines = []
-  let top = null
+  let left = Infinity
   items.forEach((item) => {
-    const t = item.offsetTop
-    if (top === null || Math.abs(t - top) > 2) {
-      lines.push([])
-      top = t
-    }
+    const l = item.getBoundingClientRect().left
+    if (l <= left + 0.5) lines.push([])
+    left = l
     lines[lines.length - 1].push(item)
   })
   container.textContent = ''

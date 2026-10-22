@@ -1,5 +1,5 @@
 import gsap from 'gsap'
-import { qs } from '../utils/helpers.js'
+import { qs, fontsReady } from '../utils/helpers.js'
 import { EMAIL, PHONE } from '../core/booking.js'
 
 const GIFTS = {
@@ -31,16 +31,24 @@ export function initVoucher({ reduced }) {
     nameEl.style.fontSize = ''
     let lo = 50
     let hi = 150
+    const setAxes = (st) => {
+      nameEl.style.fontStretch = `${st}%`
+      nameEl.style.fontWeight = Math.round(900 - ((st - 50) / 100) * 640)
+    }
     for (let i = 0; i < 9; i++) {
       const mid = (lo + hi) / 2
-      nameEl.style.fontStretch = `${mid}%`
+      setAxes(mid)
       if (nameEl.getBoundingClientRect().width > avail) hi = mid
       else lo = mid
     }
-    nameEl.style.fontStretch = `${lo}%`
-    nameEl.style.fontWeight = Math.round(900 - ((lo - 50) / 100) * 640)
+    setAxes(lo)
+    // too long even when condensed → smaller; very short even when stretched → bigger
     const w = nameEl.getBoundingClientRect().width
-    if (w > avail) nameEl.style.fontSize = `${(parseFloat(getComputedStyle(nameEl).fontSize) * avail) / w}px`
+    const fs = parseFloat(getComputedStyle(nameEl).fontSize)
+    if (w > avail || (lo > 149 && w < avail * 0.97)) {
+      const next = Math.min((fs * avail) / w, nameBox.clientWidth * 0.42)
+      nameEl.style.fontSize = `${next}px`
+    }
   }
 
   let lastGift = null
@@ -61,7 +69,7 @@ export function initVoucher({ reduced }) {
   }
   form.addEventListener('input', update)
   new ResizeObserver(fit).observe(nameBox)
-  document.fonts?.ready.then(fit)
+  fontsReady().then(fit)
   update()
 
   form.addEventListener('submit', (e) => {

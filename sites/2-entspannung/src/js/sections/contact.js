@@ -1,4 +1,4 @@
-import { qs, qsa, zurichNow, openStatus, canHover, onVisibility } from '../utils/helpers.js'
+import { qs, qsa, zurichNow, openStatus, canHover, onVisibility, fontsReady } from '../utils/helpers.js'
 import { Kinetic, fitWidth } from '../core/kinetic.js'
 
 const START = 7
@@ -39,7 +39,7 @@ export function initContact({ reduced }) {
   if (!big || !inner) return
   const fit = () => fitWidth(inner, big)
   if (reduced) {
-    document.fonts?.ready.then(fit)
+    fontsReady().then(fit)
     window.addEventListener('resize', fit)
     return
   }
@@ -53,7 +53,7 @@ export function initContact({ reduced }) {
   inner.style.setProperty('--fw-rest', '760')
   if (canHover()) big.setAttribute('data-cursor', 'Anrufen')
   onVisibility(big, (v) => kin.setVisible(v), '100px')
-  document.fonts?.ready.then(() => {
+  fontsReady().then(() => {
     kin.rebuild()
     fit()
   })

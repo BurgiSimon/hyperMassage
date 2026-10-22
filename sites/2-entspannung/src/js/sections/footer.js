@@ -1,6 +1,6 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { qs, onVisibility } from '../utils/helpers.js'
+import { qs, onVisibility, fontsReady } from '../utils/helpers.js'
 import { Kinetic, fitWidth } from '../core/kinetic.js'
 
 /** «Entspannung.» – fully relaxed, edge to edge, and still soft to the touch. */
@@ -14,14 +14,14 @@ export function initFooter({ reduced }) {
   inner.style.setProperty('--fs-rest', '140%')
   inner.style.setProperty('--fw-rest', '200')
   if (reduced) {
-    document.fonts?.ready.then(fit)
+    fontsReady().then(fit)
     window.addEventListener('resize', fit)
     return
   }
   const kin = new Kinetic(inner, { knead: true, radius: 260, strength: -0.9, onTick: () => fit() })
   box.setAttribute('data-cursor', 'Locker')
   onVisibility(box, (v) => kin.setVisible(v), '100px')
-  document.fonts?.ready.then(() => {
+  fontsReady().then(() => {
     kin.rebuild()
     fit()
   })

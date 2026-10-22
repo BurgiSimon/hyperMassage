@@ -402,7 +402,6 @@
   color: var(--ink);
   border-radius: 28px 28px 0 0;
   padding: clamp(20px, 3vw, 44px) var(--m) calc(var(--m) + env(safe-area-inset-bottom));
-  transform: translateY(102%);
 }
 .sheet__head {
   display: flex;
@@ -459,6 +458,7 @@
 }
 .madlib {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 26px;
   max-width: 1280px;
 }
@@ -510,7 +510,7 @@
 }
 .slot--input input {
   padding-right: 0.1em;
-  width: 9.5ch;
+  width: 7.5em;
   cursor: text;
 }
 .slot input::placeholder {

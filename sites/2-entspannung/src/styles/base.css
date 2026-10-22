@@ -459,11 +459,14 @@ ul {
 
 .field {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 8px;
+  min-width: 0;
 }
 .field input,
 .field textarea {
   width: 100%;
+  min-width: 0;
   border: 0;
   border-bottom: 1.5px solid var(--line-strong);
   background: transparent;

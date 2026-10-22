@@ -1,6 +1,6 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { qs, qsa, canHover, onVisibility } from '../utils/helpers.js'
+import { qs, qsa, canHover, onVisibility, fontsReady } from '../utils/helpers.js'
 import { Kinetic, lockLines } from '../core/kinetic.js'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -57,8 +57,7 @@ export function initKineticHeadings({ reduced }) {
     build()
     onWidthChange(() => instances.forEach((k) => k.rebuild()))
   }
-  if (document.fonts?.status === 'loaded') start()
-  else document.fonts.ready.then(start)
+  fontsReady().then(start)
 }
 
 /** «Verspannungen» loosens up as the sentence scrolls through the reader's eye line. */
@@ -111,12 +110,10 @@ export function initWelcome({ reduced }) {
       onUpdate: (self) => word.style.setProperty('--r', self.progress.toFixed(3)),
     })
   }
-  const start = () => {
+  fontsReady().then(() => {
     run()
     onWidthChange(run)
-  }
-  if (document.fonts?.status === 'loaded') start()
-  else document.fonts.ready.then(start)
+  })
 }
 
 /** Quiet fade-ups for everything else, plus counting facts. */

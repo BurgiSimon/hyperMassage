@@ -110,3 +110,17 @@ export function openStatus(now = zurichNow()) {
   }
   return { open: false, text: 'Termine nur mit Voranmeldung' }
 }
+
+/**
+ * Resolves once the two web fonts are really loaded (or after a timeout).
+ * `document.fonts.ready` alone can resolve before a font has even been requested.
+ */
+let fontsPromise = null
+export function fontsReady(timeout = 3500) {
+  if (fontsPromise) return fontsPromise
+  const load = document.fonts
+    ? Promise.all([document.fonts.load('700 16px Anybody'), document.fonts.load('400 16px "Mona Sans"')]).then(() => document.fonts.ready)
+    : Promise.resolve()
+  fontsPromise = Promise.race([load, new Promise((r) => setTimeout(r, timeout))]).catch(() => {})
+  return fontsPromise
+}

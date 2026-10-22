@@ -1,5 +1,5 @@
 import gsap from 'gsap'
-import { qs, qsa, clamp, smoothstep, onVisibility } from '../utils/helpers.js'
+import { qs, qsa, clamp, smoothstep, onVisibility, fontsReady } from '../utils/helpers.js'
 import { pointer } from '../core/pointer.js'
 import { spring } from '../core/kinetic.js'
 
@@ -132,7 +132,7 @@ export function initHero({ reduced }) {
     render(0)
   }
   window.addEventListener('resize', refit)
-  document.fonts?.ready.then(refit)
+  fontsReady().then(refit)
   render(0)
 
   return {
