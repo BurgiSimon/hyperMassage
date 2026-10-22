@@ -46,9 +46,19 @@
           if (sessionStorage.getItem('cb-visited')) d.classList.add('is-revisit')
         } catch (e) {}
         // safety net: if the app never boots, fall back to the static page
-        setTimeout(function () {
+        var fallback = function () {
           if (!d.classList.contains('app-booted')) d.classList.replace('js', 'no-js')
-        }, 9000)
+        }
+        setTimeout(fallback, 9000)
+        // …and at once if the app's script fails to load
+        window.addEventListener(
+          'error',
+          function (e) {
+            var t = e.target
+            if (t && t.tagName === 'SCRIPT') fallback()
+          },
+          true,
+        )
       })(document.documentElement)
     </script>
 
