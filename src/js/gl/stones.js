@@ -138,6 +138,13 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
   } catch (e) {
     return null
   }
+  // if the GPU drops the context (low memory, backgrounded tab), fall back to the still image
+  canvas.addEventListener('webglcontextlost', (e) => {
+    e.preventDefault()
+    document.body.classList.add('no-webgl')
+  })
+  canvas.addEventListener('webglcontextrestored', () => document.body.classList.remove('no-webgl'))
+
   const isSmall = window.matchMedia('(max-width: 720px)').matches
   const lowEnd = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 3
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowEnd ? 1.25 : isSmall ? 1.5 : 1.75))
