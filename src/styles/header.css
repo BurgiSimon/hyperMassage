@@ -452,3 +452,39 @@
   text-transform: uppercase;
   color: rgb(239 232 221 / 0.6);
 }
+
+/* ───────────────────────── Chapter indicator ───────────────────────── */
+.chapter {
+  display: none;
+}
+@media (min-width: 1100px) and (hover: hover) {
+  .js .chapter {
+    position: fixed;
+    left: calc(var(--gutter) / 2);
+    top: 50%;
+    z-index: 700;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--fg-soft);
+    font-size: 0.62rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translate(-50%, -50%) rotate(-90deg);
+  }
+  .chapter__line {
+    width: 1.5rem;
+    height: 1px;
+    background: currentColor;
+  }
+  .chapter__clip {
+    display: inline-block;
+    overflow: hidden;
+    line-height: 1.4;
+  }
+  .chapter__clip span {
+    display: inline-block;
+  }
+}

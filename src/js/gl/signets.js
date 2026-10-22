@@ -334,7 +334,21 @@ class Signet {
 
 export function initSignets({ reduced = false } = {}) {
   const items = qsa('canvas[data-signet]').map((c) => new Signet(c))
-  if (reduced) return items
+  if (reduced) {
+    // still images: draw once, in the right colours, when they come into view
+    const still = new IntersectionObserver((entries) =>
+      entries.forEach((entry) => {
+        const s = items.find((i) => i.canvas === entry.target)
+        if (!entry.isIntersecting || !s) return
+        setTimeout(() => {
+          s.colorTimer = 0
+          s.frame(0)
+        }, 950)
+      }),
+    )
+    items.forEach((s) => still.observe(s.canvas))
+    return items
+  }
   const io = new IntersectionObserver(
     (entries) =>
       entries.forEach((entry) => {

@@ -1870,3 +1870,24 @@ footer[data-theme] {
     padding-bottom: calc(5.5rem + env(safe-area-inset-bottom));
   }
 }
+
+/* reduced motion: the services become a calm grid instead of a pinned journey */
+@media (min-width: 1024px) {
+  .reduced .services__viewport {
+    overflow: visible;
+  }
+  .reduced .services__track {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: auto;
+  }
+  .reduced .service,
+  .reduced .service--cta {
+    width: auto;
+    height: auto;
+    min-height: 26rem;
+  }
+  .reduced .services__progress {
+    display: none;
+  }
+}

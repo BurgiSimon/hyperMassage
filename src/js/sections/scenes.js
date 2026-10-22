@@ -38,7 +38,10 @@ export function initHeroScroll() {
       xTo(((e.clientX - r.left) / r.width) * 100)
       yTo(((e.clientY - r.top) / r.height) * 100)
     })
+    let active = true
+    ScrollTrigger.create({ trigger: hero, start: 'top bottom', end: 'bottom top', onToggle: (self) => (active = self.isActive) })
     gsap.ticker.add(() => {
+      if (!active) return
       glow.style.setProperty('--cx', `${pos.x.toFixed(2)}%`)
       glow.style.setProperty('--cy', `${pos.y.toFixed(2)}%`)
     })
@@ -126,7 +129,7 @@ export function initMarquee() {
 }
 
 /* ───────────── Services: pinned horizontal journey ───────────── */
-export function initServices() {
+export function initServices({ reduced = false } = {}) {
   const section = qs('#angebot')
   const pin = qs('[data-services-pin]')
   const track = qs('[data-services-track]')
@@ -137,6 +140,7 @@ export function initServices() {
   const cards = qsa('.service', track)
   const total = qsa('[data-service]', track).length
 
+  if (reduced) return
   const mm = gsap.matchMedia()
   mm.add('(min-width: 1024px)', () => {
     const distance = () => track.scrollWidth - window.innerWidth
@@ -193,5 +197,54 @@ export function initServices() {
         scrollTrigger: { trigger: card, start: 'top 90%', once: true },
       })
     })
+  })
+}
+
+/* ───────────── Chapter indicator (desktop) ───────────── */
+export function initChapters() {
+  const el = qs('[data-chapter]')
+  if (!el) return
+  const label = qs('[data-chapter-label]', el)
+  const sections = qsa('main > section[id], main > [data-chapter-name]')
+  let current = ''
+  const set = (text) => {
+    if (text === current) return
+    current = text
+    gsap.to(label, {
+      yPercent: -100,
+      autoAlpha: 0,
+      duration: 0.3,
+      ease: 'power2.in',
+      onComplete: () => {
+        label.textContent = text
+        gsap.fromTo(label, { yPercent: 100, autoAlpha: 0 }, { yPercent: 0, autoAlpha: 1, duration: 0.6, ease: 'expo.out' })
+      },
+    })
+  }
+  sections.forEach((section) => {
+    const eyebrow = qs('.eyebrow', section)
+    const text = section.id === 'start' ? '(00) Lass los' : eyebrow?.textContent.replace(/\s+/g, ' ').trim()
+    if (!text) return
+    ScrollTrigger.create({
+      trigger: section,
+      start: 'top 50%',
+      end: 'bottom 50%',
+      onToggle: (self) => self.isActive && set(text),
+    })
+  })
+  // the hero and the footer have their own way-finding
+  const toggle = (show) => gsap.to(el, { autoAlpha: show ? 1 : 0, duration: 0.6, overwrite: 'auto' })
+  ScrollTrigger.create({
+    trigger: '#start',
+    start: 'top top',
+    end: 'bottom 40%',
+    onLeave: () => toggle(true),
+    onEnterBack: () => toggle(false),
+  })
+  ScrollTrigger.create({
+    trigger: '.footer',
+    start: 'top 70%',
+    onEnter: () => toggle(false),
+    onLeaveBack: () => toggle(true),
   })
 }

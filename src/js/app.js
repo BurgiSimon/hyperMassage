@@ -1,13 +1,21 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { qs, initRollText, prefersReducedMotion } from './utils/helpers.js'
-import { initScroll, initAnchors, stopScroll, startScroll } from './core/scroll.js'
+import { initScroll, initAnchors, stopScroll, startScroll, scrollTo } from './core/scroll.js'
 import { initThemes, initHeader, initMenu } from './core/chrome.js'
 import { initCursor, initMagnetic, trackPointer, cursor } from './core/cursor.js'
 import { runLoader } from './core/loader.js'
 import { initBooking } from './core/booking.js'
 import { initReveals, revealAllInstantly } from './sections/reveals.js'
-import { prepareHero, playHeroIntro, initHeroScroll, initAbout, initMarquee, initServices } from './sections/scenes.js'
+import {
+  prepareHero,
+  playHeroIntro,
+  initHeroScroll,
+  initAbout,
+  initMarquee,
+  initServices,
+  initChapters,
+} from './sections/scenes.js'
 import { initBreath } from './sections/breath.js'
 import { initPrices } from './sections/prices.js'
 import { initVoucher } from './sections/voucher.js'
@@ -46,7 +54,7 @@ export function initApp() {
   initScroll({ smooth: !reduced })
   stopScroll()
   // the pinned services track changes page height – create it before any trigger below it
-  initServices()
+  initServices({ reduced })
   initThemes()
   initHeader()
   const menu = initMenu({ reduced })
@@ -106,6 +114,7 @@ export function initApp() {
     initMarquee()
     initWordmark({ reduced })
   }
+  initChapters()
 
   // ── loader → intro ──
   const ready = Promise.race([Promise.all([document.fonts?.ready, stonesReady]), timeout(6000)])
@@ -114,7 +123,21 @@ export function initApp() {
     if (!reduced) playHeroIntro(heroChars)
     stones?.playIntro()
     ScrollTrigger.refresh()
+    // deep links (e.g. /#preise) land after the layout is final
+    const target = location.hash && document.querySelector(location.hash)
+    if (target) scrollTo(target, { immediate: true, offset: -10 })
   })
+
+  // small studio touches
+  const title = document.title
+  document.addEventListener('visibilitychange', () => {
+    document.title = document.hidden ? 'Atme durch … | Massage Claudia Bürgi' : title
+  })
+  console.log(
+    '%cLass los.%c\nMassagepraxis Claudia Bürgi, Kestenholz · Website: Simon Bürgi',
+    'font: italic 300 32px Fraunces, Georgia, serif; color: #e3815a;',
+    'font: 12px "Geist Mono", monospace; color: #8a7f74;',
+  )
 
   document.fonts?.ready.then(() => ScrollTrigger.refresh())
   window.addEventListener('load', () => ScrollTrigger.refresh())
