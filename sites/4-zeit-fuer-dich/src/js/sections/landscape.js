@@ -21,6 +21,7 @@ export function initLandscape({ scene, reduced }) {
   const hero = qs('.hero')
   const footer = qs('[data-footer]')
   const veil = qs('[data-scene-veil]')
+  const peaksEl = qs('[data-peaks]')
   const fallback = qs('[data-scene-fallback]')
   let today = zurichDay()
 
@@ -35,9 +36,11 @@ export function initLandscape({ scene, reduced }) {
 
   // ───── colours that read on the current sky ─────
   const rgb = (c) => `rgb(${c.map((v) => Math.round(v * 255)).join(' ')})`
+  let fallbackLook = null
   const paintFallback = (L) => {
+    fallbackLook = L
     // (only while there is no live scene – the layer sits behind the canvas otherwise)
-    if (!fallback || (scene && !scene.lost)) return
+    if (!fallback || (scene && !scene.lost && scene.ready)) return
     const k = 0.2 + 0.8 * L.amb
     const land = [0.2, 0.27, 0.19].map((v, i) => v * k * 0.75 + L.fog[i] * 0.25 * k)
     fallback.style.setProperty('--fb-zen', rgb(L.zen))
@@ -94,8 +97,9 @@ export function initLandscape({ scene, reduced }) {
     const L = heroLook
     const h = live.override ?? live.hour
     scene?.setLook(L, h)
-    // the warm sheet rises: the evening light dims the view behind it
+    // the warm sheet rises: the evening light dims the view behind it, the summit names step back
     if (veil) veil.style.opacity = (clamp(y / Math.max(1, m.heroH)) * 0.85).toFixed(3)
+    if (peaksEl) peaksEl.style.opacity = (1 - clamp(y / Math.max(1, m.heroH * 0.35))).toFixed(3)
     Object.assign(current, { look: L, hour: h, take: 'hero' })
     paintSky(L)
   }
@@ -113,6 +117,7 @@ export function initLandscape({ scene, reduced }) {
   const nowEl = qs('[data-now]')
   const nowTime = qs('[data-now-time]')
   const nowText = qs('[data-now-text]')
+  const nowSr = qs('[data-now-sr]')
   const paintStatus = () => {
     const n = zurichNow()
     const h = n.decimal
@@ -124,7 +129,7 @@ export function initLandscape({ scene, reduced }) {
     if (nowTime) nowTime.textContent = `${String(n.hour).padStart(2, '0')}:${String(n.minute).padStart(2, '0')}`
     if (nowText) nowText.textContent = st.text
     nowEl?.classList.toggle('is-open', st.open)
-    nowEl?.setAttribute('aria-label', `Kestenholz, ${fmtTime(h)} Uhr: ${st.text}`)
+    if (nowSr) nowSr.textContent = `Kestenholz, ${fmtTime(h)} Uhr: ${st.text}`
   }
   paintStatus()
   setInterval(() => {
@@ -267,6 +272,8 @@ export function initLandscape({ scene, reduced }) {
     mix: (t) => mixLook(heroLook, nightLook(NIGHT), t),
     refresh: () => {
       measure()
+      lastBg = ''
+      if (fallbackLook) paintFallback(fallbackLook)
       update()
       placePeaks()
     },

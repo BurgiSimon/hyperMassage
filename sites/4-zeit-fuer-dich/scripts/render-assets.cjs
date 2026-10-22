@@ -1,4 +1,4 @@
-// Renders the favicons and the social share image (a sunset over the real Jura skyline).
+// Renders the favicons and the social share image («Zeit für dich.» over the real Jura skyline at the golden hour).
 // Usage: npm run build && npm run preview  (other terminal)  →  npm run assets
 const path = require('node:path')
 const fs = require('node:fs')
@@ -8,7 +8,7 @@ try {
 } catch {
   ;({ chromium } = require('/opt/node22/lib/node_modules/playwright'))
 }
-const base = process.argv[2] || 'http://localhost:4176/'
+const base = process.argv[2] || 'http://localhost:4178/'
 const pub = path.join(__dirname, '..', 'public')
 
 ;(async () => {
@@ -28,18 +28,37 @@ const pub = path.join(__dirname, '..', 'public')
   }
 
   // share image: the hero at the golden hour, with the title
-  const og = await browser.newPage({ viewport: { width: 1200, height: 630 } })
+  const ogCtx = await browser.newContext({ viewport: { width: 1200, height: 630 } })
+  await ogCtx.addInitScript(() => {
+    const delta = new Date('2026-10-15T18:02:00+02:00').getTime() - Date.now()
+    const R = Date
+    globalThis.Date = class extends R {
+      constructor(...a) {
+        a.length ? super(...a) : super(R.now() + delta)
+      }
+      static now() {
+        return R.now() + delta
+      }
+    }
+  })
+  const og = await ogCtx.newPage()
   await og.goto(base + '?debug', { waitUntil: 'networkidle' })
-  await og.waitForTimeout(6000)
+  await og.waitForTimeout(8000)
   await og.addStyleTag({
     content: `html{scrollbar-gutter:auto!important}
-      .header,.hero__hint,.hero__card,.hero__greet,.peaks,.cursor,.dock{display:none!important}
-      .og-brand{position:fixed;left:48px;right:48px;bottom:40px;display:flex;justify-content:space-between;font:600 17px 'Instrument Sans',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#fff7ea;text-shadow:0 1px 12px rgb(0 0 0 / .4)}
-      .hero__inner{padding-top:150px!important}
-      .hero__title{font-size:150px!important;color:#fff7ea!important;text-shadow:0 2px 40px rgb(40 20 30 / .45)!important}`,
+      .header,.hero__hint,.hero__card,.hero__greet,.hero__down,.peaks,.cursor,.dock{display:none!important}
+      .og-brand{position:fixed;left:56px;right:56px;bottom:44px;display:flex;justify-content:space-between;font:500 15px 'Geist Mono',monospace;letter-spacing:.14em;text-transform:uppercase;color:#fff7ea;text-shadow:0 1px 12px rgb(0 0 0 / .45)}
+      .hero__inner{padding:78px 56px!important}
+      .hero__title{font-size:168px!important;color:#fff7ea!important;--sky-halo:rgb(60 25 10 / .4)}`,
   })
   await og.evaluate(() => {
-    window.__day?.preview(18.15)
+    // a full-resolution still of the landscape (the live scene runs at a low resolution on a software GPU)
+    const c = document.createElement('canvas')
+    c.width = 1200
+    c.height = 630
+    window.__paintStill(c, 17.8, { day: { y: 2026, m: 10, d: 15 }, azC: 326, fov: 118 })
+    c.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:-1'
+    document.body.appendChild(c)
     const b = document.createElement('div')
     b.className = 'og-brand'
     b.innerHTML = '<span>Massage Claudia Bürgi · Kestenholz</span><span>078 224 91 97</span>'
@@ -47,6 +66,7 @@ const pub = path.join(__dirname, '..', 'public')
   })
   await og.waitForTimeout(800)
   await og.screenshot({ path: path.join(pub, 'og-image.jpg'), type: 'jpeg', quality: 88 })
+  await ogCtx.close()
   await browser.close()
   console.log('assets rendered')
 })()

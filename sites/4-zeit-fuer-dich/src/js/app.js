@@ -1,6 +1,6 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { qs, qsa, prefersReducedMotion } from './utils/helpers.js'
+import { qs, qsa, prefersReducedMotion, whenNear } from './utils/helpers.js'
 import { initScroll, stopScroll, startScroll, initAnchors, releaseAllScrollLocks, scrollTo } from './core/scroll.js'
 import { runLoader } from './core/loader.js'
 import { initCursor } from './core/cursor.js'
@@ -17,7 +17,7 @@ import { initPostcard } from './sections/postcard.js'
 import { initHours } from './sections/hours.js'
 import { initFaq } from './sections/faq.js'
 import { initMap } from './sections/map.js'
-import { createScene } from './gl/scene.js'
+import { createScene, paintStill } from './gl/scene.js'
 import { createNature } from './audio/nature.js'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -38,6 +38,16 @@ export function initApp() {
   }
 }
 
+// (one task per part: the page stays responsive while it sets itself up)
+const nextTask = () => new Promise((r) => (globalThis.scheduler?.yield ? globalThis.scheduler.yield().then(r) : setTimeout(r, 0)))
+const run = (fn) => {
+  try {
+    return fn()
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 function boot() {
   const reduced = prefersReducedMotion()
   const revisit = html.classList.contains('is-revisit')
@@ -47,67 +57,18 @@ function boot() {
   stopScroll('loader')
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
   if (!location.hash) window.scrollTo(0, 0)
-
-  // the landscape (opening and closing)
-  const canvas = qs('[data-scene]')
-  let scene = null
-  try {
-    scene = createScene(canvas, { reduced })
-  } catch (err) {
-    console.warn(err)
-  }
-  // (without WebGL the silhouette in .scene__fallback stays, coloured by the hour)
-  if (scene) qs('.scene').classList.add('is-live')
+  const loader = runLoader({ reduced, revisit })
 
   trackPointer()
   initCursor()
-  const hero = prepareHero({ reduced })
-  const land = initLandscape({ scene, reduced })
-  // the GPU may drop the scene for a moment: show the silhouette meanwhile
-  canvas.addEventListener('scene:lost', () => {
-    qs('.scene').classList.remove('is-live')
-    land.refresh()
-  })
-  canvas.addEventListener('scene:restored', () => {
-    qs('.scene').classList.add('is-live')
-    land.refresh()
-  })
-  const chrome = initHeader()
   const menu = initMenu({ reduced })
   initAnchors(() => menu.close())
   const booking = initBooking({ reduced, beforeOpen: () => menu.close() })
 
-  const run = (fn) => {
-    try {
-      return fn()
-    } catch (err) {
-      console.error(err)
-    }
-  }
-  const reveals = run(() => initReveals({ reduced }))
-  run(() => initBodyMap({ reduced }))
-  run(() => initSignets({ reduced }))
-  // the breath drives the Atempause headline (once its letters exist)
-  const breathTitle = qs('[data-breath-title]')
-  const breathKin = {
-    set offset(v) {
-      const k = reveals?.kinetics.get(breathTitle)
-      if (!k) return
-      k.offset = v
-      k.wake()
-    },
-  }
-  run(() => initBreath({ reduced, title: reduced ? null : breathKin }))
-  run(() => initPlanner({ webgl: !!scene }))
-  run(() => initPostcard({ reduced, webgl: !!scene }))
-  run(() => initHours())
-  run(() => initFaq())
-  run(() => initMap({ reduced }))
-  if (new URLSearchParams(location.search).has('debug')) Object.assign(window, { __land: land, __scene: scene, __reveals: reveals })
-
+  const app = {}
   // Klang – one switch in the header, one in the menu on phones; they stay in step
   const soundBtns = qsa('[data-sound]')
-  const nature = createNature(() => land.look)
+  const nature = createNature(() => app.land?.look)
   soundBtns.forEach((btn) =>
     btn.addEventListener('click', () => {
       const on = nature.toggle()
@@ -115,16 +76,69 @@ function boot() {
     }),
   )
 
-  runLoader({ reduced, revisit }).then(() => {
+  const steps = [
+    // the landscape (opening and closing) and the hero
+    () => {
+      const canvas = qs('[data-scene]')
+      try {
+        app.scene = createScene(canvas, { reduced })
+      } catch (err) {
+        console.warn(err)
+      }
+      app.hero = prepareHero({ reduced })
+      app.land = initLandscape({ scene: app.scene, reduced })
+      // (without WebGL – and until the shader is compiled – the silhouette in .scene__fallback shows, coloured by the hour)
+      const live = (on) => {
+        qs('.scene').classList.toggle('is-live', on)
+        app.land.refresh()
+      }
+      if (app.scene?.ready) live(true)
+      canvas.addEventListener('scene:ready', () => live(true))
+      // the GPU may drop the scene for a moment: the silhouette meanwhile
+      canvas.addEventListener('scene:lost', () => live(false))
+    },
+    () => (app.chrome = initHeader()),
+    () => (app.reveals = initReveals({ reduced })),
+    // (the body's relief takes a moment to build: only when the section comes near)
+    () => whenNear(qs('[data-bodymap]'), () => run(() => initBodyMap({ reduced })), '900px'),
+    () => initSignets({ reduced }),
+    () => {
+      // the breath drives the Atempause headline (once its letters exist)
+      const title = qs('[data-breath-title]')
+      const breathKin = {
+        set offset(v) {
+          const k = app.reveals?.kinetics.get(title)
+          if (!k) return
+          k.offset = v
+          k.wake()
+        },
+      }
+      initBreath({ reduced, title: reduced ? null : breathKin })
+    },
+    () => initPlanner({ webgl: !!app.scene }),
+    () => initPostcard({ reduced, webgl: !!app.scene }),
+    () => initHours(),
+    () => initFaq(),
+    () => initMap({ reduced }),
+  ]
+  const ready = (async () => {
+    for (const step of steps) {
+      await nextTask()
+      run(step)
+    }
+    if (new URLSearchParams(location.search).has('debug')) Object.assign(window, { __land: app.land, __scene: app.scene, __reveals: app.reveals, __paintStill: paintStill })
+  })()
+
+  Promise.all([loader, ready]).then(() => {
     try {
       sessionStorage.setItem('cb4-visited', '1')
     } catch {}
     startScroll('loader')
-    hero.play()
+    app.hero?.play()
     ScrollTrigger.refresh()
-    land.refresh()
-    chrome?.refresh()
-    land.showHint()
+    app.land?.refresh()
+    app.chrome?.refresh()
+    app.land?.showHint()
     // a link to /#termin opens the request dialog
     if (location.hash === '#termin') booking.open()
     else if (location.hash) {

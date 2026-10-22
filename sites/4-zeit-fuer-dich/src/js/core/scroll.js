@@ -25,6 +25,8 @@ export function scrollTo(target, opts = {}) {
   const el = typeof target === 'string' ? document.querySelector(target) : target
   if (lenis) {
     lenis.scrollTo(el ?? 0, { duration: 1.5, easing: EASE, ...opts })
+    // (a jump does not always reach ScrollTrigger: reveal what is now on screen)
+    if (opts.immediate) requestAnimationFrame(() => ScrollTrigger.update())
     return
   }
   const top =

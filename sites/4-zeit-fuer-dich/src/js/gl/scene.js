@@ -287,13 +287,15 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
   const gl = canvas.getContext('webgl2', { antialias: false, alpha: false, powerPreference: 'low-power', preserveDrawingBuffer: !!still })
   if (!gl) return null
 
+  // (status is only asked once the program is linked: asking earlier waits for the GPU)
   const compile = (type, src) => {
     const s = gl.createShader(type)
     gl.shaderSource(s, src)
     gl.compileShader(s)
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s))
     return s
   }
+  // the shader compiles in the background where the browser can: the page stays responsive meanwhile
+  const parallel = still ? null : gl.getExtension('KHR_parallel_shader_compile')
 
   // ridge texture data: one row per distance band, R = elevation angle (deg), G = distance (km)
   const W = horizon.count
@@ -314,17 +316,26 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
   })
 
   const U = {}
+  let pending = null
+  let ready = false
   /** program, triangle, texture, uniforms – again after a lost context comes back */
   const setup = () => {
-    let prog
-    try {
-      prog = gl.createProgram()
-      gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT))
-      gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG))
-      gl.linkProgram(prog)
-      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog))
-    } catch (err) {
-      console.warn('scene shader failed', err)
+    ready = false
+    const prog = gl.createProgram()
+    const vs = compile(gl.VERTEX_SHADER, VERT)
+    const fs = compile(gl.FRAGMENT_SHADER, FRAG)
+    gl.attachShader(prog, vs)
+    gl.attachShader(prog, fs)
+    gl.linkProgram(prog)
+    pending = { prog, vs, fs }
+    // (without the extension – and for stills – it is finished right here)
+    return parallel ? 'pending' : finish()
+  }
+  const finish = () => {
+    const { prog, vs, fs } = pending
+    pending = null
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+      console.warn('scene shader failed', gl.getShaderInfoLog(vs) || gl.getShaderInfoLog(fs) || gl.getProgramInfoLog(prog))
       return false
     }
     gl.useProgram(prog)
@@ -349,11 +360,25 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
     gl.uniform1i(U.uRidge, 0)
     gl.uniform1f(U.uSeed, 3.7)
     gl.uniform1f(U.uCloud, 0.45)
+    ready = true
+    state.dirty = true
+    canvas.dispatchEvent(new CustomEvent('scene:ready', { bubbles: true }))
     return true
   }
-  if (!setup()) return null
+  /** a background compile has finished? then set up – or give up on the scene */
+  const poll = () => {
+    if (!pending || !gl.getProgramParameter(pending.prog, parallel.COMPLETION_STATUS_KHR)) return
+    if (finish()) {
+      if (!lost) draw()
+      return
+    }
+    lost = true
+    cancelAnimationFrame(raf)
+    canvas.dispatchEvent(new CustomEvent('scene:lost', { bubbles: true }))
+  }
 
   const state = { hour: 12, day: STORY_DAY, look: null, w: 0, h: 0, scale: 0.6, dirty: true, time: 0, visible: true, active: true, view: null, quality: 1, idleFps: 12, maxFps: 60 }
+  if (setup() === false) return null
 
   // a software renderer (no GPU) draws synchronously and slowly: start small there
   const dbg = gl.getExtension('WEBGL_debug_renderer_info')
@@ -428,7 +453,7 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
   const draw = () => {
     const L = state.look
     const v = state.view
-    if (!L || !v) return
+    if (!L || !v || !ready) return
     gl.uniform2f(U.uRes, canvas.width, canvas.height)
     gl.uniform1f(U.uAzC, v.azC)
     gl.uniform1f(U.uFov, v.fov)
@@ -489,6 +514,7 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
   let drewLast = false
   const frame = (t) => {
     raf = requestAnimationFrame(frame)
+    if (!ready) return poll()
     const gap = t - last
     const dt = Math.min(0.1, gap / 1000 || 0)
     last = t
@@ -516,7 +542,7 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
     canvas.dispatchEvent(new CustomEvent('scene:lost', { bubbles: true }))
   })
   canvas.addEventListener('webglcontextrestored', () => {
-    if (!setup()) return
+    if (setup() === false) return
     lost = false
     resize()
     draw()
@@ -547,6 +573,10 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
     },
     get lost() {
       return lost
+    },
+    /** the shader is compiled and the landscape drawn */
+    get ready() {
+      return ready
     },
     /** screen position (CSS px) of a point on the skyline */
     project(az, elDeg) {

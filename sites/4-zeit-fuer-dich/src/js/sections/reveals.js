@@ -1,6 +1,6 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { qs, qsa, clamp, smoothstep, fontsReady, onVisibility } from '../utils/helpers.js'
+import { qs, qsa, clamp, smoothstep, fontsReady, onVisibility, whenNear } from '../utils/helpers.js'
 import { Kinetic, splitText, freezeLines } from '../core/kinetic.js'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -64,15 +64,21 @@ export function initReveals({ reduced }) {
   const kinetics = new Map()
   if (!reduced) {
     // ───── headlines exhale as they arrive ─────
+    // (each is split into letters only when it comes near: the work is spread out, not done at load)
     fontsReady().then(() => {
-      qsa('[data-kin]').forEach((el) => {
-        const kin = new Kinetic(el, { start: -1 })
-        kinetics.set(el, kin)
-        onVisibility(el, (v) => kin.setVisible(v), '0px')
-        ScrollTrigger.create({ trigger: el, start: 'top 86%', once: true, onEnter: () => kin.release(0.1) })
-      })
+      qsa('[data-kin]').forEach((el) =>
+        whenNear(
+          el,
+          () => {
+            const kin = new Kinetic(el, { start: -1 })
+            kinetics.set(el, kin)
+            onVisibility(el, (v) => kin.setVisible(v), '0px')
+            ScrollTrigger.create({ trigger: el, start: 'top 86%', once: true, onEnter: () => kin.release(0.1) })
+          },
+          '400px',
+        ),
+      )
       onWidthChange(() => kinetics.forEach((k) => k.rebuild()))
-      ScrollTrigger.refresh()
     })
 
     // ───── the welcome statement: each word exhales as you read it ─────
@@ -98,10 +104,12 @@ export function initReveals({ reduced }) {
         })
       }
       const st = ScrollTrigger.create({ trigger: el, start: 'top 82%', end: 'bottom 48%', onUpdate: (self) => paint(self.progress) })
-      fontsReady().then(() => {
-        shown = []
-        split()
-      })
+      fontsReady().then(() =>
+        whenNear(el, () => {
+          shown = []
+          split()
+        }),
+      )
       onWidthChange(() => {
         shown = []
         split()

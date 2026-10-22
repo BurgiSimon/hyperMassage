@@ -4,8 +4,8 @@
   "description": "Massagepraxis Claudia Bürgi in Kestenholz",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#1b2233",
-  "theme_color": "#1b2233",
+  "background_color": "#f1e9dd",
+  "theme_color": "#f1e9dd",
   "lang": "de-CH",
   "icons": [
     { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
