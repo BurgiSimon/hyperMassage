@@ -53,7 +53,10 @@ npm install
 npm run dev       # local dev server
 npm run build     # production build → dist/
 npm run preview   # serve the build on http://localhost:4173
+npm run verify    # (with preview running) interaction checks: drawer, menu, focus, scroll locks …
 ```
+
+`verify` and `assets` use Playwright (`npm i -D playwright` if it is not installed globally).
 
 The `dist/` folder is a plain static site — upload it to any static host (Netlify, Cloudflare Pages,
 Vercel, GitHub Pages, a classic web host …). No server configuration is required.
