@@ -44,14 +44,15 @@ export function initDay({ scene, reduced }) {
   // CSS colours that read well on the current sky
   let lastInk = ''
   const paintChrome = (L) => {
-    const t = smoothstep(0.26, 0.46, L.skyLum)
-    const c = INK_LIGHT.map((v, i) => Math.round(v + (INK_DARK[i] - v) * t))
+    // dark or light ink – never a grey in between (CSS cross-fades the switch)
+    const t = L.skyLum > 0.5 ? 1 : 0
+    const c = t ? INK_DARK : INK_LIGHT
     const ink = `rgb(${c.join(' ')})`
     if (ink !== lastInk) {
       lastInk = ink
       html.style.setProperty('--sky-ink', ink)
       html.style.setProperty('--sky-ink-soft', `rgb(${c.join(' ')} / 0.72)`)
-      html.style.setProperty('--chrome-bg', t > 0.5 ? `rgb(246 241 231 / ${(0.35 + 0.3 * t).toFixed(2)})` : `rgb(16 21 36 / ${(0.55 - 0.25 * t).toFixed(2)})`)
+      html.style.setProperty('--chrome-bg', t ? 'rgb(246 241 231 / 0.62)' : 'rgb(16 21 36 / 0.42)')
       document.querySelector('meta[name="theme-color"]')?.setAttribute('content', `rgb(${L.zen.map((v) => Math.round(v * 255)).join(',')})`)
     }
   }

@@ -26,7 +26,21 @@
   ascent-override: 98%;
 }
 
+@property --sky-ink {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1c1e24;
+}
+@property --chrome-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgb(246 241 231 / 0.62);
+}
+
 :root {
+  transition:
+    --sky-ink 0.9s ease,
+    --chrome-bg 0.9s ease;
   --paper: #f6f1e7;
   --paper-2: #efe8db;
   --ink: #1c1e24;
