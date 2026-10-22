@@ -87,7 +87,7 @@ export function initHero({ reduced }) {
       const jy = amp * noise(state.t * 11, l.seed + 4.1)
       l.node.style.transform = `translate(${jx.toFixed(2)}px, calc(${(l.intro.y * 100).toFixed(2)}% + ${jy.toFixed(2)}px))`
     }
-    inner.style.color = `color-mix(in oklch, var(--tense), var(--ink) ${(smoothstep(0.1, 0.75, m) * 100).toFixed(1)}%)`
+    inner.style.color = `color-mix(in oklch, var(--tense-text), var(--ink) ${(smoothstep(0.1, 0.75, m) * 100).toFixed(1)}%)`
     inner.style.letterSpacing = `${(-0.02 + 0.03 * m).toFixed(4)}em`
 
     // fit the word to the stage: full width, but never taller than the room it has
@@ -132,7 +132,10 @@ export function initHero({ reduced }) {
     render(0)
   }
   window.addEventListener('resize', refit)
-  fontsReady().then(refit)
+  fontsReady().then(() => {
+    refit()
+    inner.classList.add('is-fit')
+  })
   render(0)
 
   return {

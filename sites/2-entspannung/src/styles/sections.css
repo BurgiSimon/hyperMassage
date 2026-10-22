@@ -139,6 +139,10 @@
 .kword__in {
   display: inline-block;
 }
+/* hidden until it has been fitted with the real font (no layout shift) */
+.js .kword__in:not(.is-fit) {
+  visibility: hidden;
+}
 .kl {
   display: inline-block;
   font-stretch: 140%;
@@ -275,7 +279,7 @@
   font-weight: calc(880 - 640 * var(--r));
   font-stretch: calc(52% + 84% * var(--r));
   letter-spacing: -0.01em;
-  color: color-mix(in oklch, var(--tense), var(--ink) calc(var(--r) * 100%));
+  color: color-mix(in oklch, var(--tense-text), var(--ink) calc(var(--r) * 100%));
   line-height: 0.9;
 }
 .calm-word {
