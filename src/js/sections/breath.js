@@ -87,7 +87,6 @@ export function initBreath({ reduced, emit }) {
     session = null
     clearInterval(countTimer)
     count.textContent = ''
-    btn.setAttribute('aria-pressed', 'false')
     setRollText(btnLabel, completed ? 'Nochmals' : 'Atemübung starten')
     progress.textContent = completed ? 'Schön. Genau so fühlt sich eine Auszeit an.' : ''
     setLabel(completed ? 'Danke' : 'Atme ein')
@@ -98,7 +97,6 @@ export function initBreath({ reduced, emit }) {
 
   const start = () => {
     stopIdle()
-    btn.setAttribute('aria-pressed', 'true')
     setRollText(btnLabel, 'Beenden')
     progress.textContent = `Atemzug 1 von ${CYCLES}`
     const total = (IN + HOLD + OUT) * CYCLES

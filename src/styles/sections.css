@@ -594,7 +594,7 @@ footer[data-theme] {
   color: var(--fg-soft);
 }
 .service__meta span:first-child {
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 .service__title {
   margin: 1rem 0 1.1rem;
@@ -1933,7 +1933,7 @@ footer[data-theme] {
   outline-offset: 2px;
 }
 .faq__num {
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 .faq__text {
   font-family: var(--font-serif);

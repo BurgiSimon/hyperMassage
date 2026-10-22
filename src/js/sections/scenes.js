@@ -57,7 +57,7 @@ export function initHeroScroll() {
     .to(title, { yPercent: 18, ease: 'none' }, 0)
     .to(qs('.hero__line--1', hero), { xPercent: -6, ease: 'none' }, 0)
     .to(qs('.hero__line--2', hero), { xPercent: 6, ease: 'none' }, 0)
-    .to(['.hero__meta', '.hero__foot'], { opacity: 0, yPercent: -30, ease: 'none' }, 0)
+    .fromTo(['.hero__meta', '.hero__foot'], { opacity: 1, yPercent: 0 }, { opacity: 0, yPercent: -30, ease: 'none' }, 0)
 }
 
 /* ───────────── About ───────────── */

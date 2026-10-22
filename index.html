@@ -44,7 +44,7 @@
         // safety net: if the app never boots, fall back to the static page
         setTimeout(function () {
           if (!d.classList.contains('app-booted')) d.classList.replace('js', 'no-js')
-        }, 7000)
+        }, 9000)
       })(document.documentElement)
     </script>
 
@@ -142,7 +142,7 @@
       </nav>
 
       <div class="header__actions">
-        <button class="sound" type="button" data-sound aria-pressed="false" aria-label="Klang einschalten">
+        <button class="sound" type="button" data-sound aria-pressed="false" aria-label="Klang">
           <span class="sound__bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
           <span class="sound__label">Klang</span>
         </button>
@@ -193,10 +193,10 @@
           </div>
         </div>
 
-        <div class="hero__foot" data-hero-fade>
-          <span class="mono">47.2835° N — 7.7523° E</span>
-          <span class="hero__scroll mono" aria-hidden="true"><span class="hero__scroll-line"></span>Scrollen</span>
-          <span class="mono">Termine nur mit Voranmeldung</span>
+        <div class="hero__foot">
+          <span class="mono" data-hero-fade>47.2835° N — 7.7523° E</span>
+          <span class="hero__scroll mono" aria-hidden="true" data-hero-fade><span class="hero__scroll-line"></span>Scrollen</span>
+          <span class="mono" data-hero-fade>Termine nur mit Voranmeldung</span>
         </div>
       </section>
 
@@ -326,7 +326,7 @@
           <div class="services__viewport">
             <ol class="services__track" data-services-track>
               <li class="service" data-service>
-                <div class="service__art"><canvas data-signet="classic"></canvas></div>
+                <div class="service__art" data-cursor="Berühren"><canvas data-signet="classic"></canvas></div>
                 <div class="service__body">
                   <p class="service__meta mono"><span>01</span><span>Lösen</span></p>
                   <h3 class="service__title">Klassische Massage</h3>
@@ -341,7 +341,7 @@
                 </div>
               </li>
               <li class="service" data-service>
-                <div class="service__art"><canvas data-signet="neck"></canvas></div>
+                <div class="service__art" data-cursor="Berühren"><canvas data-signet="neck"></canvas></div>
                 <div class="service__body">
                   <p class="service__meta mono"><span>02</span><span>Entlasten</span></p>
                   <h3 class="service__title">Nacken-Schulter&shy;massage</h3>
@@ -356,7 +356,7 @@
                 </div>
               </li>
               <li class="service" data-service>
-                <div class="service__art"><canvas data-signet="point"></canvas></div>
+                <div class="service__art" data-cursor="Berühren"><canvas data-signet="point"></canvas></div>
                 <div class="service__body">
                   <p class="service__meta mono"><span>03</span><span>Punktgenau</span></p>
                   <h3 class="service__title">Manuelle Schmerz&shy;therapie</h3>
@@ -370,7 +370,7 @@
                 </div>
               </li>
               <li class="service" data-service>
-                <div class="service__art"><canvas data-signet="wave"></canvas></div>
+                <div class="service__art" data-cursor="Berühren"><canvas data-signet="wave"></canvas></div>
                 <div class="service__body">
                   <p class="service__meta mono"><span>04</span><span>Schwingen</span></p>
                   <h3 class="service__title">Schwingkissen-Therapie</h3>
@@ -384,7 +384,7 @@
                 </div>
               </li>
               <li class="service" data-service>
-                <div class="service__art"><canvas data-signet="stone"></canvas></div>
+                <div class="service__art" data-cursor="Berühren"><canvas data-signet="stone"></canvas></div>
                 <div class="service__body">
                   <p class="service__meta mono"><span>05</span><span>Wärmen</span></p>
                   <h3 class="service__title">Hot-Stone-Massage</h3>
@@ -843,9 +843,9 @@
     </div>
 
     <!-- ───────────────────────────── Menu ───────────────────────────── -->
-    <div class="menu" id="menu" data-menu aria-hidden="true">
+    <div class="menu" id="menu" data-menu inert>
       <div class="menu__bg" aria-hidden="true"></div>
-      <div class="menu__inner">
+      <div class="menu__inner" data-lenis-prevent>
         <nav aria-label="Menü">
           <ol class="menu__list">
             <li><a href="#ueber-mich" data-scroll-to data-menu-link><span class="mono">01</span><span class="menu__text">Über mich</span></a></li>
@@ -868,9 +868,9 @@
     </div>
 
     <!-- ───────────────────────────── Booking drawer ───────────────────────────── -->
-    <div class="booking" data-booking aria-hidden="true">
+    <div class="booking" data-booking inert>
       <div class="booking__scrim" data-booking-close></div>
-      <div class="booking__panel" role="dialog" aria-modal="true" aria-labelledby="booking-title" tabindex="-1">
+      <div class="booking__panel" role="dialog" aria-modal="true" aria-labelledby="booking-title" tabindex="-1" data-lenis-prevent>
         <div class="booking__head">
           <p class="mono">Termine nur mit Voranmeldung</p>
           <button class="booking__close" type="button" data-booking-close aria-label="Schliessen">
@@ -961,10 +961,5 @@
       </div>
     </div>
 
-    <noscript>
-      <style>
-        .loader, .cursor, .booking, .menu { display: none !important; }
-      </style>
-    </noscript>
   </body>
 </html>

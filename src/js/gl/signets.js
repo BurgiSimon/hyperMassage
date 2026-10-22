@@ -355,13 +355,17 @@ export function initSignets({ reduced = false } = {}) {
         const s = items.find((i) => i.canvas === entry.target)
         if (!s) return
         s.visible = entry.isIntersecting
-        s.visible && !document.hidden ? s.start() : s.stop()
+        s.visible && !document.hidden && !overlays.size ? s.start() : s.stop()
       }),
     { rootMargin: '100px' },
   )
   items.forEach((s) => io.observe(s.canvas))
-  document.addEventListener('visibilitychange', () => {
-    items.forEach((s) => (document.hidden || !s.visible ? s.stop() : s.start()))
+  const overlays = new Set()
+  const sync = () => items.forEach((s) => (document.hidden || overlays.size || !s.visible ? s.stop() : s.start()))
+  document.addEventListener('visibilitychange', sync)
+  document.addEventListener('overlay', (e) => {
+    e.detail.open ? overlays.add(e.detail.source) : overlays.delete(e.detail.source)
+    setTimeout(sync, e.detail.open ? 900 : 0)
   })
   return items
 }

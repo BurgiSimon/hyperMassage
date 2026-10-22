@@ -1,7 +1,7 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { qs, initRollText, prefersReducedMotion } from './utils/helpers.js'
-import { initScroll, initAnchors, stopScroll, startScroll, scrollTo } from './core/scroll.js'
+import { initScroll, initAnchors, stopScroll, startScroll, scrollTo, releaseAllScrollLocks } from './core/scroll.js'
 import { initThemes, initHeader, initMenu } from './core/chrome.js'
 import { initCursor, initMagnetic, trackPointer, cursor } from './core/cursor.js'
 import { runLoader } from './core/loader.js'
@@ -30,13 +30,40 @@ gsap.registerPlugin(ScrollTrigger)
 
 const timeout = (ms) => new Promise((r) => setTimeout(r, ms))
 
+/** Never leave the page locked or hidden if something goes wrong while booting. */
+function recover(err) {
+  console.error(err)
+  const html = document.documentElement
+  qs('[data-loader]')?.remove()
+  html.classList.remove('motion')
+  gsap.set('.hero__char, [data-hero-fade], [data-hero-rise], .split-line, [data-reveal-fade]', {
+    clearProps: 'all',
+  })
+  releaseAllScrollLocks()
+}
+
 export function initApp() {
   const html = document.documentElement
+  // the inline safety net gave up waiting (very slow connection): boot without the intro
+  const late = html.classList.contains('no-js')
+  if (late) {
+    html.classList.replace('no-js', 'js')
+    qs('[data-loader]')?.remove()
+  }
   html.classList.add('app-booted')
+  try {
+    boot({ late })
+  } catch (err) {
+    recover(err)
+  }
+}
+
+function boot({ late }) {
+  const html = document.documentElement
   const reduced = prefersReducedMotion()
   html.classList.add(reduced ? 'reduced' : 'motion')
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual'
-  if (!location.hash) window.scrollTo(0, 0)
+  if (!location.hash && !late) window.scrollTo(0, 0)
 
   // ── sound + tiny event bus ──
   const ambient = createAmbient()
@@ -45,7 +72,6 @@ export function initApp() {
   soundBtn?.addEventListener('click', async () => {
     const on = await ambient.toggle()
     soundBtn.setAttribute('aria-pressed', String(on))
-    soundBtn.setAttribute('aria-label', on ? 'Klang ausschalten' : 'Klang einschalten')
   })
   document.addEventListener('visibilitychange', () => (document.hidden ? ambient.pause() : ambient.resume()))
 
@@ -53,7 +79,7 @@ export function initApp() {
   trackPointer()
   initRollText()
   initScroll({ smooth: !reduced })
-  stopScroll()
+  if (!late) stopScroll('loader')
   // the pinned services track changes page height – create it before any trigger below it
   initServices({ reduced })
   initThemes()
@@ -65,7 +91,7 @@ export function initApp() {
   initBooking({ reduced, emit, onOpen: () => menu.close() })
 
   // ── hero + WebGL ──
-  const heroChars = reduced ? [] : prepareHero()
+  const heroChars = reduced || late ? [] : prepareHero()
   const canvas = qs('[data-hero-canvas]')
   const hint = qs('[data-hero-hint]')
   let stones = null
@@ -121,15 +147,22 @@ export function initApp() {
 
   // ── loader → intro ──
   const ready = Promise.race([Promise.all([document.fonts?.ready, stonesReady]), timeout(6000)])
-  runLoader({ ready, reduced }).then(() => {
-    startScroll()
-    if (!reduced) playHeroIntro(heroChars)
-    stones?.playIntro()
-    ScrollTrigger.refresh()
-    // deep links (e.g. /#preise) land after the layout is final
-    const target = location.hash && document.querySelector(location.hash)
-    if (target) scrollTo(target, { immediate: true, offset: -10 })
-  })
+  runLoader({ ready, reduced })
+    .then(() => {
+      startScroll('loader')
+      if (heroChars.length) playHeroIntro(heroChars)
+      stones?.playIntro()
+      ScrollTrigger.refresh()
+      // deep links (e.g. /#preise) land after the layout is final
+      let target = null
+      try {
+        target = location.hash && document.getElementById(decodeURIComponent(location.hash.slice(1)))
+      } catch (e) {
+        /* malformed hash */
+      }
+      if (target) scrollTo(target, { immediate: true, offset: -10 })
+    })
+    .catch(recover)
 
   // small studio touches
   const title = document.title

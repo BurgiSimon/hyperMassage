@@ -1,5 +1,5 @@
 import gsap from 'gsap'
-import { qs } from '../utils/helpers.js'
+import { qs, onVisibility } from '../utils/helpers.js'
 
 const EMAIL = 'massage_buergi@ggs.ch'
 const GIFTS = {
@@ -69,7 +69,16 @@ export function initVoucher({ reduced, emit }) {
   // tilt + light
   if (reduced || !window.matchMedia('(hover: hover)').matches) {
     if (!reduced) {
-      gsap.to(card, { '--ry': '8deg', '--rx': '-4deg', duration: 4, yoyo: true, repeat: -1, ease: 'sine.inOut' })
+      const sway = gsap.to(card, {
+        '--ry': '8deg',
+        '--rx': '-4deg',
+        duration: 4,
+        yoyo: true,
+        repeat: -1,
+        ease: 'sine.inOut',
+        paused: true,
+      })
+      onVisibility(card, (visible) => (visible ? sway.play() : sway.pause()))
     }
     return
   }

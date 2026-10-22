@@ -377,14 +377,20 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
     cancelAnimationFrame(rafId)
   }
 
-  // pause when off-screen or tab hidden
+  // pause when off-screen, covered by the menu / booking drawer, or the tab is hidden
+  const overlays = new Set()
+  const sync = () => (state.visible && !overlays.size && !document.hidden ? start() : stop())
   const io = new IntersectionObserver(([entry]) => {
     state.visible = entry.isIntersecting
-    if (entry.isIntersecting && !document.hidden) start()
-    else stop()
+    sync()
   })
   io.observe(canvas)
-  document.addEventListener('visibilitychange', () => (document.hidden ? stop() : state.visible && start()))
+  document.addEventListener('visibilitychange', sync)
+  document.addEventListener('overlay', (e) => {
+    e.detail.open ? overlays.add(e.detail.source) : overlays.delete(e.detail.source)
+    // let the opening transition finish over a live frame, then rest
+    setTimeout(sync, e.detail.open ? 900 : 0)
+  })
 
   // compile shaders off the main thread where supported, then draw a first frame
   const ready = (renderer.compileAsync ? renderer.compileAsync(scene, camera) : Promise.resolve())

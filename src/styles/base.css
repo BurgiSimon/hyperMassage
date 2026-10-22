@@ -223,7 +223,7 @@ address {
   opacity: 0.6;
 }
 .eyebrow__num {
-  color: var(--accent);
+  color: var(--accent-ink);
 }
 
 /* ───────────────────────── Buttons ───────────────────────── */
@@ -473,6 +473,14 @@ button:hover .roll__b {
   background-size: 128px;
   animation: grain 1.2s steps(6) infinite;
   mix-blend-mode: overlay;
+}
+@media (hover: none), (pointer: coarse) {
+  .grain {
+    inset: 0;
+    animation: none;
+    mix-blend-mode: normal;
+    opacity: 0.045;
+  }
 }
 @keyframes grain {
   0% {

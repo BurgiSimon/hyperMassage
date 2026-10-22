@@ -7,7 +7,7 @@ const THEME_COLORS = {
   dark: '#15120f',
   light: '#efe8dd',
   moss: '#1d2620',
-  clay: '#b04f2c',
+  clay: '#a24727',
 }
 
 /** Lift the theme of the section in the middle of the viewport to :root. */
@@ -39,8 +39,16 @@ export function initHeader() {
   const hero = qs('#start')
   let lastY = 0
 
+  let max = 1
+  let heroH = window.innerHeight
+  const measure = () => {
+    max = document.documentElement.scrollHeight - window.innerHeight
+    heroH = hero ? hero.offsetHeight : window.innerHeight
+  }
+  measure()
+  ScrollTrigger.addEventListener('refresh', measure)
+
   const update = (y) => {
-    const max = document.documentElement.scrollHeight - window.innerHeight
     header.classList.toggle('is-scrolled', y > 40)
     const goingDown = y > lastY + 2
     const goingUp = y < lastY - 2
@@ -51,7 +59,7 @@ export function initHeader() {
     }
     lastY = y
     if (bar) bar.style.transform = `scaleX(${max > 0 ? y / max : 0})`
-    if (dock && hero) dock.classList.toggle('is-visible', y > hero.offsetHeight * 0.6)
+    if (dock) dock.classList.toggle('is-visible', y > heroH * 0.6)
   }
 
   const lenis = getLenis()
@@ -87,11 +95,12 @@ export function initMenu({ reduced }) {
     if (open === value) return
     open = value
     toggle.setAttribute('aria-expanded', String(open))
-    menu.setAttribute('aria-hidden', String(!open))
+    menu.inert = !open
+    document.dispatchEvent(new CustomEvent('overlay', { detail: { open, source: 'menu' } }))
     document.body.classList.toggle('menu-open', open)
     tl?.kill()
     if (open) {
-      stopScroll()
+      stopScroll('menu')
       menu.classList.add('is-open')
       const r = toggle.getBoundingClientRect()
       const origin = `${r.left + r.width / 2}px ${r.top + r.height / 2}px`
@@ -104,19 +113,19 @@ export function initMenu({ reduced }) {
         )
         .fromTo(
           items,
-          { yPercent: 60, autoAlpha: 0 },
-          { yPercent: 0, autoAlpha: 1, duration: 0.9, stagger: 0.05, ease: 'expo.out' },
+          { yPercent: 60, opacity: 0 },
+          { yPercent: 0, opacity: 1, duration: 0.9, stagger: 0.05, ease: 'expo.out' },
           '-=0.55',
         )
-        .fromTo(aside, { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'expo.out' }, '<0.2')
+        .fromTo(aside, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease: 'expo.out' }, '<0.2')
       qs('a', menu)?.focus({ preventScroll: true })
     } else {
-      startScroll()
+      startScroll('menu')
       const r = toggle.getBoundingClientRect()
       const origin = `${r.left + r.width / 2}px ${r.top + r.height / 2}px`
       tl = gsap
         .timeline({ onComplete: () => menu.classList.remove('is-open') })
-        .to([...items, aside], { autoAlpha: 0, y: -10, duration: 0.3, stagger: 0.02, ease: 'power2.in' })
+        .to([...items, aside], { opacity: 0, y: -10, duration: 0.3, stagger: 0.02, ease: 'power2.in' })
         .to(bg, { clipPath: `circle(0% at ${origin})`, duration: reduced ? 0.01 : 0.8, ease: 'expo.inOut' }, '-=0.1')
     }
   }

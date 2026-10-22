@@ -27,10 +27,14 @@ export function initBooking({ reduced, emit, onOpen }) {
     if (prefill.service) {
       const r = qs(`input[name="service"][value="${prefill.service}"]`, form)
       if (r) r.checked = true
+    } else if (prefill.fromPrice && qs('input[name="service"]:checked', form)?.value === 'Hot-Stone-Massage') {
+      // the price dial says "no Hot Stone" – don't keep a stale choice from earlier
+      qs('input[name="service"]', form).checked = true
     }
     root.classList.add('is-open')
-    root.setAttribute('aria-hidden', 'false')
-    stopScroll()
+    root.inert = false
+    document.dispatchEvent(new CustomEvent('overlay', { detail: { open: true, source: 'booking' } }))
+    stopScroll('booking')
     panel.scrollTop = 0
     if (!reduced) {
       gsap.fromTo(
@@ -47,8 +51,9 @@ export function initBooking({ reduced, emit, onOpen }) {
     if (!isOpen) return
     isOpen = false
     root.classList.remove('is-open')
-    root.setAttribute('aria-hidden', 'true')
-    startScroll()
+    root.inert = true
+    document.dispatchEvent(new CustomEvent('overlay', { detail: { open: false, source: 'booking' } }))
+    startScroll('booking')
     lastFocus?.focus?.({ preventScroll: true })
   }
 
@@ -56,7 +61,11 @@ export function initBooking({ reduced, emit, onOpen }) {
     const trigger = e.target.closest('[data-booking-open]')
     if (trigger) {
       e.preventDefault()
-      open({ dur: trigger.dataset.dur, service: trigger.dataset.service })
+      open({
+        dur: trigger.dataset.dur,
+        service: trigger.dataset.service,
+        fromPrice: trigger.hasAttribute('data-booking-from-price'),
+      })
       return
     }
     if (e.target.closest('[data-booking-close]')) close()
@@ -69,10 +78,12 @@ export function initBooking({ reduced, emit, onOpen }) {
       const focusables = qsa('a[href], button, input, textarea', panel).filter((el) => el.offsetParent !== null)
       const first = focusables[0]
       const last = focusables[focusables.length - 1]
-      if (e.shiftKey && document.activeElement === first) {
+      const active = document.activeElement
+      const outside = active === panel || !panel.contains(active)
+      if (e.shiftKey && (active === first || outside)) {
         e.preventDefault()
         last.focus()
-      } else if (!e.shiftKey && document.activeElement === last) {
+      } else if (!e.shiftKey && (active === last || outside)) {
         e.preventDefault()
         first.focus()
       }

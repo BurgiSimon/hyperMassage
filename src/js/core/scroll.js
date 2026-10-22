@@ -34,14 +34,26 @@ export function scrollTo(target, opts = {}) {
   }
 }
 
-export function stopScroll() {
+// Several things can lock the page (loader, menu, booking drawer). Only when
+// every one of them has let go does the page scroll again.
+const locks = new Set()
+
+export function stopScroll(reason = 'default') {
+  locks.add(reason)
   lenis?.stop()
   document.documentElement.style.overflow = 'hidden'
 }
 
-export function startScroll() {
+export function startScroll(reason = 'default') {
+  locks.delete(reason)
+  if (locks.size) return
   lenis?.start()
   document.documentElement.style.overflow = ''
+}
+
+export function releaseAllScrollLocks() {
+  locks.clear()
+  startScroll()
 }
 
 /** Smooth anchor links. */
