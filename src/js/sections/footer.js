@@ -13,7 +13,8 @@ export function initWordmark({ reduced }) {
   // fit the wordmark edge to edge
   const fit = () => {
     const cs = getComputedStyle(el)
-    const target = (el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) * 0.985
+    // leave headroom: letters swell (and widen) under the cursor
+    const target = (el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) * 0.93
     let size = 100
     for (let pass = 0; pass < 3; pass++) {
       el.style.fontSize = `${size}px`
