@@ -70,6 +70,7 @@ export function initPrices({ emit }) {
       onUpdate: () => (priceEl.textContent = Math.round(state.shown)),
     })
     durEl.textContent = `${minutes} Minuten${hot?.checked ? ' · Hot Stone' : ''}`
+    dial.classList.toggle('is-hot', !!hot?.checked)
     const text = hot?.checked ? `${minutes} Min. Hot Stone anfragen` : `${minutes} Minuten anfragen`
     setRollText(ctaLabel, text)
     if (cta) {

@@ -468,6 +468,13 @@
           <div class="prices__grid">
             <div class="dial" data-dial aria-hidden="true">
               <svg class="dial__svg" viewBox="0 0 400 400">
+                <defs>
+                  <linearGradient id="dial-ember" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0" stop-color="#ffb47e" />
+                    <stop offset="0.5" stop-color="#e3815a" />
+                    <stop offset="1" stop-color="#a24727" />
+                  </linearGradient>
+                </defs>
                 <g class="dial__ticks" data-dial-ticks></g>
                 <circle class="dial__track" cx="200" cy="200" r="150" />
                 <circle class="dial__arc" cx="200" cy="200" r="150" data-dial-arc />

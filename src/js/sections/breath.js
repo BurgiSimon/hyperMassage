@@ -1,6 +1,7 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { qs, qsa, setRollText } from '../utils/helpers.js'
+import { scrollTo } from '../core/scroll.js'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -63,7 +64,10 @@ export function initBreath({ reduced, emit }) {
     start: 'top bottom',
     end: 'bottom top',
     onToggle: (self) => {
-      if (session) return
+      if (session) {
+        if (!self.isActive) end(false)
+        return
+      }
       self.isActive ? startIdle() : stopIdle()
     },
   })
@@ -82,9 +86,12 @@ export function initBreath({ reduced, emit }) {
     }, 1000)
   }
 
+  const focus = (on) => document.body.classList.toggle('is-breathing', on)
+
   const end = (completed) => {
     session?.kill()
     session = null
+    focus(false)
     clearInterval(countTimer)
     count.textContent = ''
     setRollText(btnLabel, completed ? 'Nochmals' : 'Atemübung starten')
@@ -97,6 +104,8 @@ export function initBreath({ reduced, emit }) {
 
   const start = () => {
     stopIdle()
+    focus(true)
+    scrollTo(stage.closest('section'), { offset: -(window.innerHeight - stage.closest('section').offsetHeight) / 2 })
     setRollText(btnLabel, 'Beenden')
     progress.textContent = `Atemzug 1 von ${CYCLES}`
     const total = (IN + HOLD + OUT) * CYCLES

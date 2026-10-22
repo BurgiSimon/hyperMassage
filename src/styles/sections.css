@@ -2034,3 +2034,64 @@ footer[data-theme] {
     padding: 0 0 1.5rem 2.85rem;
   }
 }
+
+/* breathing focus mode: everything else steps back */
+.header,
+.dock {
+  transition-property: transform, opacity, background-color;
+}
+body.is-breathing .header,
+body.is-breathing .dock,
+body.is-breathing .chapter {
+  opacity: 0 !important;
+  pointer-events: none;
+  transition: opacity 1.2s var(--ease-in-out);
+}
+.breath > .container {
+  position: relative;
+  z-index: 1;
+}
+.breath::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(70% 70% at 70% 50%, transparent 40%, rgb(8 12 9 / 0.55));
+  opacity: 0;
+  transition: opacity 1.6s var(--ease-in-out);
+}
+body.is-breathing .breath::before {
+  opacity: 1;
+}
+@media (max-width: 900px) {
+  .breath::before {
+    background: radial-gradient(80% 60% at 50% 65%, transparent 40%, rgb(8 12 9 / 0.55));
+  }
+}
+
+/* hot stone warms the price dial */
+.dial__arc {
+  transition: stroke 0.6s;
+}
+.dial.is-hot .dial__arc {
+  stroke: url(#dial-ember);
+  filter: drop-shadow(0 0 6px rgb(255 140 80 / 0.55));
+}
+.dial.is-hot .dial__price {
+  color: var(--clay);
+}
+
+/* the "now" marker in the opening hours */
+.hours__bar b {
+  animation: now-pulse 2.4s var(--ease-in-out) infinite;
+}
+@keyframes now-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(239 232 221 / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgb(239 232 221 / 0);
+  }
+}
