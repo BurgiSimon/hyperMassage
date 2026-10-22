@@ -31,7 +31,7 @@ Header and text switch from dark to light ink as the sky gets dark.
 | Hour | What happens |
 | --- | --- |
 | Loader | Sunrise behind the real Jura silhouette. |
-| Jetzt | A greeting for the time of day, «Zeit für dich.», whether the practice is open right now, and the summit names placed on the real peaks. **Drag the sun** across the sky to see the practice at any hour. |
+| Jetzt | A greeting for the time of day, «Zeit für dich.», whether the practice is open right now, and the summit names placed on the real peaks. **Drag the sun** across the sky to see the practice at any hour; double-click returns to now. |
 | 07:30 · Über mich | «Der Tag beginnt. Die Praxis öffnet.» Claudia, her story and the facts. |
 | 10:00 · Angebot | The five treatments. |
 | 12:30 · Preise | The tariff, plus a **planner**: pick a day, a duration and a start time on the opening-hours timeline in 15-minute steps. The sky in the background shows that hour. «So anfragen» fills in the booking request. |
@@ -57,6 +57,7 @@ Extras:
 - On a slow or software-only GPU the scene lowers its resolution and only redraws when something changes.
 - The site publishes `HealthAndBeautyBusiness` JSON-LD with address, geo coordinates, opening hours, services, price range and payment methods. It also has an Open Graph image, favicons, a web manifest, `sitemap.xml` and `robots.txt`.
 - Fonts are self-hosted, and the page makes **no third-party requests**.
+- Lighthouse (production build): desktop 100 / 100 / 100 / 100, mobile 88 / 100 / 100 / 100. The mobile performance score was measured with software-rendered WebGL, so a real phone GPU does better.
 
 ## Development
 
@@ -65,7 +66,7 @@ npm install
 npm run dev       # local dev server
 npm run build     # production build → dist/
 npm run preview   # serve the build on http://localhost:4176
-npm run verify    # (with preview running) browser checks: day/scroll, sun drag, planner, dialog, menu, sizes, fallbacks …
+npm run verify    # (with preview running) 29 browser checks: day/scroll, sun drag, planner, dialog, menu, sizes, fallbacks, print …
 npm run assets    # (with preview running) favicons and share image
 ```
 
