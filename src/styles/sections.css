@@ -304,27 +304,11 @@ footer[data-theme] {
   height: 100%;
 }
 .pill--stone {
-  background: radial-gradient(120% 140% at 30% 20%, #3a332c, var(--basalt) 70%);
+  background:
+    url('/images/stones-poster.webp') 50% 86.5% / 118% auto no-repeat,
+    radial-gradient(120% 140% at 30% 20%, #f6efe4, #ddd0bd 75%);
   border-color: transparent;
-}
-.pill--stone span {
-  position: absolute;
-  border-radius: 50%;
-  background: radial-gradient(ellipse at 35% 25%, #6a5f55, #2b2520 55%, #15110e);
-  box-shadow: inset 0 -0.05em 0.08em rgb(0 0 0 / 0.5);
-}
-.pill--stone span:first-child {
-  left: 18%;
-  bottom: 14%;
-  width: 46%;
-  height: 52%;
-}
-.pill--stone span:last-child {
-  left: 52%;
-  bottom: 12%;
-  width: 34%;
-  height: 40%;
-  background: radial-gradient(ellipse at 35% 25%, #ffb47e, #e3815a 40%, #8f3d20 90%);
+  box-shadow: inset 0 -0.06em 0.12em rgb(27 24 21 / 0.12);
 }
 .intro__foot {
   display: flex;
