@@ -66,6 +66,7 @@ function boot() {
   initCursor()
   const hero = prepareHero({ reduced })
   const day = initDay({ scene, reduced })
+  if (new URLSearchParams(location.search).has('debug')) window.__day = day
   initHeader()
   const menu = initMenu({ reduced })
   initAnchors(() => menu.close())

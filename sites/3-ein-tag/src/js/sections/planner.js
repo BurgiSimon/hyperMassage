@@ -20,6 +20,12 @@ export function initPlanner({ day }) {
   const summary = qs('[data-p-summary]', root)
   const hot = qs('[data-p-hot]', root)
   const cta = qs('[data-from-planner]', root)
+  const live = qs('[data-p-live]', root)
+  let liveT = null
+  const announce = () => {
+    clearTimeout(liveT)
+    liveT = setTimeout(() => (live.textContent = summary.textContent), 500)
+  }
 
   for (let h = 7; h <= 19; h += 2) {
     const s = document.createElement('span')
@@ -58,9 +64,9 @@ export function initPlanner({ day }) {
     cta.dataset.service = isHot ? 'Hot-Stone-Massage' : 'Klassische Massage'
   }
 
-  qsa('input[name="p-day"]', root).forEach((r) => r.addEventListener('change', () => r.checked && ((state.day = Number(r.value)), render())))
-  qsa('input[name="p-dur"]', root).forEach((r) => r.addEventListener('change', () => r.checked && ((state.dur = Number(r.value)), render())))
-  hot.addEventListener('change', render)
+  qsa('input[name="p-day"]', root).forEach((r) => r.addEventListener('change', () => r.checked && ((state.day = Number(r.value)), render(), announce())))
+  qsa('input[name="p-dur"]', root).forEach((r) => r.addEventListener('change', () => r.checked && ((state.dur = Number(r.value)), render(), announce())))
+  hot.addEventListener('change', () => (render(), announce()))
 
   // drag the slot; the sky follows
   let drag = null
@@ -101,6 +107,7 @@ export function initPlanner({ day }) {
     drag = null
     slot.classList.remove('is-drag')
     endPreview()
+    announce()
   }
   slot.addEventListener('pointerup', end)
   slot.addEventListener('pointercancel', end)
@@ -115,6 +122,7 @@ export function initPlanner({ day }) {
     render()
     preview(state.start + state.dur / 2)
     endPreview()
+    announce()
   })
   slot.addEventListener('blur', () => day?.preview(null))
   slot.setAttribute('data-cursor', 'Verschieben')

@@ -497,10 +497,15 @@
     backdrop-filter: blur(14px);
     box-shadow: 0 10px 30px -12px rgb(0 0 0 / 0.35);
     transform: translateY(160%);
-    transition: transform 0.7s var(--ease-out);
+    visibility: hidden;
+    transition:
+      transform 0.7s var(--ease-out),
+      visibility 0s 0.7s;
   }
   .dock.is-visible {
     transform: none;
+    visibility: visible;
+    transition: transform 0.7s var(--ease-out);
   }
   .dock__btn {
     display: flex;

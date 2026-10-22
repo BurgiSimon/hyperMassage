@@ -29,7 +29,8 @@ export function scrollTo(target, opts = {}) {
   }
   const top =
     typeof el === 'number' ? el : el ? el.getBoundingClientRect().top + window.scrollY + (opts.offset || 0) : 0
-  window.scrollTo({ top, behavior: opts.immediate ? 'auto' : 'smooth' })
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  window.scrollTo({ top, behavior: opts.immediate || reduced ? 'auto' : 'smooth' })
 }
 
 // Several things can lock the page (loader, menu, booking sheet). Only when

@@ -11,6 +11,7 @@ export function initMap({ reduced }) {
     host.innerHTML = svg
     const map = qs('svg', host)
     map.setAttribute('viewBox', '-900 -620 1800 1240')
+    new IntersectionObserver((e) => host.parentElement.classList.toggle('is-on', e[0].isIntersecting)).observe(host)
     if (reduced) return
     const paths = qsa('.m-draw', map)
     paths.forEach((p) => {

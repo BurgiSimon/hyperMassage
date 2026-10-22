@@ -33,6 +33,7 @@ export function initBooking({ reduced, beforeOpen }) {
     if (pre.when) when.value = pre.when
     root.inert = false
     root.classList.add('is-open')
+    document.dispatchEvent(new CustomEvent('overlay', { detail: { open: true, source: 'booking' } }))
     stopScroll('booking')
     card.scrollTop = 0
     tl?.kill()
@@ -49,6 +50,7 @@ export function initBooking({ reduced, beforeOpen }) {
     if (!isOpen) return
     isOpen = false
     root.inert = true
+    document.dispatchEvent(new CustomEvent('overlay', { detail: { open: false, source: 'booking' } }))
     startScroll('booking')
     tl?.kill()
     const done = () => root.classList.remove('is-open')
@@ -88,8 +90,15 @@ export function initBooking({ reduced, beforeOpen }) {
     }
   })
 
+  // Enter in a field: SMS on phones, e-mail on computers
+  let implicit = false
+  form.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.matches('input')) implicit = true
+  })
   form.addEventListener('submit', (e) => {
     e.preventDefault()
+    const viaEnter = implicit
+    implicit = false
     if (!form.reportValidity()) return
     const d = new FormData(form)
     const service = d.get('service') || ''
@@ -100,7 +109,8 @@ export function initBooking({ reduced, beforeOpen }) {
     const wish = String(d.get('when') || '').trim()
     const note = String(d.get('note') || '').trim()
     const what = `${service || 'eine Massage (was passt, besprechen wir zusammen)'}, ${dur} Minuten (CHF ${price})`
-    if (e.submitter?.dataset.send === 'mail') {
+    const channel = viaEnter ? (window.matchMedia('(hover: hover) and (pointer: fine)').matches ? 'mail' : 'sms') : e.submitter?.dataset.send
+    if (channel === 'mail') {
       const body = [
         'Hallo Claudia',
         '',

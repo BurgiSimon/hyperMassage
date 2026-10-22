@@ -34,12 +34,15 @@ export function initMenu({ reduced }) {
   if (!menu || !btn) return { close() {} }
   let open = false
   let tl = null
+  const behind = qsa('main, footer, [data-dock]')
   const set = (state) => {
     if (state === open) return
     open = state
+    behind.forEach((el) => (el.inert = open))
     btn.setAttribute('aria-expanded', String(open))
     label.textContent = open ? 'Schliessen' : 'Tagesplan'
     document.documentElement.classList.toggle('menu-open', open)
+    document.dispatchEvent(new CustomEvent('overlay', { detail: { open, source: 'menu' } }))
     tl?.kill()
     if (open) {
       menu.inert = false
@@ -74,7 +77,8 @@ export function initMenu({ reduced }) {
       btn.focus()
     }
     if (e.key === 'Tab') {
-      const f = [btn, ...qsa('a[href]', menu)]
+      const header = qs('[data-header]')
+      const f = [...qsa('a[href], button', header).filter((el) => el.offsetParent !== null), ...qsa('a[href]', menu)]
       const i = f.indexOf(document.activeElement)
       if (e.shiftKey && i <= 0) {
         e.preventDefault()

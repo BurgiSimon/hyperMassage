@@ -71,6 +71,7 @@
   font-weight: 520;
 }
 .hero__dot {
+  position: relative;
   width: 9px;
   height: 9px;
   border-radius: 50%;
@@ -80,15 +81,24 @@
 .hero__status.is-open .hero__dot {
   background: #3fae6b;
   opacity: 1;
-  box-shadow: 0 0 0 0 rgb(63 174 107 / 0.5);
+}
+.hero__status.is-open .hero__dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #3fae6b;
   animation: pulse 2.2s infinite;
 }
 @keyframes pulse {
-  70% {
-    box-shadow: 0 0 0 9px rgb(63 174 107 / 0);
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
   }
+  70%,
   100% {
-    box-shadow: 0 0 0 0 rgb(63 174 107 / 0);
+    transform: scale(3);
+    opacity: 0;
   }
 }
 .hero__hint {
@@ -126,6 +136,7 @@
 }
 .js .hero {
   cursor: grab;
+  touch-action: pan-y;
 }
 .js .hero.is-dragging {
   cursor: grabbing;
@@ -632,7 +643,7 @@
   background: linear-gradient(160deg, #e7a26f, var(--sun));
   box-shadow: 0 12px 30px -12px rgb(194 90 50 / 0.8);
   cursor: grab;
-  touch-action: none;
+  touch-action: pan-y;
   transition: width 0.5s var(--ease-out), box-shadow 0.3s;
   display: grid;
   place-items: center;
@@ -1126,6 +1137,10 @@
   transform-box: fill-box;
   transform-origin: center;
   animation: ring 3s var(--ease-out) infinite;
+  animation-play-state: paused;
+}
+.visit__map.is-on .map .m-pin-ring {
+  animation-play-state: running;
 }
 .map .m-pin-ring:nth-of-type(2) {
   animation-delay: 1.5s;
@@ -1246,6 +1261,19 @@
 
 .no-js .interlude {
   min-height: 60svh;
+}
+.no-js .gift__form,
+.no-js .menu-btn,
+.no-js .sound,
+.no-js .planner {
+  display: none;
+}
+.nojs-note {
+  display: none;
+}
+.no-js .nojs-note {
+  display: block;
+  font-size: var(--fs-lead);
 }
 @media (max-width: 760px) {
   .planner__slot-time {

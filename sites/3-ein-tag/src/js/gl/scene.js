@@ -410,18 +410,24 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
     state.dirty = false
   }
 
-  // ~30 fps is plenty for drifting clouds and twinkling stars
+  // clouds drift slowly and stars twinkle: ~12 fps is plenty when nothing else changes;
+  // changes (scrolling, dragging the sun) draw right away. Under an overlay it rests.
   let raf = 0
   let last = 0
   let acc = 0
+  const overlays = new Set()
+  document.addEventListener('overlay', (e) => {
+    if (e.detail.open) overlays.add(e.detail.source)
+    else overlays.delete(e.detail.source)
+  })
   const frame = (t) => {
     raf = requestAnimationFrame(frame)
     const dt = Math.min(0.1, (t - last) / 1000 || 0)
     last = t
     if (!state.visible) return
-    if (!reduced) state.time += dt
+    if (!reduced && !overlays.size) state.time += dt
     acc += dt
-    if (state.dirty || (!reduced && acc > 1 / 30)) {
+    if (state.dirty || (!reduced && !overlays.size && acc > 1 / 12)) {
       acc = 0
       draw()
     }

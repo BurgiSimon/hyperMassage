@@ -1,0 +1,231 @@
+// Interaction checks against the built site.
+// Usage: npm run build && npm run preview  (in another terminal)  →  npm run verify
+let chromium
+try {
+  ;({ chromium } = require('playwright'))
+} catch {
+  ;({ chromium } = require('/opt/node22/lib/node_modules/playwright'))
+}
+const base = process.argv[2] || 'http://localhost:4176/'
+const results = []
+const ok = (name, cond, info = '') => results.push(`${cond ? 'PASS' : 'FAIL'}  ${name} ${info}`)
+const wait = (p, ms) => p.waitForTimeout(ms)
+const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
+
+;(async () => {
+  const browser = await chromium.launch({ args: GL })
+  const errors = []
+  const open = async (opts = {}, url = base, b = browser) => {
+    const ctx = await b.newContext({ viewport: { width: 1280, height: 760 }, ...opts })
+    const page = await ctx.newPage()
+    page.on('pageerror', (e) => errors.push(`${url}: ${e.message}`))
+    await page.goto(url + (url.includes('?') ? '&' : '?') + 'debug', { waitUntil: 'networkidle' })
+    await wait(page, 5200)
+    return { ctx, page }
+  }
+  const jump = async (page, sel, off = -90) => {
+    await page.evaluate(
+      ([sel, off]) => {
+        const el = document.querySelector(sel)
+        const y = el.getBoundingClientRect().top + window.scrollY + off
+        window.__lenis ? window.__lenis.scrollTo(y, { immediate: true }) : window.scrollTo(0, y)
+      },
+      [sel, off],
+    )
+    await wait(page, 900)
+  }
+  const clock = (page) => page.evaluate(() => document.querySelector('[data-clock-time]').textContent)
+
+  // ── the day follows the scroll
+  {
+    const { ctx, page } = await open()
+    const live = await page.evaluate(() => document.querySelector('.scene').classList.contains('is-live'))
+    ok('landscape renders with WebGL', live)
+    const times = []
+    for (const sel of ['.interlude[data-hour="10"]', '.interlude[data-hour="15.5"]', '.interlude[data-hour="21.5"]']) {
+      await page.evaluate((sel) => {
+        const el = document.querySelector(sel)
+        window.__lenis.scrollTo(el.getBoundingClientRect().top + scrollY + el.offsetHeight / 2 - innerHeight / 2, { immediate: true })
+      }, sel)
+      await wait(page, 700)
+      times.push(await clock(page))
+    }
+    ok('the clock follows the scroll through the day', times[0] === '10:00' && times[1] === '15:30' && times[2] === '21:30', times.join(' → '))
+    await wait(page, 1500) // the ink cross-fades
+    const ink = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--sky-ink').trim())
+    ok('light ink on the night sky', /244|rgb\(2[34]\d/.test(ink), `(${ink})`)
+
+    // drag the sun in the hero
+    await page.evaluate(() => window.__lenis.scrollTo(0, { immediate: true }))
+    await wait(page, 900)
+    const before = await clock(page)
+    await page.mouse.move(1180, 260)
+    await page.mouse.down()
+    await page.mouse.move(160, 260, { steps: 10 })
+    await page.mouse.up()
+    const after = await clock(page)
+    ok('dragging the sun changes the time', before !== after, `(${before} → ${after})`)
+
+    // planner: keyboard, opening hours, prefill
+    await jump(page, '#preise .planner', -120)
+    await page.click('label:has(input[name="p-day"][value="2"])')
+    await page.focus('[data-p-slot]')
+    await page.keyboard.press('Home')
+    const home = await page.evaluate(() => document.querySelector('[data-p-summary]').textContent)
+    await page.keyboard.press('ArrowRight')
+    await page.keyboard.press('ArrowRight')
+    const moved = await page.evaluate(() => document.querySelector('[data-p-summary]').textContent)
+    ok('planner: Tuesday starts at 8:00, arrows move by 15 min', /Dienstag, 8:00 – 9:00/.test(home) && /8:30 – 9:30/.test(moved), `(${home} | ${moved})`)
+    await page.click('[data-from-planner]')
+    await wait(page, 1100)
+    const pre = await page.evaluate(() => ({
+      when: document.querySelector('[data-booking-when]').value,
+      focus: document.querySelector('.booking__card').contains(document.activeElement),
+      locked: document.documentElement.style.overflow === 'hidden',
+    }))
+    ok('planner fills in the request; dialog takes focus and locks the page', /Dienstag, 8:30/.test(pre.when) && pre.focus && pre.locked, JSON.stringify(pre))
+    for (let i = 0; i < 30; i++) await page.keyboard.press('Tab')
+    ok('focus stays inside the dialog', await page.evaluate(() => document.querySelector('.booking__card').contains(document.activeElement)))
+    await page.keyboard.press('Escape')
+    await wait(page, 1400)
+    const closed = await page.evaluate(() => ({
+      open: document.querySelector('[data-booking]').classList.contains('is-open'),
+      back: document.activeElement?.matches('[data-from-planner]'),
+      unlocked: document.documentElement.style.overflow === '',
+    }))
+    ok('escape closes, focus returns, page unlocked', !closed.open && closed.back && closed.unlocked, JSON.stringify(closed))
+
+    // postcard repaints with the mood
+    await jump(page, '#gutschein .gift')
+    const px = () =>
+      page.evaluate(() => {
+        const c = document.querySelector('[data-postcard-canvas]')
+        const d = c.getContext('2d').getImageData(Math.floor(c.width / 2), Math.floor(c.height * 0.2), 1, 1).data
+        return d[0] + d[1] + d[2]
+      })
+    const evening = await px()
+    await page.click('label:has(input[name="mood"][value="22.5"])')
+    await wait(page, 600)
+    const night = await px()
+    ok('postcard paints the chosen time of day', night < evening - 60, `(${evening} → ${night})`)
+
+    // FAQ, sound
+    await jump(page, '#gut-zu-wissen')
+    await page.click('.faq summary')
+    await wait(page, 700)
+    ok('FAQ opens', await page.evaluate(() => document.querySelector('.faq details').open))
+    // (the header hides while scrolling down – scroll back up a little first)
+    await page.mouse.wheel(0, -300)
+    await wait(page, 900)
+    await page.click('[data-sound]')
+    await wait(page, 800)
+    ok('sound switches on', (await page.getAttribute('[data-sound]', 'aria-pressed')) === 'true')
+    await page.click('[data-sound]')
+    await ctx.close()
+  }
+
+  // ── menu
+  {
+    const { ctx, page } = await open()
+    await page.click('[data-menu-toggle]')
+    await wait(page, 800)
+    let leaked = 0
+    for (let i = 0; i < 24; i++) {
+      await page.keyboard.press(i < 12 ? 'Tab' : 'Shift+Tab')
+      if (await page.evaluate(() => !!document.activeElement.closest('main, footer, [data-dock]'))) leaked++
+    }
+    await page.click('[data-menu-link][href="#gutschein"]')
+    await wait(page, 2000)
+    const st = await page.evaluate(() => ({
+      expanded: document.querySelector('[data-menu-toggle]').getAttribute('aria-expanded'),
+      unlocked: document.documentElement.style.overflow === '',
+      near: Math.abs(document.getElementById('gutschein').getBoundingClientRect().top) < 140,
+    }))
+    ok('menu traps focus, navigates and closes', leaked === 0 && st.expanded === 'false' && st.unlocked && st.near, JSON.stringify({ leaked, ...st }))
+    await ctx.close()
+  }
+
+  // ── sizes
+  {
+    const bad = []
+    for (const [w, h] of [
+      [360, 740],
+      [390, 844],
+      [844, 390],
+      [768, 1024],
+      [1024, 768],
+      [1440, 900],
+      [1920, 1080],
+    ]) {
+      const mobile = w < 900 && h > w
+      const { ctx, page } = await open({ viewport: { width: w, height: h }, isMobile: mobile, hasTouch: mobile })
+      const sw = await page.evaluate(async () => {
+        for (let y = 0; y < document.documentElement.scrollHeight; y += 700) {
+          window.scrollTo(0, y)
+          await new Promise((r) => setTimeout(r, 30))
+        }
+        return document.documentElement.scrollWidth
+      })
+      if (sw > w) bad.push(`${w}×${h} → ${sw}`)
+      await ctx.close()
+    }
+    ok('no horizontal scrolling from 360 px to 1920 px', bad.length === 0, bad.join(', '))
+  }
+
+  // ── a hanging font, reduced motion, no WebGL, no JS, legal pages
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 760 } })
+    const page = await ctx.newPage()
+    await page.route('**/fonts/instrument-sans.woff2', async (route) => {
+      await new Promise((r) => setTimeout(r, 15000))
+      route.continue().catch(() => {})
+    })
+    await page.goto(base, { waitUntil: 'domcontentloaded' })
+    await wait(page, 8500)
+    const st = await page.evaluate(() => ({ loader: !!document.querySelector('[data-loader]:not(.is-done)'), locked: document.documentElement.style.overflow === 'hidden' }))
+    ok('a hanging font does not lock the page', !st.loader && !st.locked, JSON.stringify(st))
+    await ctx.close()
+  }
+  {
+    const { ctx, page } = await open({ reducedMotion: 'reduce' })
+    const st = await page.evaluate(() => ({ loader: !!document.querySelector('[data-loader]'), unlocked: document.documentElement.style.overflow === '' }))
+    ok('reduced motion: no loader, page scrolls', !st.loader && st.unlocked, JSON.stringify(st))
+    await ctx.close()
+  }
+  {
+    const noGL = await chromium.launch({ args: ['--disable-gpu', '--disable-webgl', '--disable-webgl2'] })
+    const { ctx, page } = await open({}, base, noGL)
+    const st = await page.evaluate(() => ({
+      live: document.querySelector('.scene').classList.contains('is-live'),
+      fallback: getComputedStyle(document.querySelector('[data-scene-fallback]')).backgroundImage.startsWith('url('),
+      unlocked: document.documentElement.style.overflow === '',
+    }))
+    ok('without WebGL: painted skyline instead, page works', !st.live && st.fallback && st.unlocked, JSON.stringify(st))
+    await ctx.close()
+    await noGL.close()
+  }
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 760 }, javaScriptEnabled: false })
+    const page = await ctx.newPage()
+    await page.goto(base, { waitUntil: 'domcontentloaded' })
+    const st = await page.evaluate(() => ({
+      links: [...document.querySelectorAll('[data-booking-open]')].every((a) => a.getAttribute('href') === '#kontakt'),
+      loaderHidden: getComputedStyle(document.querySelector('[data-loader]')).display === 'none',
+      planner: getComputedStyle(document.querySelector('.planner')).display === 'none',
+    }))
+    ok('without JavaScript: booking links lead to the contact section', st.links && st.loaderHidden && st.planner, JSON.stringify(st))
+    await ctx.close()
+  }
+  for (const path of ['impressum/', '404.html']) {
+    const { ctx, page } = await open({}, base + path)
+    ok(`${path} renders`, await page.evaluate(() => !!document.querySelector('h1')))
+    await ctx.close()
+  }
+
+  ok('no JavaScript errors', errors.length === 0, errors.join(' | '))
+  await browser.close()
+  console.log(results.join('\n'))
+  const failed = results.filter((r) => r.startsWith('FAIL')).length
+  console.log(`\n${results.length - failed}/${results.length} passed`)
+  process.exit(failed ? 1 : 0)
+})()

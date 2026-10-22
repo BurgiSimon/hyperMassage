@@ -26,9 +26,13 @@ export function runLoader({ reduced, revisit }) {
   const time = qs('[data-loader-time]', el)
   ridge.setAttribute('d', skylinePath())
 
-  const ready = Promise.all([
-    fontsReady(),
-    new Promise((r) => (document.readyState === 'complete' ? r() : window.addEventListener('load', r, { once: true }))),
+  // fonts and the load event, but never longer than a few seconds
+  const ready = Promise.race([
+    Promise.all([
+      fontsReady(),
+      new Promise((r) => (document.readyState === 'complete' ? r() : window.addEventListener('load', r, { once: true }))),
+    ]),
+    new Promise((r) => setTimeout(r, 5000)),
   ])
 
   if (reduced) {
