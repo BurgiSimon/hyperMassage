@@ -57,7 +57,7 @@
   --f-display: 'Anybody', 'Arial Narrow', 'Helvetica Neue', sans-serif;
   --f-text: 'Mona Sans', 'Mona Fallback', 'Helvetica Neue', Arial, sans-serif;
 
-  --m: clamp(16px, 2.8vw, 40px);
+  --m: max(clamp(16px, 2.8vw, 40px), env(safe-area-inset-left), env(safe-area-inset-right));
   --gap: clamp(12px, 1.6vw, 24px);
   --header-h: 64px;
   --radius: 999px;

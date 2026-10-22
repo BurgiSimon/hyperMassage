@@ -45,9 +45,10 @@
           if (sessionStorage.getItem('cb2-visited')) d.classList.add('is-revisit')
         } catch (e) {}
         // safety net: if the app never boots, fall back to the static page
-        setTimeout(function () {
+        d.__fallback = function () {
           if (!d.classList.contains('app-booted')) d.classList.replace('js', 'no-js')
-        }, 9000)
+        }
+        setTimeout(d.__fallback, 20000)
       })(document.documentElement)
     </script>
 
@@ -77,7 +78,7 @@
           { "@type": "OpeningHoursSpecification", "dayOfWeek": "Thursday", "opens": "07:30", "closes": "19:00" }
         ],
         "hasMap": "https://maps.google.com/?q=St.+Peterstrasse+12,+4703+Kestenholz",
-        "priceRange": "CHF 45–85",
+        "priceRange": "CHF 45–100",
         "paymentAccepted": "Barzahlung, TWINT",
         "currenciesAccepted": "CHF",
         "makesOffer": [
@@ -94,7 +95,7 @@
     <script type="application/ld+json">
       {"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "Wie vereinbare ich einen Termin?", "acceptedAnswer": {"@type": "Answer", "text": "Termine gibt es nur mit Voranmeldung. Ruf mich an unter 078 224 91 97 oder schreib mir eine SMS oder E-Mail an massage_buergi@ggs.ch. Wenn ich gerade behandle, sprich mir auf den Beantworter – ich melde mich gerne bei dir."}}, {"@type": "Question", "name": "Welche Massage passt zu mir?", "acceptedAnswer": {"@type": "Answer", "text": "Das besprechen wir kurz zu Beginn deines Termins. Ich nehme mir Zeit für deine Bedürfnisse und kombiniere die Techniken so, wie es dir guttut."}}, {"@type": "Question", "name": "Wie lange dauert eine Behandlung – und was kostet sie?", "acceptedAnswer": {"@type": "Answer", "text": "Du wählst zwischen 30, 45 und 60 Minuten. Der Tarif ist für alle Angebote gleich: CHF 45, 65 oder 85. Bei der Hot-Stone-Massage kommt ein Zuschlag von CHF 15 dazu."}}, {"@type": "Question", "name": "Wie kann ich bezahlen?", "acceptedAnswer": {"@type": "Answer", "text": "Bar oder mit TWINT."}}, {"@type": "Question", "name": "Übernimmt die Krankenkasse die Kosten?", "acceptedAnswer": {"@type": "Answer", "text": "Meine Massagen sind zurzeit nicht krankenkassenanerkannt."}}, {"@type": "Question", "name": "Kann ich eine Massage verschenken?", "acceptedAnswer": {"@type": "Answer", "text": "Sehr gerne – individuelle Gutscheine sind bei mir erhältlich. Stell dir deinen Gutschein auf dieser Seite zusammen oder frag mich direkt an."}}, {"@type": "Question", "name": "Wann ist die Praxis geöffnet?", "acceptedAnswer": {"@type": "Answer", "text": "Montag, Mittwoch und Donnerstag von 7:30 bis 19:00 Uhr, Dienstag von 8:00 bis 19:00 Uhr. Von Freitag bis Sonntag ist die Praxis geschlossen."}}, {"@type": "Question", "name": "Wo finde ich die Praxis?", "acceptedAnswer": {"@type": "Answer", "text": "In meiner kleinen Praxis im Eigenheim an der St. Peterstrasse 12 in 4703 Kestenholz."}}]}
     </script>
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/main.js" onerror="document.documentElement.__fallback()"></script>
   </head>
 
   <body>
@@ -144,7 +145,7 @@
       </div>
 
       <div class="header__actions">
-        <a class="btn btn--ink" href="#termin" data-booking-open data-press>
+        <a class="btn btn--ink" href="#kontakt" data-booking-open data-press>
           <span>Termin anfragen</span>
         </a>
         <button class="menu-btn" type="button" data-menu-toggle aria-expanded="false" aria-controls="menu">
@@ -181,7 +182,7 @@
               mit ruhigen, erfahrenen Händen. Bei Claudia Bürgi in Kestenholz.
             </p>
             <div class="hero__ctas">
-              <a class="btn btn--ink btn--lg" href="#termin" data-booking-open data-press><span>Termin anfragen</span></a>
+              <a class="btn btn--ink btn--lg" href="#kontakt" data-booking-open data-press><span>Termin anfragen</span></a>
               <a class="btn btn--line btn--lg" href="tel:+41782249197" data-press><span>078 224 91 97</span></a>
             </div>
             <div class="hero__hint label" data-hero-hint>
@@ -261,10 +262,11 @@
               Ganz gleich, wo es zieht: Zu Beginn jeder Behandlung nehme ich mir Zeit für ein kurzes Gespräch.
             </p>
             <div class="bodymap__actions">
-              <a class="btn btn--ink" href="#termin" data-booking-open data-rec-cta data-press><span>So anfragen</span></a>
+              <a class="btn btn--ink" href="#kontakt" data-booking-open data-rec-cta data-press><span>So anfragen</span></a>
               <button class="btn btn--line" type="button" data-rec-reset hidden><span>Zurücksetzen</span></button>
             </div>
             <p class="bodymap__small">Eine erste Orientierung, keine Diagnose.</p>
+            <p class="nojs-note">Was zu dir passt, besprechen wir gerne am Telefon: <a href="tel:+41782249197">078 224 91 97</a>.</p>
           </div>
         </div>
       </section>
@@ -357,7 +359,7 @@
               <div class="srow__inner">
                 <p>Die bewährte Ganzkörper- oder Teilmassage: löst Verspannungen, fördert die Durchblutung und lässt dich abschalten.</p>
                 <p class="srow__meta label">30 · 45 · 60 Minuten — ab CHF 45</p>
-                <a class="btn btn--ink" href="#termin" data-booking-open data-service="Klassische Massage" data-press><span>Klassische Massage anfragen</span></a>
+                <a class="btn btn--ink" href="#kontakt" data-booking-open data-service="Klassische Massage" data-press><span>Klassische Massage anfragen</span></a>
               </div>
             </div>
           </li>
@@ -374,7 +376,7 @@
               <div class="srow__inner">
                 <p>Gezielte Behandlung der HWS-Zone – von Nacken und Schultern, dort, wo sich der Alltag gerne festsetzt.</p>
                 <p class="srow__meta label">30 · 45 · 60 Minuten — ab CHF 45</p>
-                <a class="btn btn--ink" href="#termin" data-booking-open data-service="Nacken-Schultermassage" data-press><span>Nacken-Schultermassage anfragen</span></a>
+                <a class="btn btn--ink" href="#kontakt" data-booking-open data-service="Nacken-Schultermassage" data-press><span>Nacken-Schultermassage anfragen</span></a>
               </div>
             </div>
           </li>
@@ -391,7 +393,7 @@
               <div class="srow__inner">
                 <p>Punktgenaue Grifftechniken bei muskulären Schmerzen, abgestimmt auf dein Empfinden.</p>
                 <p class="srow__meta label">30 · 45 · 60 Minuten — ab CHF 45</p>
-                <a class="btn btn--ink" href="#termin" data-booking-open data-service="Manuelle Schmerztherapie" data-press><span>Schmerztherapie anfragen</span></a>
+                <a class="btn btn--ink" href="#kontakt" data-booking-open data-service="Manuelle Schmerztherapie" data-press><span>Schmerztherapie anfragen</span></a>
               </div>
             </div>
           </li>
@@ -408,7 +410,7 @@
               <div class="srow__inner">
                 <p>Sanfte Schwingungen lockern die tiefliegende Muskulatur und bringen den Körper ins Gleichgewicht.</p>
                 <p class="srow__meta label">30 · 45 · 60 Minuten — ab CHF 45</p>
-                <a class="btn btn--ink" href="#termin" data-booking-open data-service="Schwingkissen-Therapie" data-press><span>Schwingkissen-Therapie anfragen</span></a>
+                <a class="btn btn--ink" href="#kontakt" data-booking-open data-service="Schwingkissen-Therapie" data-press><span>Schwingkissen-Therapie anfragen</span></a>
               </div>
             </div>
           </li>
@@ -425,7 +427,7 @@
               <div class="srow__inner">
                 <p>Eine äusserst entspannende Ganzkörpermassage, die mit Hilfe von warmen Lavasteinen ausgeführt wird.</p>
                 <p class="srow__meta label">Tarif nach Dauer + Zuschlag CHF 15</p>
-                <a class="btn btn--ink" href="#termin" data-booking-open data-service="Hot-Stone-Massage" data-dur="60" data-press><span>Hot Stone anfragen</span></a>
+                <a class="btn btn--ink" href="#kontakt" data-booking-open data-service="Hot-Stone-Massage" data-dur="60" data-press><span>Hot Stone anfragen</span></a>
               </div>
             </div>
           </li>
@@ -475,7 +477,7 @@
         </div>
         <div class="prices__grid">
           <div class="prices__intro">
-            <h2 class="h2 kin" data-kin>Ein Tarif. Für alle&nbsp;Angebote.</h2>
+            <h2 class="h2 kin" data-kin>Ein Tarif. Für alle Angebote.</h2>
             <p class="lead">Du bestimmst nur die Zeit. Zieh am Regler – oder wähle die Dauer.</p>
           </div>
 
@@ -505,7 +507,8 @@
                 <span class="switch__ui" aria-hidden="true"></span>
                 <span>Als Hot-Stone-Massage <b>+ CHF 15</b></span>
               </label>
-              <p class="prices__total" aria-live="polite">
+              <p class="sr-only" aria-live="polite" data-price-live></p>
+              <p class="prices__total">
                 <span class="label">Total</span>
                 <span class="prices__chf">CHF <span data-price>85</span></span>
               </p>
@@ -516,7 +519,7 @@
               <li>Zurzeit nicht krankenkassenanerkannt</li>
               <li>Zuschlag von CHF 15 bei Hot-Stone-Massage</li>
             </ul>
-            <a class="btn btn--ink btn--lg" href="#termin" data-booking-open data-booking-from-price data-press
+            <a class="btn btn--ink btn--lg" href="#kontakt" data-booking-open data-booking-from-price data-press
               ><span data-price-cta>60 Minuten anfragen</span></a
             >
           </div>
@@ -547,10 +550,10 @@
               </label>
               <fieldset class="seg seg--wrap">
                 <legend class="label">Geschenk</legend>
-                <label class="seg__opt"><input type="radio" name="gift" value="30" /><span>30 Min.</span></label>
-                <label class="seg__opt"><input type="radio" name="gift" value="45" /><span>45 Min.</span></label>
-                <label class="seg__opt"><input type="radio" name="gift" value="60" checked /><span>60 Min.</span></label>
-                <label class="seg__opt"><input type="radio" name="gift" value="hotstone" /><span>Hot Stone</span></label>
+                <label class="seg__opt"><input type="radio" name="gift" value="30" /><span>30 Min.<span class="sr-only"> · CHF 45</span></span></label>
+                <label class="seg__opt"><input type="radio" name="gift" value="45" /><span>45 Min.<span class="sr-only"> · CHF 65</span></span></label>
+                <label class="seg__opt"><input type="radio" name="gift" value="60" checked /><span>60 Min.<span class="sr-only"> · CHF 85</span></span></label>
+                <label class="seg__opt"><input type="radio" name="gift" value="hotstone" /><span>Hot Stone<span class="sr-only"> · 60 Minuten, CHF 100</span></span></label>
               </fieldset>
               <div class="vform__send">
                 <button class="btn btn--ink btn--lg" type="submit" data-send="mail" data-press><span>Gutschein anfragen</span></button>
@@ -558,6 +561,10 @@
               </div>
               <p class="small">Öffnet dein E-Mail- bzw. SMS-Programm – auf dieser Website wird nichts gespeichert.</p>
             </form>
+            <p class="nojs-note">
+              Für einen Gutschein ruf mich an (<a href="tel:+41782249197">078 224 91 97</a>) oder schreib mir an
+              <a href="mailto:massage_buergi@ggs.ch">massage_buergi@ggs.ch</a>.
+            </p>
           </div>
 
           <div class="poster-wrap">
@@ -769,7 +776,7 @@
     <footer class="footer" data-footer>
       <div class="footer__cta">
         <p class="footer__claim">Spannung: <span data-footer-zero>0</span>&nbsp;%. Zeit für dich.</p>
-        <a class="btn btn--ink btn--lg" href="#termin" data-booking-open data-press><span>Termin anfragen</span></a>
+        <a class="btn btn--ink btn--lg" href="#kontakt" data-booking-open data-press><span>Termin anfragen</span></a>
       </div>
       <p class="footer__word" data-footer-word aria-hidden="true">
         <span class="footer__word-in" data-footer-word-in>Entspannung.</span>
@@ -904,7 +911,7 @@
     <!-- mobile action dock -->
     <div class="dock" data-dock>
       <a class="dock__btn" href="tel:+41782249197" data-press>Anrufen</a>
-      <a class="dock__btn dock__btn--ink" href="#termin" data-booking-open data-press>Termin anfragen</a>
+      <a class="dock__btn dock__btn--ink" href="#kontakt" data-booking-open data-press>Termin anfragen</a>
     </div>
   </body>
 </html>

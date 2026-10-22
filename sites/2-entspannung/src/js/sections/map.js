@@ -1,6 +1,6 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { qs, qsa, whenNear } from '../utils/helpers.js'
+import { qs, qsa, whenNear, onVisibility } from '../utils/helpers.js'
 
 /** The street map of Kestenholz (OpenStreetMap data), drawn in as you arrive. */
 export function initMap({ reduced }) {
@@ -11,6 +11,7 @@ export function initMap({ reduced }) {
     host.innerHTML = svg
     const map = qs('svg', host)
     map.setAttribute('viewBox', '-900 -560 1800 1120')
+    onVisibility(host, (v) => host.parentElement.classList.toggle('is-on', v))
     if (reduced) return
     const paths = qsa('.m-draw', map)
     paths.forEach((p) => {

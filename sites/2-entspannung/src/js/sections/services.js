@@ -1,6 +1,6 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { qs, qsa, clamp, canHover, onVisibility } from '../utils/helpers.js'
+import { qs, qsa, clamp, canHover, onVisibility, onWidthChange } from '../utils/helpers.js'
 import { Kinetic } from '../core/kinetic.js'
 import { pointer } from '../core/pointer.js'
 
@@ -43,6 +43,7 @@ export function initServices({ reduced }) {
     const body = qs('[data-srow-body]', row)
     const name = qs('[data-srow-name]', row)
     const gesture = GESTURES[row.dataset.gesture]
+    body.inert = true
     let kin = null
     let started = 0
     const ctx = { focus: 0 }
@@ -94,6 +95,8 @@ export function initServices({ reduced }) {
       kin.wake()
     }
 
+    onWidthChange(() => kin?.rebuild())
+
     if (hover) {
       row.addEventListener('pointerenter', () => {
         play()
@@ -107,6 +110,7 @@ export function initServices({ reduced }) {
       const open = !row.classList.contains('is-open')
       row.classList.toggle('is-open', open)
       btn.setAttribute('aria-expanded', String(open))
+      body.inert = !open
       // on touch screens the treatment moves once when you open it
       if (open && !hover && !reduced) play(2200)
       clearTimeout(row._r)

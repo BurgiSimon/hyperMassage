@@ -24,7 +24,8 @@ export function spring(s, target, dt, { stiffness, damping } = SPRING) {
  * can change width without the paragraph re-wrapping under the reader's eyes.
  */
 export function splitKinetic(el) {
-  if (!el.dataset.kText) el.dataset.kText = el.textContent.replace(/\s+/g, ' ').trim()
+  // collapse ordinary whitespace only – a non-breaking space must keep its words together
+  if (!el.dataset.kText) el.dataset.kText = el.textContent.replace(/[ \t\n\r\f]+/g, ' ').trim()
   const text = el.dataset.kText
   el.textContent = ''
   const sr = document.createElement('span')

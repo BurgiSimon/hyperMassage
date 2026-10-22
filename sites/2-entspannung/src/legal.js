@@ -1,7 +1,7 @@
 import './styles/main.css'
 import './styles/legal.css'
 import gsap from 'gsap'
-import { qs, qsa, prefersReducedMotion, canHover, fontsReady } from './js/utils/helpers.js'
+import { qs, qsa, prefersReducedMotion, canHover, fontsReady, onWidthChange } from './js/utils/helpers.js'
 import { trackPointer } from './js/core/pointer.js'
 import { initCursor } from './js/core/cursor.js'
 import { initPress } from './js/core/chrome.js'
@@ -18,6 +18,8 @@ fontsReady().then(() => {
   qsa('[data-kin], [data-nf]').forEach((el) => {
     const kin = new Kinetic(el, { knead: canHover() && !reduced, radius: 200, strength: 0.9 })
     kin.setVisible(true)
+    onWidthChange(() => kin.rebuild())
+    document.fonts?.addEventListener('loadingdone', () => kin.rebuild())
     if (reduced) return
     // arrive clenched, then let go
     kin.set(1.1)

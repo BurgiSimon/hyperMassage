@@ -227,6 +227,7 @@ export function initBodyMap({ reduced }) {
     state.portrait = r.height > r.width * 1.05
     canvas.width = Math.round(r.width * state.dpr)
     canvas.height = Math.round(r.height * state.dpr)
+    cache = null
     draw()
   }
 
@@ -280,68 +281,106 @@ export function initBodyMap({ reduced }) {
     return { hgt, k, calm }
   }
 
+  // geometry per scan line, cached on resize: the frame only adds breath and knots
+  let cache = null
+  const buildCache = () => {
+    const L = layout()
+    const step = state.portrait ? 3 : 4
+    const lines = []
+    for (let i = 0; i < L.lines; i++) {
+      const xs = []
+      const us = []
+      const vs = []
+      const base = []
+      const tor = []
+      const zw = ZONE_KEYS.map(() => [])
+      for (let x = L.x0 - step; x <= L.x1 + step; x += step) {
+        const [u, v] = L.xToBody(x, i)
+        xs.push(x)
+        us.push(u)
+        vs.push(v)
+        const b = sample(field.base, u, v)
+        base.push(b)
+        tor.push(b > 0 ? sample(field.torso, u, v) : 0)
+        ZONE_KEYS.forEach((key, k) => zw[k].push(b > 0 ? zoneWeight(key, u, v) : 0))
+      }
+      lines.push({ by: L.baseY(i), xs, us, vs, base, tor, zw })
+    }
+    cache = { L, lines }
+  }
+
   function draw() {
     const { w, h, dpr, time } = state
     if (!w) return
-    const L = layout()
+    if (!cache) buildCache()
+    const { L, lines } = cache
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
     ctx.fillStyle = BG
     ctx.fillRect(0, 0, w, h)
-    const step = state.portrait ? 3 : 4
-    for (let i = 0; i < L.lines; i++) {
-      const by = L.baseY(i)
-      const pts = []
-      const ks = []
-      const cs = []
-      for (let x = L.x0 - step; x <= L.x1 + step; x += step) {
-        const [u, v] = L.xToBody(x, i)
-        const { hgt, k, calm } = heightAt(u, v, time)
-        pts.push(x, by - hgt * L.lift)
-        ks.push(k)
-        cs.push(calm)
+    const breath = 0.06 * Math.sin(time * 1.1)
+    const zs = ZONE_KEYS.map((key) => zones[key])
+    for (const line of lines) {
+      const n = line.xs.length
+      const ys = new Float32Array(n)
+      const ks = new Float32Array(n)
+      const cs = new Float32Array(n)
+      for (let j = 0; j < n; j++) {
+        let hgt = line.base[j]
+        if (hgt > 0) {
+          hgt *= 1 + line.tor[j] * breath
+          let k = 0
+          let calm = 0
+          for (let z = 0; z < zs.length; z++) {
+            const wgt = line.zw[z][j]
+            if (!wgt) continue
+            const zone = zs[z]
+            if (zone.t > 0.01) {
+              k = Math.max(k, zone.t * wgt)
+              const u = line.us[j]
+              const v = line.vs[j]
+              hgt += zone.t * wgt * 0.0085 * (Math.sin(u * 105 + time * 3.2) * Math.cos(v * 92 - time * 2.4) + Math.sin(u * 190 - time * 5.5) * 0.35)
+            }
+            if (zone.on && zone.rubbed) calm = Math.max(calm, wgt * (1 - zone.t))
+          }
+          ks[j] = k
+          cs[j] = calm
+        }
+        ys[j] = line.by - hgt * L.lift
       }
       // occlude the lines behind
       ctx.beginPath()
-      ctx.moveTo(pts[0], h)
-      for (let p = 0; p < pts.length; p += 2) ctx.lineTo(pts[p], pts[p + 1])
-      ctx.lineTo(pts[pts.length - 2], h)
+      ctx.moveTo(line.xs[0], h)
+      for (let j = 0; j < n; j++) ctx.lineTo(line.xs[j], ys[j])
+      ctx.lineTo(line.xs[n - 1], h)
       ctx.closePath()
       ctx.fillStyle = BG
       ctx.fill()
-      // the line itself
       ctx.beginPath()
-      for (let p = 0; p < pts.length; p += 2) (p ? ctx.lineTo : ctx.moveTo).call(ctx, pts[p], pts[p + 1])
+      for (let j = 0; j < n; j++) (j ? ctx.lineTo : ctx.moveTo).call(ctx, line.xs[j], ys[j])
       ctx.strokeStyle = INK
       ctx.globalAlpha = 0.78
       ctx.lineWidth = 1.15
       ctx.stroke()
       ctx.globalAlpha = 1
-      // tension runs in red
-      let run = false
-      ctx.beginPath()
-      for (let p = 0, q = 0; p < pts.length; p += 2, q++) {
-        if (ks[q] > 0.08) {
-          if (!run) ctx.moveTo(pts[p], pts[p + 1])
-          else ctx.lineTo(pts[p], pts[p + 1])
-          run = true
-        } else run = false
+      const runs = (arr, thr, color, width) => {
+        let run = false
+        let any = false
+        ctx.beginPath()
+        for (let j = 0; j < n; j++) {
+          if (arr[j] > thr) {
+            if (!run) ctx.moveTo(line.xs[j], ys[j])
+            else ctx.lineTo(line.xs[j], ys[j])
+            run = true
+            any = true
+          } else run = false
+        }
+        if (!any) return
+        ctx.strokeStyle = color
+        ctx.lineWidth = width
+        ctx.stroke()
       }
-      ctx.strokeStyle = TENSE
-      ctx.lineWidth = 2.2
-      ctx.stroke()
-      // released knots glow calm
-      run = false
-      ctx.beginPath()
-      for (let p = 0, q = 0; p < pts.length; p += 2, q++) {
-        if (cs[q] > 0.25) {
-          if (!run) ctx.moveTo(pts[p], pts[p + 1])
-          else ctx.lineTo(pts[p], pts[p + 1])
-          run = true
-        } else run = false
-      }
-      ctx.strokeStyle = CALM
-      ctx.lineWidth = 2
-      ctx.stroke()
+      runs(ks, 0.08, TENSE, 2.2)   // tension runs in red
+      runs(cs, 0.25, CALM, 2)      // released knots glow calm
     }
   }
 
@@ -477,15 +516,20 @@ export function initBodyMap({ reduced }) {
 
   let running = false
   let idle = 0
+  let acc = 0
   const loop = (_, deltaMs) => {
     const dt = Math.min(deltaMs / 1000, 1 / 30)
-    if (!reduced) state.time += dt
+    acc += dt
+    if (acc < 1 / 31) return // 30 frames a second are plenty for breathing lines
+    const frameDt = acc
+    acc = 0
+    if (!reduced) state.time += frameDt
     let moving = false
     for (const key of ZONE_KEYS) {
       const z = zones[key]
       const a = -90 * (z.t - z.target) - 12 * z.vel
-      z.vel += a * dt
-      z.t = clamp(z.t + z.vel * dt, 0, 1.2)
+      z.vel += a * frameDt
+      z.t = clamp(z.t + z.vel * frameDt, 0, 1.2)
       if (Math.abs(z.t - z.target) > 0.002 || Math.abs(z.vel) > 0.002) moving = true
     }
     draw()

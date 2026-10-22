@@ -22,7 +22,6 @@ export function initPmr({ reduced }) {
   const status = qs('[data-pmr-status]', root)
   const cue = qs('[data-pmr-cue] span', root)
   const steps = qsa('[data-pmr-steps] li', root)
-  const html = document.documentElement
   const C = 2 * Math.PI * 92
 
   const state = { step: 0, holding: false, held: 0, press: 0, vel: 0, target: 0, resting: false, done: false, t: 0 }
@@ -64,13 +63,14 @@ export function initPmr({ reduced }) {
     state.vel += a * dt
     state.press += state.vel * dt
     const p = clamp(state.press, -0.6, 1.1)
-    html.style.setProperty('--press', p.toFixed(3))
-    html.classList.toggle('is-squeezing', !reduced && Math.abs(p) > 0.005)
+    // only this section restyles while you hold – not the whole page
+    root.style.setProperty('--press', p.toFixed(3))
+    root.classList.toggle('is-squeezing', !reduced && Math.abs(p) > 0.005)
     fill.style.strokeDashoffset = (C * (1 - clamp(state.held / HOLD))).toFixed(1)
     const settled = !state.holding && Math.abs(state.press) < 0.002 && Math.abs(state.vel) < 0.002
     if (settled) {
-      html.style.setProperty('--press', 0)
-      html.classList.remove('is-squeezing')
+      root.style.setProperty('--press', 0)
+      root.classList.remove('is-squeezing')
       stop()
     }
   }
@@ -86,7 +86,17 @@ export function initPmr({ reduced }) {
 
   const press = () => {
     if (state.holding) return
+    gsap.killTweensOf(state)
     clearTimeout(restTimer)
+    if (state.resting) {
+      // pressed again while still resting: the step counts, move on
+      state.resting = false
+      if (state.step < STEPS.length - 1) setStep(state.step + 1)
+      else {
+        state.done = true
+        setStep(state.step)
+      }
+    }
     if (state.done) {
       state.done = false
       setStep(0)
@@ -98,17 +108,26 @@ export function initPmr({ reduced }) {
     root.classList.add('is-holding')
     status.textContent = STEPS[state.step].tense
     label.textContent = 'Halten …'
-    vibrate(25)
+    clearTimeout(state.buzz)
+    state.buzz = setTimeout(() => state.holding && vibrate(25), 160)
     start()
   }
 
-  const release = () => {
+  const release = (silent = false) => {
     if (!state.holding) return
     state.holding = false
     root.classList.remove('is-holding')
     state.target = 0
+    clearTimeout(state.buzz)
     vibrate(0)
     start()
+    if (silent === true && state.held < 0.4) {
+      // the finger was only passing by on its way to scroll
+      state.held = 0
+      fill.style.strokeDashoffset = C
+      setStep(state.step)
+      return
+    }
     if (state.held < MIN_HOLD) {
       status.textContent = 'Etwas länger halten – ein paar Sekunden, bis es richtig spannt.'
       label.textContent = 'Gedrückt halten'
@@ -134,13 +153,13 @@ export function initPmr({ reduced }) {
 
   btn.addEventListener('pointerdown', (e) => {
     if (e.button > 0) return
-    e.preventDefault()
+    if (e.pointerType === 'mouse') e.preventDefault()
     btn.setPointerCapture?.(e.pointerId)
     press()
   })
-  btn.addEventListener('pointerup', release)
-  btn.addEventListener('pointercancel', release)
-  btn.addEventListener('lostpointercapture', release)
+  btn.addEventListener('pointerup', () => release())
+  btn.addEventListener('pointercancel', () => release(true))
+  btn.addEventListener('lostpointercapture', () => release(true))
   btn.addEventListener('contextmenu', (e) => e.preventDefault())
   btn.addEventListener('keydown', (e) => {
     if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) {
@@ -154,7 +173,7 @@ export function initPmr({ reduced }) {
       release()
     }
   })
-  btn.addEventListener('blur', release)
+  btn.addEventListener('blur', () => release())
   // scrolling away mid-exercise lets go too
   onVisibility(root, (v) => !v && release())
 

@@ -124,3 +124,17 @@ export function fontsReady(timeout = 3500) {
   fontsPromise = Promise.race([load, new Promise((r) => setTimeout(r, timeout))]).catch(() => {})
   return fontsPromise
 }
+
+/** Re-run `fn` when the viewport width really changes (not on mobile toolbar resizes). */
+export function onWidthChange(fn) {
+  let w = window.innerWidth
+  let t = null
+  window.addEventListener('resize', () => {
+    clearTimeout(t)
+    t = setTimeout(() => {
+      if (Math.abs(window.innerWidth - w) < 2) return
+      w = window.innerWidth
+      fn()
+    }, 180)
+  })
+}

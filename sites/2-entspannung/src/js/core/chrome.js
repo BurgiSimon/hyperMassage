@@ -111,9 +111,11 @@ export function initMenu({ reduced }) {
   let open = false
   let tl = null
 
+  const behind = qsa('main, footer, [data-dock]')
   const set = (state) => {
     if (state === open) return
     open = state
+    behind.forEach((el) => (el.inert = open))
     btn.setAttribute('aria-expanded', String(open))
     label.textContent = open ? 'Schliessen' : 'Index'
     document.documentElement.classList.toggle('menu-open', open)
@@ -169,7 +171,8 @@ export function initMenu({ reduced }) {
       btn.focus()
     }
     if (e.key === 'Tab') {
-      const focusables = [btn, ...qsa('a[href]', menu)]
+      const header = qs('[data-header]')
+      const focusables = [...qsa('a[href], button', header).filter((el) => el.offsetParent !== null), ...qsa('a[href]', menu)]
       const i = focusables.indexOf(document.activeElement)
       if (e.shiftKey && i <= 0) {
         e.preventDefault()

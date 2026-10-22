@@ -150,11 +150,11 @@ const wait = (p, ms) => p.waitForTimeout(ms)
     await page.focus('[data-pmr-btn]')
     await page.keyboard.down('Space')
     await wait(page, 3200)
-    const pressed = await page.evaluate(() => parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--press')))
+    const pressed = await page.evaluate(() => parseFloat(getComputedStyle(document.querySelector('.pmr')).getPropertyValue('--press')))
     await page.keyboard.up('Space')
     await wait(page, 4400)
     const step = await page.evaluate(() => document.querySelector('.pmr__steps .is-current')?.dataset.step)
-    const settled = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--press').trim())
+    const settled = await page.evaluate(() => getComputedStyle(document.querySelector('.pmr')).getPropertyValue('--press').trim())
     ok('exercise works with the keyboard (hold space)', pressed > 0.8 && step === '1' && Number(settled) === 0, `(press ${pressed}, step ${step}, after ${settled})`)
 
     await jump(page, '#gutschein')
@@ -218,6 +218,86 @@ const wait = (p, ms) => p.waitForTimeout(ms)
       ok(`${path} renders`, await p2.evaluate(() => !!document.querySelector('h1')))
       await c2.close()
     }
+  }
+
+
+  // ── regressions from the code review
+  {
+    // a hanging font must not keep the loader up
+    const ctx = await browser.newContext({ viewport: { width: 1280, height: 760 } })
+    const page = await ctx.newPage()
+    await page.route('**/fonts/mona-sans.woff2', async (route) => {
+      await new Promise((r) => setTimeout(r, 15000))
+      route.continue().catch(() => {})
+    })
+    page.on('pageerror', (e) => errors.push(`slow font: ${e.message}`))
+    await page.goto(base, { waitUntil: 'domcontentloaded' })
+    await wait(page, 8000)
+    const st = await page.evaluate(() => ({ loader: !!document.querySelector('[data-loader]:not(.is-done)'), locked: document.documentElement.style.overflow === 'hidden' }))
+    ok('a hanging font does not lock the page', !st.loader && !st.locked, JSON.stringify(st))
+    await ctx.close()
+  }
+  {
+    const { ctx, page } = await open()
+    // menu: Tab never lands behind the overlay
+    await page.click('[data-menu-toggle]')
+    await wait(page, 900)
+    let leaked = 0
+    for (let i = 0; i < 16; i++) {
+      await page.keyboard.press(i % 2 ? 'Tab' : 'Shift+Tab')
+      if (await page.evaluate(() => !!document.activeElement.closest('main, footer, [data-dock]'))) leaked++
+    }
+    for (let i = 0; i < 14; i++) {
+      await page.keyboard.press('Tab')
+      if (await page.evaluate(() => !!document.activeElement.closest('main, footer, [data-dock]'))) leaked++
+    }
+    ok('menu keeps keyboard focus out of the page behind it', leaked === 0, `(${leaked} leaks)`)
+    await page.keyboard.press('Escape')
+    await wait(page, 700)
+    // collapsed treatment rows are not in the tab order
+    const hidden = await page.evaluate(() => [...document.querySelectorAll('.srow:not(.is-open) .srow__body a')].every((a) => a.closest('[inert]')))
+    ok('collapsed treatment rows are skipped by Tab', hidden)
+    // stale prefilled note is replaced, a typed one is kept
+    await jump(page, '#wo-drueckts')
+    await wait(page, 700)
+    await page.click('[data-zone="neck"]')
+    await page.click('[data-rec-cta]')
+    await wait(page, 900)
+    await page.keyboard.press('Escape')
+    await wait(page, 800)
+    await page.click('[data-zone="neck"]')
+    await page.click('[data-zone="legs"]')
+    await page.click('[data-rec-cta]')
+    await wait(page, 900)
+    const note = await page.evaluate(() => document.querySelector('[data-booking-note]').value)
+    ok('a suggestion replaces its own earlier note', /Beine/.test(note) && !/Kopf/.test(note), `(${note})`)
+    await page.keyboard.press('Escape')
+    await wait(page, 800)
+    // pressing the exercise again during the rest moves on instead of breaking
+    await jump(page, '#spannen-loesen')
+    await wait(page, 800)
+    await page.focus('[data-pmr-btn]')
+    await page.keyboard.down('Space')
+    await wait(page, 3000)
+    await page.keyboard.up('Space')
+    await wait(page, 700)
+    await page.keyboard.down('Space')
+    await wait(page, 400)
+    const re = await page.evaluate(() => ({ step: document.querySelector('.pmr__steps .is-current')?.dataset.step, status: document.querySelector('[data-pmr-status]').textContent }))
+    await page.keyboard.up('Space')
+    ok('pressing again while resting starts the next step', re.step === '1' && !/loslassen/.test(re.status), JSON.stringify(re))
+    await ctx.close()
+  }
+  {
+    // booking sheet never scrolls sideways on a phone, even with the longest option
+    const { ctx, page } = await open({ viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true })
+    await page.evaluate(() => document.querySelector('.hero__ctas [data-booking-open]').click())
+    await wait(page, 1200)
+    await page.selectOption('select[name="service"]', { index: 5 })
+    await wait(page, 300)
+    const sw = await page.evaluate(() => [document.querySelector('.sheet__panel').scrollWidth, document.querySelector('.sheet__panel').clientWidth])
+    ok('booking sheet fits a 360 px phone', sw[0] <= sw[1] + 1, JSON.stringify(sw))
+    await ctx.close()
   }
 
   ok('no JavaScript errors', errors.length === 0, errors.join(' | '))

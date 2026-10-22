@@ -18,6 +18,7 @@ export function initBooking({ reduced, beforeOpen }) {
   let isOpen = false
   let lastFocus = null
   let tl = null
+  let autoNote = ''
   gsap.set(panel, { yPercent: 102 })
 
   // the blanks in the sentence are only as wide as what's written in them
@@ -32,8 +33,18 @@ export function initBooking({ reduced, beforeOpen }) {
     const text = el.tagName === 'SELECT' ? el.options[el.selectedIndex]?.textContent || '' : el.value || el.placeholder
     ruler.textContent = text
     const extra = el.tagName === 'SELECT' ? 1.35 : 0.4
-    el.style.width = `${Math.ceil(ruler.getBoundingClientRect().width + parseFloat(cs.fontSize) * extra)}px`
+    const max = form.clientWidth || window.innerWidth - 40
+    el.style.width = `${Math.min(max, Math.ceil(ruler.getBoundingClientRect().width + parseFloat(cs.fontSize) * extra))}px`
   }
+  // the duration list shows the Hot Stone price when that is chosen
+  const durSelect = form.elements.dur
+  const labelPrices = () => {
+    const hs = form.elements.service.value === 'Hot-Stone-Massage'
+    Array.from(durSelect.options).forEach((o) => (o.textContent = `${o.value} Minuten (CHF ${PRICES[o.value] + (hs ? HOTSTONE : 0)})`))
+    autosize(durSelect)
+  }
+  form.elements.service.addEventListener('change', labelPrices)
+
   const slots = qsa('.slot select, .slot input', form)
   const sizeAll = () => slots.forEach(autosize)
   slots.forEach((el) => el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => autosize(el)))
@@ -52,9 +63,14 @@ export function initBooking({ reduced, beforeOpen }) {
     lastFocus = document.activeElement
     beforeOpen?.()
     if (prefill.service !== undefined) select('service', prefill.service)
-    else if (prefill.fromPrice) select('service', 'Klassische Massage')
+    else if (prefill.fromPrice && form.elements.service.value === 'Hot-Stone-Massage') select('service', 'Klassische Massage')
     if (prefill.dur) select('dur', prefill.dur)
-    if (prefill.note && note && !note.value.trim()) note.value = prefill.note
+    // replace a note we filled in earlier, never one the visitor wrote
+    if (prefill.note && note && (!note.value.trim() || note.value === autoNote)) {
+      note.value = prefill.note
+      autoNote = prefill.note
+    }
+    labelPrices()
     root.inert = false
     root.classList.add('is-open')
     sizeAll()
@@ -134,8 +150,15 @@ export function initBooking({ reduced, beforeOpen }) {
     }
   })
 
+  // Enter in a field: SMS on phones, e-mail on computers
+  let implicit = false
+  form.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.matches('input')) implicit = true
+  })
   form.addEventListener('submit', (e) => {
     e.preventDefault()
+    const viaEnter = implicit
+    implicit = false
     if (!form.reportValidity()) return
     const d = new FormData(form)
     const service = d.get('service') || 'Massage (was passt, besprechen wir zusammen)'
@@ -159,7 +182,8 @@ export function initBooking({ reduced, beforeOpen }) {
     ]
       .filter((l) => l !== null)
       .join('\n')
-    if (e.submitter?.dataset.send === 'mail') {
+    const channel = viaEnter ? (window.matchMedia('(hover: hover) and (pointer: fine)').matches ? 'mail' : 'sms') : e.submitter?.dataset.send
+    if (channel === 'mail') {
       window.location.href = `mailto:${EMAIL}?subject=${encodeURIComponent(`Terminanfrage – ${name}`)}&body=${encodeURIComponent(body)}`
     } else {
       const sms = [sentence, `${name}${phone ? `, ${phone}` : ''}`, extra || null].filter(Boolean).join('\n')

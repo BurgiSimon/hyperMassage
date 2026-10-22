@@ -11,9 +11,13 @@ export function runLoader({ reduced, revisit }) {
   const path = qs('[data-loader-path]', el)
   const count = qs('[data-loader-count]', el)
 
-  const ready = Promise.all([
-    fontsReady(),
-    new Promise((r) => (document.readyState === 'complete' ? r() : window.addEventListener('load', r, { once: true }))),
+  // fonts and the load event, but never longer than a few seconds – a hanging request must not lock the page
+  const ready = Promise.race([
+    Promise.all([
+      fontsReady(),
+      new Promise((r) => (document.readyState === 'complete' ? r() : window.addEventListener('load', r, { once: true }))),
+    ]),
+    new Promise((r) => setTimeout(r, 5000)),
   ])
 
   if (reduced) {

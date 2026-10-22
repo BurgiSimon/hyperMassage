@@ -1,25 +1,11 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { qs, qsa, canHover, onVisibility, fontsReady } from '../utils/helpers.js'
+import { qs, qsa, canHover, onVisibility, fontsReady, onWidthChange } from '../utils/helpers.js'
 import { Kinetic, lockLines } from '../core/kinetic.js'
 
 gsap.registerPlugin(ScrollTrigger)
 
 const instances = []
-
-/** Re-run `fn` when the viewport width really changes (not on mobile toolbar resizes). */
-export function onWidthChange(fn) {
-  let w = window.innerWidth
-  let t = null
-  window.addEventListener('resize', () => {
-    clearTimeout(t)
-    t = setTimeout(() => {
-      if (Math.abs(window.innerWidth - w) < 2) return
-      w = window.innerWidth
-      fn()
-    }, 180)
-  })
-}
 
 /**
  * Section headings arrive clenched and let go letter by letter – and relax
@@ -56,6 +42,11 @@ export function initKineticHeadings({ reduced }) {
   const start = () => {
     build()
     onWidthChange(() => instances.forEach((k) => k.rebuild()))
+    // a font that shows up after the timeout changes every width: measure again
+    document.fonts?.addEventListener('loadingdone', () => {
+      instances.forEach((k) => k.rebuild())
+      ScrollTrigger.refresh()
+    })
   }
   fontsReady().then(start)
 }

@@ -148,18 +148,30 @@
   opacity: 0.4;
   flex: none;
 }
+.dot {
+  position: relative;
+}
 .is-open .dot {
   background: #22b35e;
   opacity: 1;
-  box-shadow: 0 0 0 0 rgb(34 179 94 / 0.5);
+}
+.is-open .dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: #22b35e;
   animation: pulse 2.2s infinite;
 }
 @keyframes pulse {
-  70% {
-    box-shadow: 0 0 0 8px rgb(34 179 94 / 0);
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
   }
+  70%,
   100% {
-    box-shadow: 0 0 0 0 rgb(34 179 94 / 0);
+    transform: scale(3);
+    opacity: 0;
   }
 }
 
@@ -476,6 +488,12 @@
   display: inline-block;
   position: relative;
   vertical-align: baseline;
+  max-width: 100%;
+}
+.slot select {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
 }
 .slot select,
 .slot input {
@@ -514,7 +532,7 @@
   cursor: text;
 }
 .slot input::placeholder {
-  color: rgb(18 18 18 / 0.42);
+  color: rgb(18 18 18 / 0.6);
   font-weight: 500;
 }
 .slot select:focus-visible,
@@ -554,10 +572,15 @@
     backdrop-filter: blur(14px);
     border: 1px solid rgb(18 18 18 / 0.12);
     transform: translateY(160%);
-    transition: transform 0.7s var(--ease-out);
+    visibility: hidden;
+    transition:
+      transform 0.7s var(--ease-out),
+      visibility 0s 0.7s;
   }
   .dock.is-visible {
     transform: none;
+    visibility: visible;
+    transition: transform 0.7s var(--ease-out);
   }
   .dock__btn {
     display: flex;

@@ -18,6 +18,7 @@ export function initPrices({ reduced }) {
   const cta = qs('[data-booking-from-price]', root)
   const ctaLabel = qs('[data-price-cta]', root)
   const radios = qsa('input[name="dur"]', root)
+  const live = qs('[data-price-live]', root)
 
   const state = { v: 1, minutes: 60, shown: 85 }
 
@@ -51,14 +52,17 @@ export function initPrices({ reduced }) {
     const hs = hot?.checked
     ctaLabel.textContent = hs ? `${minutes} Min. Hot Stone anfragen` : `${minutes} Minuten anfragen`
     cta.dataset.dur = minutes
-    cta.dataset.service = hs ? 'Hot-Stone-Massage' : 'Klassische Massage'
+    // one tariff for every treatment: only Hot Stone changes the request
+    if (hs) cta.dataset.service = 'Hot-Stone-Massage'
+    else delete cta.dataset.service
+    if (live && animate) live.textContent = `${minutes} Minuten${hs ? ' Hot Stone' : ''}: CHF ${price}`
   }
 
   radios.forEach((r) => r.addEventListener('change', () => r.checked && commit(Number(r.value))))
   hot?.addEventListener('change', () => commit(state.minutes))
 
-  // drag the bar
-  let dragging = false
+  // drag the bar (a vertical swipe still scrolls the page and changes nothing)
+  let drag = null
   const fromPointer = (e) => {
     const rect = track.getBoundingClientRect()
     const v = clamp((e.clientX - rect.left) / rect.width, 0.5, 1)
@@ -69,20 +73,28 @@ export function initPrices({ reduced }) {
     return nearest
   }
   track.addEventListener('pointerdown', (e) => {
-    dragging = true
+    drag = { x: e.clientX, y: e.clientY, moved: e.pointerType === 'mouse' }
     track.setPointerCapture(e.pointerId)
     track.classList.add('is-drag')
-    fromPointer(e)
+    if (drag.moved) fromPointer(e)
   })
-  track.addEventListener('pointermove', (e) => dragging && fromPointer(e))
-  const end = (e) => {
-    if (!dragging) return
-    dragging = false
+  track.addEventListener('pointermove', (e) => {
+    if (!drag) return
+    if (!drag.moved && Math.abs(e.clientX - drag.x) > 6) drag.moved = true
+    if (drag.moved) fromPointer(e)
+  })
+  track.addEventListener('pointerup', (e) => {
+    if (!drag) return
+    drag = null
     track.classList.remove('is-drag')
     commit(fromPointer(e))
-  }
-  track.addEventListener('pointerup', end)
-  track.addEventListener('pointercancel', end)
+  })
+  track.addEventListener('pointercancel', () => {
+    if (!drag) return
+    drag = null
+    track.classList.remove('is-drag')
+    commit(state.minutes)
+  })
   track.setAttribute('data-cursor', 'Ziehen')
   handleBox.classList.add('is-ready')
 

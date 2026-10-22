@@ -834,7 +834,7 @@
   place-items: center;
   background: var(--paper);
   color: var(--ink);
-  touch-action: none;
+  touch-action: pan-y;
   user-select: none;
   -webkit-user-select: none;
   -webkit-touch-callout: none;
@@ -883,10 +883,9 @@
 .pmr.is-holding .pmr__btn {
   background: var(--tense);
 }
-/* while you hold, the whole page tenses */
-.is-squeezing main {
-  transform: scale(calc(1 - var(--press) * 0.012));
-  transform-origin: 50% var(--squeeze-y, 50%);
+/* while you hold, the exercise tenses (scoped: --press lives on this section only) */
+.pmr.is-squeezing .pmr__grid {
+  transform: scale(calc(1 - var(--press) * 0.02));
 }
 @media (max-width: 960px) {
   .pmr__intro,
@@ -948,7 +947,7 @@
   position: relative;
   height: 64px;
   margin-inline: 17px;
-  touch-action: none;
+  touch-action: pan-y;
   cursor: grab;
 }
 .stretch__track::before {
@@ -1477,7 +1476,7 @@
 }
 .hrow.is-closed .hrow__t,
 .hrow.is-closed .hrow__day {
-  color: rgb(236 232 225 / 0.45);
+  color: rgb(236 232 225 / 0.62);
 }
 .hours__note {
   margin-top: 14px;
@@ -1630,6 +1629,10 @@
   transform-box: fill-box;
   transform-origin: center;
   animation: ring 2.8s var(--ease-out) infinite;
+  animation-play-state: paused;
+}
+.visit__map.is-on .map .m-pin-ring {
+  animation-play-state: running;
 }
 .map .m-pin-ring:nth-of-type(2) {
   animation-delay: 1.4s;
@@ -1792,8 +1795,23 @@
 .no-js .bodymap__stage,
 .no-js .pmr__stage,
 .no-js .visit__map-host,
-.no-js .poster-wrap {
+.no-js .poster-wrap,
+.no-js .zones,
+.no-js .bodymap__actions,
+.no-js .vform,
+.no-js .prices__row,
+.no-js .menu-btn {
   display: none;
+}
+.nojs-note {
+  display: none;
+}
+.no-js .nojs-note {
+  display: block;
+  font-size: var(--fs-lead);
+}
+.nojs-note a {
+  color: inherit;
 }
 
 .no-js .hero,
