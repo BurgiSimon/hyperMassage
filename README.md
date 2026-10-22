@@ -3,6 +3,16 @@
 Immersive one-page website for the massage practice of **Claudia Bürgi** in Kestenholz (SO).
 Static build, no backend, no cookies, no tracking.
 
+![Hero – Lass los.](docs/preview-hero.jpg)
+
+<details>
+<summary>All sections (desktop & mobile)</summary>
+
+![Desktop](docs/preview-desktop.jpg)
+![Mobile](docs/preview-mobile.jpg)
+
+</details>
+
 ## Concept — «Lass los.»
 
 The whole site is built around three ideas from the practice itself: **touch, warmth and breath**.
