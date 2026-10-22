@@ -330,7 +330,16 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
   gl.uniform1f(U.uSeed, 3.7)
   gl.uniform1f(U.uCloud, 0.45)
 
-  const state = { hour: 12, day: STORY_DAY, look: null, w: 0, h: 0, scale: 0.6, dirty: true, time: 0, visible: true, view: null }
+  const state = { hour: 12, day: STORY_DAY, look: null, w: 0, h: 0, scale: 0.6, dirty: true, time: 0, visible: true, view: null, quality: 1, idleFps: 12 }
+
+  // a software renderer (no GPU) draws synchronously and slowly: start small there
+  const dbg = gl.getExtension('WEBGL_debug_renderer_info')
+  const renderer = dbg ? String(gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL)) : ''
+  if (/swiftshader|llvmpipe|software|basic render/i.test(renderer)) {
+    state.quality = 0.4
+    state.idleFps = 0 // no idle animation at all: draw only when something changes
+    state.maxFps = 8
+  }
 
   // camera: centred on the Roggenflue, wider on wide screens
   const camera = () => {
@@ -362,7 +371,7 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
     state.w = r.width
     state.h = r.height
     const lowEnd = (navigator.hardwareConcurrency || 4) <= 2 || (navigator.deviceMemory || 4) <= 2
-    state.scale = (r.width > 900 ? 0.7 : 0.6) * (lowEnd ? 0.7 : 1)
+    state.scale = (r.width > 900 ? 0.7 : 0.6) * (lowEnd ? 0.7 : 1) * state.quality
     canvas.width = Math.max(2, Math.round(r.width * dpr * state.scale))
     canvas.height = Math.max(2, Math.round(r.height * dpr * state.scale))
     gl.viewport(0, 0, canvas.width, canvas.height)
@@ -406,9 +415,21 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
     gl.uniform1f(U.uNight, L.night)
     gl.uniform1f(U.uHaze, L.haze)
     gl.uniform1f(U.uLights, L.lights)
+    const t0 = performance.now()
     gl.drawArrays(gl.TRIANGLES, 0, 3)
     state.dirty = false
+    // if drawing itself is slow (CPU-bound renderer), lower the resolution and the idle frame rate
+    const cost = performance.now() - t0
+    slowFrames = cost > 14 ? slowFrames + 1 : Math.max(0, slowFrames - 1)
+    if (slowFrames > 6 && state.quality > 0.3 && !still) {
+      slowFrames = 0
+      state.quality *= 0.75
+      state.idleFps = state.idleFps > 4 ? state.idleFps / 2 : 0
+      state.maxFps = Math.max(8, (state.maxFps || 60) / 2)
+      resize()
+    }
   }
+  let slowFrames = 0
 
   // clouds drift slowly and stars twinkle: ~12 fps is plenty when nothing else changes;
   // changes (scrolling, dragging the sun) draw right away. Under an overlay it rests.
@@ -427,7 +448,8 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
     if (!state.visible) return
     if (!reduced && !overlays.size) state.time += dt
     acc += dt
-    if (state.dirty || (!reduced && !overlays.size && acc > 1 / 12)) {
+    const idle = !reduced && !overlays.size && state.idleFps > 0 && acc > 1 / state.idleFps
+    if ((state.dirty && acc >= 1 / (state.maxFps || 120)) || idle) {
       acc = 0
       draw()
     }

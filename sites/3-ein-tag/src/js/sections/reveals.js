@@ -32,7 +32,7 @@ export function initReveals({ reduced }) {
   })
   // cards rise into place
   qsa('.page__card').forEach((card) => {
-    gsap.fromTo(card, { y: 80, opacity: 0.4 }, { y: 0, opacity: 1, ease: 'none', scrollTrigger: { trigger: card, start: 'top bottom', end: 'top 55%', scrub: 0.6 } })
+    gsap.fromTo(card, { y: 80 }, { y: 0, ease: 'none', scrollTrigger: { trigger: card, start: 'top bottom', end: 'top 55%', scrub: 0.6 } })
   })
   const els = qsa('.page__kicker, .page__title, .page__lead, .quote, .about > *, .facts > div, .treat, .tariff li, .planner, .gift > *, .faq details, .phone, .contact li, .hours__days li, .visit > *, .footer__cols > div')
   gsap.set(els, { opacity: 0, y: 28 })

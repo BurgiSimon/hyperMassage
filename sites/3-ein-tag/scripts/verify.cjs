@@ -124,6 +124,18 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
     await ctx.close()
   }
 
+  // ── a finger on the hero scrolls; it only moves the sun when it moves sideways
+  {
+    const { ctx, page } = await open({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
+    const before = await clock(page)
+    await page.touchscreen.tap(300, 330)
+    await wait(page, 500)
+    const after = await clock(page)
+    const hint = await page.evaluate(() => getComputedStyle(document.querySelector('[data-sun-hint]')).opacity)
+    ok('phone: a tap on the sky does not change the time; the hint shows', before === after && hint === '1', `(${before} → ${after}, hint ${hint})`)
+    await ctx.close()
+  }
+
   // ── menu
   {
     const { ctx, page } = await open()
@@ -150,7 +162,9 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
     const bad = []
     for (const [w, h] of [
       [360, 740],
+      [375, 667],
       [390, 844],
+      [414, 896],
       [844, 390],
       [768, 1024],
       [1024, 768],
@@ -167,9 +181,12 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
         return document.documentElement.scrollWidth
       })
       if (sw > w) bad.push(`${w}×${h} → ${sw}`)
+      // the page clips sideways overflow, so check the fixed header on its own
+      const hdr = await page.evaluate(() => Math.max(...[...document.querySelectorAll('.header > *')].map((el) => el.getBoundingClientRect().right)))
+      if (hdr > w) bad.push(`${w}×${h} header → ${Math.round(hdr)}`)
       await ctx.close()
     }
-    ok('no horizontal scrolling from 360 px to 1920 px', bad.length === 0, bad.join(', '))
+    ok('no horizontal scrolling from 360 px to 1920 px; the header fits', bad.length === 0, bad.join(', '))
   }
 
   // ── a hanging font, reduced motion, no WebGL, no JS, legal pages

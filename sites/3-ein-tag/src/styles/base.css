@@ -13,7 +13,7 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   scroll-padding-top: 24px;
-  background: #1b2233;
+  background: var(--page-bg, #a9bdd3);
 }
 
 html.lenis,
@@ -407,6 +407,9 @@ ul {
 .cursor.has-label .cursor__label {
   opacity: 1;
   transform: none;
+}
+.cursor.is-hidden.has-label .cursor__label {
+  opacity: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {

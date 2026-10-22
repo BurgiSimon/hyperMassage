@@ -53,7 +53,9 @@ export function initDay({ scene, reduced }) {
       html.style.setProperty('--sky-ink', ink)
       html.style.setProperty('--sky-ink-soft', `rgb(${c.join(' ')} / 0.72)`)
       html.style.setProperty('--chrome-bg', t ? 'rgb(246 241 231 / 0.62)' : 'rgb(16 21 36 / 0.42)')
-      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', `rgb(${L.zen.map((v) => Math.round(v * 255)).join(',')})`)
+      const zen = `rgb(${L.zen.map((v) => Math.round(v * 255)).join(',')})`
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', zen)
+      html.style.setProperty('--page-bg', zen)
     }
   }
 
@@ -127,11 +129,18 @@ export function initDay({ scene, reduced }) {
   // panorama labels on the real summits
   const peaks = qs('[data-peaks]')
   const blockers = qsa('.hero__line > span, .hero__card, .hero__greet, .hero__hint')
+  // the hero lines may still be mid-rise: take x from the words, y from their (unmoved) line
+  const boxOf = (b) => {
+    const r = b.getBoundingClientRect()
+    if (!b.parentElement.matches('.hero__line')) return r
+    const l = b.parentElement.getBoundingClientRect()
+    return { left: r.left, right: r.right, top: l.top, bottom: l.bottom }
+  }
   const placePeaks = () => {
     if (!scene || !peaks) return
     const w = window.innerWidth
     const items = qsa('li', peaks)
-    const boxes = blockers.map((b) => b.getBoundingClientRect())
+    const boxes = blockers.map(boxOf)
     const scrollY = window.scrollY
     let lastX = -Infinity
     items.forEach((li) => {
@@ -171,15 +180,29 @@ export function initDay({ scene, reduced }) {
       const isOpen = dayOpen && hr >= dayOpen[0] && hr < dayOpen[1]
       hintText.textContent = `${fmtTime(hr)} Uhr${dayOpen ? (isOpen ? ' · Praxis offen' : ' · Praxis geschlossen') : ''}`
     }
+    // a mouse grabs the sun at once; a finger only once it moves sideways (a vertical swipe just scrolls)
+    let start = null
     hero.addEventListener('pointerdown', (e) => {
       if (e.button > 0 || isInteractive(e.target) || window.scrollY > 40) return
+      start = { x: e.clientX, y: e.clientY }
+      if (e.pointerType !== 'mouse') return
       dragging = true
       hero.classList.add('is-dragging')
       hero.setPointerCapture(e.pointerId)
       setFromX(e.clientX)
     })
-    hero.addEventListener('pointermove', (e) => dragging && setFromX(e.clientX))
+    hero.addEventListener('pointermove', (e) => {
+      if (!dragging && start) {
+        const dx = Math.abs(e.clientX - start.x)
+        if (dx < 8 || dx < Math.abs(e.clientY - start.y)) return
+        dragging = true
+        hero.classList.add('is-dragging')
+        hero.setPointerCapture(e.pointerId)
+      }
+      if (dragging) setFromX(e.clientX)
+    })
     const end = () => {
+      start = null
       if (!dragging) return
       dragging = false
       hero.classList.remove('is-dragging')
@@ -187,10 +210,14 @@ export function initDay({ scene, reduced }) {
     hero.addEventListener('pointerup', end)
     hero.addEventListener('pointercancel', end)
     if (canHover()) hero.setAttribute('data-cursor', 'Sonne ziehen')
-    if (hint) gsap.to(hint, { opacity: 1, duration: 1, delay: 2.6 })
   }
+  const canDrag = !!(scene && hero && !reduced)
 
   return {
+    /** after the loader: offer the sun to drag */
+    showHint() {
+      if (hint && canDrag) gsap.to(hint, { opacity: 1, duration: 1, delay: 1.6 })
+    },
     get look() {
       return current.look
     },

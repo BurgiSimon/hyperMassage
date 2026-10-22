@@ -1,6 +1,6 @@
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { qs, prefersReducedMotion } from './utils/helpers.js'
+import { qs, qsa, prefersReducedMotion } from './utils/helpers.js'
 import { initScroll, stopScroll, startScroll, initAnchors, releaseAllScrollLocks, scrollTo } from './core/scroll.js'
 import { runLoader, skylinePath } from './core/loader.js'
 import { initCursor } from './core/cursor.js'
@@ -87,12 +87,15 @@ function boot() {
   run(() => initReveals({ reduced }))
 
   // Klang
-  const soundBtn = qs('[data-sound]')
+  // (one switch in the header, one in the menu on phones – they stay in step)
+  const soundBtns = qsa('[data-sound]')
   const nature = createNature(() => day.look)
-  soundBtn?.addEventListener('click', () => {
-    const on = nature.toggle()
-    soundBtn.setAttribute('aria-pressed', String(on))
-  })
+  soundBtns.forEach((btn) =>
+    btn.addEventListener('click', () => {
+      const on = nature.toggle()
+      soundBtns.forEach((b) => b.setAttribute('aria-pressed', String(on)))
+    }),
+  )
 
   runLoader({ reduced, revisit }).then(() => {
     try {
@@ -102,6 +105,7 @@ function boot() {
     hero.play()
     ScrollTrigger.refresh()
     day.refresh()
+    day.showHint?.()
     if (location.hash) {
       const target = document.getElementById(decodeURIComponent(location.hash.slice(1)))
       if (target) scrollTo(target, { immediate: true, offset: -8 })
