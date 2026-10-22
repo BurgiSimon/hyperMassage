@@ -81,6 +81,9 @@ footer[data-theme] {
     font-weight: 290;
   }
 }
+.hero.is-away .hero__word {
+  animation-play-state: paused;
+}
 @keyframes word-breathe {
   0%,
   100% {
@@ -212,6 +215,10 @@ footer[data-theme] {
 }
 .hero__touch {
   display: none;
+}
+.no-webgl .hero__touch,
+.no-js .hero__touch {
+  display: none !important;
 }
 @media (hover: none) {
   .hero__touch {

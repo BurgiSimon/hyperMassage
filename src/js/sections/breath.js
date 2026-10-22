@@ -43,6 +43,7 @@ export function initBreath({ reduced, emit }) {
 
   // idle breathing while the section is on screen
   let idle = null
+  let onScreen = false
   const startIdle = () => {
     if (reduced || idle) return
     idle = gsap
@@ -64,6 +65,7 @@ export function initBreath({ reduced, emit }) {
     start: 'top bottom',
     end: 'bottom top',
     onToggle: (self) => {
+      onScreen = self.isActive
       if (session) {
         if (!self.isActive) end(false)
         return
@@ -98,7 +100,7 @@ export function initBreath({ reduced, emit }) {
     progress.textContent = completed ? 'Schön. Genau so fühlt sich eine Auszeit an.' : ''
     setLabel(completed ? 'Danke' : 'Atme ein')
     gsap.to(arc, { strokeDashoffset: ARC, duration: 1.2, ease: 'expo.inOut' })
-    gsap.to(orb, { scale: SMALL, duration: 2, ease: 'sine.inOut', onComplete: () => !session && startIdle() })
+    gsap.to(orb, { scale: SMALL, duration: 2, ease: 'sine.inOut', onComplete: () => !session && onScreen && startIdle() })
     emit?.('breath:end')
   }
 

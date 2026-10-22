@@ -14,7 +14,9 @@ export function initFaq({ reduced, emit }) {
 
   const close = (item) => {
     const body = qs('.faq__a', item)
+    item.dataset.closing = '1'
     if (reduced) {
+      delete item.dataset.closing
       item.open = false
       return refresh()
     }
@@ -26,6 +28,7 @@ export function initFaq({ reduced, emit }) {
         duration: 0.6,
         ease: 'expo.inOut',
         onComplete: () => {
+          delete item.dataset.closing
           item.open = false
           gsap.set(body, { clearProps: 'height' })
           refresh()
@@ -35,8 +38,10 @@ export function initFaq({ reduced, emit }) {
   }
 
   const open = (item) => {
-    item.open = true
     const body = qs('.faq__a', item)
+    gsap.killTweensOf(body)
+    delete item.dataset.closing
+    item.open = true
     if (reduced) return refresh()
     gsap.fromTo(
       body,
@@ -49,7 +54,7 @@ export function initFaq({ reduced, emit }) {
   items.forEach((item) => {
     qs('summary', item).addEventListener('click', (e) => {
       e.preventDefault()
-      if (item.open) {
+      if (item.open && !item.dataset.closing) {
         close(item)
       } else {
         items.filter((other) => other !== item && other.open).forEach(close)

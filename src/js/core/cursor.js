@@ -1,5 +1,5 @@
 import gsap from 'gsap'
-import { qs, qsa } from '../utils/helpers.js'
+import { qs, qsa, prefersReducedMotion } from '../utils/helpers.js'
 
 const HOVER_SEL = 'a, button, label, input, textarea, [data-cursor], [data-hover]'
 
@@ -7,13 +7,26 @@ export const pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2, nx
 
 export function trackPointer() {
   const needsPermission = typeof window.DeviceOrientationEvent?.requestPermission === 'function'
-  if ('DeviceOrientationEvent' in window && !needsPermission && window.matchMedia('(hover: none)').matches) {
+  const useTilt =
+    'DeviceOrientationEvent' in window &&
+    !needsPermission &&
+    !prefersReducedMotion() &&
+    window.matchMedia('(hover: none)').matches
+  if (useTilt) {
+    const clamp1 = (v) => Math.max(-1, Math.min(1, v))
     window.addEventListener(
       'deviceorientation',
       (e) => {
         if (e.gamma == null || e.beta == null) return
-        pointer.nx = Math.max(-1, Math.min(1, e.gamma / 30))
-        pointer.ny = Math.max(-1, Math.min(1, (45 - e.beta) / 30))
+        // beta/gamma are in the device's natural frame – rotate them into screen space
+        const angle = ((screen.orientation?.angle ?? window.orientation ?? 0) + 360) % 360
+        let x = e.gamma
+        let y = e.beta
+        if (angle === 90) [x, y] = [e.beta, -e.gamma]
+        else if (angle === 180) [x, y] = [-e.gamma, -e.beta]
+        else if (angle === 270) [x, y] = [-e.beta, e.gamma]
+        pointer.nx = clamp1(x / 30)
+        pointer.ny = clamp1((45 - y) / 30)
         pointer.moved = true
       },
       { passive: true },

@@ -143,10 +143,15 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
     e.preventDefault()
     document.body.classList.add('no-webgl')
   })
-  canvas.addEventListener('webglcontextrestored', () => document.body.classList.remove('no-webgl'))
+  canvas.addEventListener('webglcontextrestored', () => {
+    // render-target textures are not restored by three – rebuild the studio reflections
+    scene.environment = studioEnvironment(renderer)
+    document.body.classList.remove('no-webgl')
+  })
 
   const isSmall = window.matchMedia('(max-width: 720px)').matches
-  const lowEnd = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 3
+  // (WebKit reports 4 cores on most iPhones, so only trust very low numbers; adapt() handles the rest)
+  const lowEnd = (navigator.hardwareConcurrency || 8) <= 2 || (navigator.deviceMemory || 8) <= 3
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowEnd ? 1.25 : isSmall ? 1.5 : 1.75))
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.toneMapping = THREE.ACESFilmicToneMapping
@@ -300,6 +305,7 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
     camera.position.y = dist * 0.08
     camera.lookAt(0, 0, 0)
     root.position.y = (0.5 - centreY) * visibleH
+    if (motes) motes.material.uniforms.uScale.value = renderer.getPixelRatio() * 85
   }
   layout()
   window.addEventListener('resize', layout)
@@ -380,7 +386,8 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
     if (perf.frames < 90) return
     perf.done = true
     const avg = perf.total / perf.frames
-    if (avg > 24 && renderer.getPixelRatio() > 1) {
+    // > 40 ms ≈ under 25 fps (a 30 Hz low-power cap is ~33 ms and is left alone)
+    if (avg > 40 && renderer.getPixelRatio() > 1) {
       renderer.setPixelRatio(1)
       layout()
     }

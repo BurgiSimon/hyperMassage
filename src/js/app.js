@@ -151,7 +151,8 @@ function boot({ late }) {
     .then(() => {
       startScroll('loader')
       if (heroChars.length) playHeroIntro(heroChars)
-      stones?.playIntro()
+      // the 3D chunk may still be on its way (slow networks): land the stones whenever it arrives
+      stonesReady.then(() => stones?.playIntro())
       ScrollTrigger.refresh()
       // deep links (e.g. /#preise) land after the layout is final
       let target = null

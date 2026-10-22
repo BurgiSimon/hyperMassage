@@ -19,7 +19,13 @@ export function prepareHero() {
 
 export function playHeroIntro(chars) {
   const tl = gsap.timeline({ defaults: { ease: 'expo.out' } })
-  tl.to(chars, { yPercent: 0, rotate: 0, duration: 1.8, stagger: 0.06 })
+  tl.to(chars, {
+    yPercent: 0,
+    rotate: 0,
+    duration: 1.8,
+    stagger: 0.06,
+    onComplete: () => gsap.set(chars, { willChange: 'auto' }),
+  })
     .to('[data-hero-rise]', { y: 0, duration: 1.6 }, 0.4)
     .to('[data-hero-fade]', { autoAlpha: 1, y: 0, duration: 1.4, stagger: 0.1 }, 0.5)
     .to('[data-hero-hint]', { autoAlpha: 1, duration: 1.2 }, 1.4)
@@ -50,6 +56,13 @@ export function initHeroScroll() {
     })
   }
   const title = qs('.hero__title', hero)
+  // pause the breathing words while the hero is out of view
+  ScrollTrigger.create({
+    trigger: hero,
+    start: 'top bottom',
+    end: 'bottom top',
+    onToggle: (self) => hero.classList.toggle('is-away', !self.isActive),
+  })
   gsap
     .timeline({
       scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true },
