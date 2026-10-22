@@ -295,7 +295,8 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
     return s
   }
   // the shader compiles in the background where the browser can: the page stays responsive meanwhile
-  const parallel = still ? null : gl.getExtension('KHR_parallel_shader_compile')
+  // (asked for again in setup(): a restored context forgets its extensions)
+  let parallel = null
 
   // ridge texture data: one row per distance band, R = elevation angle (deg), G = distance (km)
   const W = horizon.count
@@ -321,6 +322,7 @@ export function createScene(canvas, { reduced = false, onLook, still = null } = 
   /** program, triangle, texture, uniforms – again after a lost context comes back */
   const setup = () => {
     ready = false
+    parallel = still ? null : gl.getExtension('KHR_parallel_shader_compile')
     const prog = gl.createProgram()
     const vs = compile(gl.VERTEX_SHADER, VERT)
     const fs = compile(gl.FRAGMENT_SHADER, FRAG)

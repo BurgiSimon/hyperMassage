@@ -143,6 +143,12 @@ html[data-tone='clay'] {
   --chrome-bg: rgb(110 44 18 / 0.55);
   --chrome-hover: rgb(251 243 234 / 0.14);
 }
+/* clay on clay would vanish: on the contact section the header button turns cream */
+html[data-tone='clay'] .header .btn--solid {
+  background: #fbf3ea;
+  color: var(--clay-deep);
+  --btn-hover: #fff;
+}
 
 .header {
   position: fixed;
@@ -287,6 +293,27 @@ html[data-tone='clay'] {
     background: var(--chrome-hover, rgb(255 255 255 / 0.25));
   }
 }
+.menu-btn__label {
+  display: inline-block;
+  min-width: 5.4em;
+  text-align: left;
+}
+@media (max-width: 480px) {
+  .menu-btn__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    min-width: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .menu-btn {
+    width: 46px;
+    padding: 0;
+    justify-content: center;
+  }
+}
 .menu-btn__lines {
   display: grid;
   gap: 5px;
@@ -401,16 +428,31 @@ html[data-tone='clay'] {
   inset: 0;
   z-index: 450;
   visibility: hidden;
-  background: rgb(23 19 15 / 0.82);
-  -webkit-backdrop-filter: blur(20px) saturate(1.1);
-  backdrop-filter: blur(20px) saturate(1.1);
+  background: var(--basalt);
   opacity: 0;
   color: #efe6d8;
+}
+.menu__ridge {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 22vh;
+  pointer-events: none;
+}
+.menu__ridge path {
+  fill: #0e0b09;
+  stroke: rgb(227 129 90 / 0.55);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
 }
 .menu.is-open {
   visibility: visible;
 }
 .menu__inner {
+  position: relative;
+  z-index: 1;
   height: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -609,15 +651,19 @@ html[data-tone='clay'] {
 }
 .bform__send {
   display: flex;
-  flex-wrap: wrap;
   gap: 10px;
-  /* the send buttons stay in reach while the form scrolls */
+  /* the send buttons stay in reach while the form scrolls: one slim bar */
   position: sticky;
   bottom: calc(-1 * clamp(24px, 4vw, 52px));
   z-index: 2;
   margin-inline: calc(-1 * clamp(24px, 4vw, 52px));
-  padding: 14px clamp(24px, 4vw, 52px) clamp(24px, 4vw, 52px);
-  background: linear-gradient(rgb(241 233 221 / 0), var(--bg) 18px);
+  padding: 12px clamp(24px, 4vw, 52px) clamp(16px, 3vw, 40px);
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+}
+.bform__send .btn {
+  flex: 1 1 0;
+  max-width: 260px;
 }
 /* on a computer the request goes out by e-mail first; SMS stays the first choice on phones */
 @media (hover: hover) and (pointer: fine) {
@@ -641,6 +687,17 @@ html[data-tone='clay'] {
 @media (max-width: 600px) {
   .bform__row {
     grid-template-columns: 1fr;
+  }
+  .bform__send {
+    padding-bottom: calc(14px + env(safe-area-inset-bottom));
+  }
+  .bform__send .btn {
+    --h: 50px;
+    padding: 0 12px;
+    font-size: 15.5px;
+  }
+  .bform__long {
+    display: none;
   }
   .booking {
     padding: 0;

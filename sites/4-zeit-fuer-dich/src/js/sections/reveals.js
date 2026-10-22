@@ -5,15 +5,36 @@ import { Kinetic, splitText, freezeLines } from '../core/kinetic.js'
 
 gsap.registerPlugin(ScrollTrigger)
 
-/** Width changes move line breaks: re-measure split text (height-only resizes – phone toolbars – do not). */
-function onWidthChange(cb) {
+/*
+ * Split text measures its line breaks once. They are measured again when the width changes
+ * (height-only resizes – phone toolbars – do not), and when the display font arrives late.
+ */
+const rebuilders = new Set()
+const onWidthChange = (cb) => rebuilders.add(cb)
+const rebuildAll = () => rebuilders.forEach((cb) => cb())
+{
   let w = window.innerWidth
   let t = null
   window.addEventListener('resize', () => {
     if (window.innerWidth === w) return
     w = window.innerWidth
     clearTimeout(t)
-    t = setTimeout(cb, 180)
+    t = setTimeout(rebuildAll, 180)
+  })
+  const fraunces = '360 16px Fraunces'
+  if (document.fonts && !document.fonts.check(fraunces)) {
+    const late = () => {
+      if (!document.fonts.check(fraunces)) return
+      document.fonts.removeEventListener('loadingdone', late)
+      rebuildAll()
+    }
+    document.fonts.addEventListener('loadingdone', late)
+  }
+  // a split that changes a heading's height moves everything below it: the triggers are measured again
+  let r = null
+  document.addEventListener('kinetic:resize', () => {
+    clearTimeout(r)
+    r = setTimeout(() => ScrollTrigger.refresh(), 120)
   })
 }
 
@@ -85,12 +106,14 @@ export function initReveals({ reduced }) {
     qsa('[data-scrub-words]').forEach((el) => {
       let words = []
       const split = () => {
+        const h = el.offsetHeight
         const s = splitText(el, { letters: false, wordClass: 'sw' })
         words = s.words
         // (line breaks measured with every word still tense – the widest it gets)
         words.forEach((w) => w.style.setProperty('--r', 0))
         freezeLines(s.visual, words)
         paint(st?.progress ?? 0)
+        if (el.offsetHeight !== h) el.dispatchEvent(new CustomEvent('kinetic:resize', { bubbles: true }))
       }
       let shown = []
       const paint = (p) => {
@@ -128,11 +151,17 @@ export function initReveals({ reduced }) {
       '.sec__head, .sheet .lead, .about__text > p, .facts > div, .zones, .bodymap__stage, .bodymap__result, .service, .breath__stage, .breath__actions, .tariff li, .tariff__notes, .planner, .gift__form, .postcard, .faq details, .phone, .links li, .hours, .visit address, .visit__geo, .visit__links, .visit__map, .footer__cols > div',
     )
     gsap.set(els, { opacity: 0, y: 28 })
-    ScrollTrigger.batch(els, {
-      start: 'top 92%',
-      once: true,
+    const hidden = new Set(els)
+    const show = (batch) => {
+      batch.forEach((el) => hidden.delete(el))
       // (clear the inline styles afterwards, so CSS states apply again)
-      onEnter: (batch) => gsap.to(batch, { opacity: 1, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.06, overwrite: true, clearProps: 'opacity,transform' }),
+      gsap.to(batch, { opacity: 1, y: 0, duration: 1.1, ease: 'expo.out', stagger: 0.06, overwrite: true, clearProps: 'opacity,transform' })
+    }
+    ScrollTrigger.batch(els, { start: 'top 92%', once: true, onEnter: show })
+    // keyboard focus on something not yet faded in (e.g. right at the bottom edge): show it at once
+    document.addEventListener('focusin', (e) => {
+      const el = [...hidden].find((h) => h.contains(e.target))
+      if (el) show([el])
     })
   }
 

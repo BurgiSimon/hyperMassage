@@ -100,19 +100,20 @@ const sample = (field, u, v) => {
 
 // ───────────── zones ─────────────
 
+// (`for`: how the zone reads after «besonders für …»)
 export const ZONES = {
-  neck: { label: 'Kopf & Nacken', acc: 'Kopf und Nacken', pts: [[0.07, 0, 0.07], [0.14, 0, 0.05]] },
-  shoulders: { label: 'Schultern', acc: 'die Schultern', pts: [[0.19, -0.095, 0.062], [0.19, 0.095, 0.062]] },
-  upper: { label: 'Oberer Rücken', acc: 'den oberen Rücken', pts: [[0.27, 0, 0.085], [0.26, -0.065, 0.06], [0.26, 0.065, 0.06]] },
-  lower: { label: 'Unterer Rücken', acc: 'den unteren Rücken', pts: [[0.405, 0, 0.075], [0.4, -0.05, 0.05], [0.4, 0.05, 0.05]] },
+  neck: { label: 'Kopf & Nacken', for: ['Kopf', 'Nacken'], pts: [[0.07, 0, 0.07], [0.14, 0, 0.05]] },
+  shoulders: { label: 'Schultern', for: ['Schultern'], pts: [[0.19, -0.095, 0.062], [0.19, 0.095, 0.062]] },
+  upper: { label: 'Oberer Rücken', for: ['den oberen Rücken'], pts: [[0.27, 0, 0.085], [0.26, -0.065, 0.06], [0.26, 0.065, 0.06]] },
+  lower: { label: 'Unterer Rücken', for: ['den unteren Rücken'], pts: [[0.405, 0, 0.075], [0.4, -0.05, 0.05], [0.4, 0.05, 0.05]] },
   arms: {
     label: 'Arme & Hände',
-    acc: 'Arme und Hände',
+    for: ['Arme', 'Hände'],
     pts: [[0.28, -0.148, 0.05], [0.43, -0.158, 0.05], [0.535, -0.163, 0.04], [0.28, 0.148, 0.05], [0.43, 0.158, 0.05], [0.535, 0.163, 0.04]],
   },
   legs: {
     label: 'Beine',
-    acc: 'die Beine',
+    for: ['Beine'],
     pts: [[0.6, -0.052, 0.07], [0.76, -0.053, 0.06], [0.88, -0.05, 0.05], [0.6, 0.052, 0.07], [0.76, 0.053, 0.06], [0.88, 0.05, 0.05]],
   },
 }
@@ -150,8 +151,10 @@ const list = (arr) => (arr.length < 2 ? arr.join('') : `${arr.slice(0, -1).join(
 export function recommend(zones, needs) {
   // (inside a sentence: «oberer Rücken», not «Oberer Rücken»)
   const names = zones.map((z) => ZONES[z].label.replace(/^(Oberer|Unterer) /, (m) => m.toLowerCase()))
-  const acc = zones.map((z) => ZONES[z].acc)
-  const where = acc.length ? ` – mit Fokus auf ${list(acc)}` : ''
+  // «Kopf, Nacken und Schultern»; both halves of the back are the whole back
+  let parts = zones.flatMap((z) => ZONES[z].for)
+  if (zones.includes('upper') && zones.includes('lower')) parts = [...parts.filter((p) => !p.endsWith('Rücken')), 'den ganzen Rücken']
+  const where = parts.length ? ` – besonders für ${list(parts)}` : ''
   let service
   let dur
   let text

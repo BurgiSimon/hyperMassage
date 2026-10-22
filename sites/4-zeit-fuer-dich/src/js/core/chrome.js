@@ -2,6 +2,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { qs, qsa } from '../utils/helpers.js'
 import { startScroll, stopScroll } from './scroll.js'
+import { skylinePath } from './loader.js'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -48,25 +49,25 @@ export function initHeader() {
   const update = () => {
     const y = window.scrollY
     const vh = window.innerHeight
-    // header colours: what is under the header's middle
-    const under = at(y + header.offsetHeight / 2)
-    let t = under?.tone || 'light'
-    if (t === 'sky') t = html.dataset.sky === 'dark' ? 'dark' : 'light'
-    if (t === 'night') t = 'dark'
-    if (t !== tone) {
-      tone = t
-      html.dataset.tone = t
-    }
-    // the sheet's theme: the section in the middle of the screen
+    // the sheet's theme: the section in the middle of the screen (the whole sheet takes its colour)
     const mid = at(y + vh * 0.5)
     const th = mid?.theme || theme || 'linen'
     if (th !== theme) {
       theme = th
       sheet?.setAttribute('data-active-theme', th)
     }
+    // header colours: the sky or the night where it is over the landscape, the sheet's colour elsewhere
+    const under = at(y + header.offsetHeight / 2)
+    let t = under?.theme ? THEME_TONE[th] || 'light' : under?.tone || 'light'
+    if (t === 'sky') t = html.dataset.sky === 'dark' ? 'dark' : 'light'
+    if (t === 'night') t = 'dark'
+    if (t !== tone) {
+      tone = t
+      html.dataset.tone = t
+    }
     // the browser bar: the sky while it shows, the section otherwise
     if (bar) {
-      const c = under?.tone === 'sky' || under?.tone === 'night' ? html.style.backgroundColor || '#17130f' : TONE_BAR[THEME_TONE[under?.theme] || 'light']
+      const c = under?.tone === 'sky' || under?.tone === 'night' ? html.style.backgroundColor || '#17130f' : TONE_BAR[THEME_TONE[th] || 'light']
       if (bar.getAttribute('content') !== c) bar.setAttribute('content', c)
     }
     // phones need the room: the header hides on the way down
@@ -97,6 +98,8 @@ export function initMenu({ reduced }) {
   let open = false
   let tl = null
   const behind = qsa('main, footer, [data-dock]')
+  // the Jura along the bottom of the menu
+  qs('[data-menu-ridge] path', menu)?.setAttribute('d', skylinePath())
   const set = (state) => {
     if (state === open) return
     open = state

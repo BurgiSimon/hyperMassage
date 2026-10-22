@@ -108,6 +108,11 @@ ul {
   box-shadow: 0 0 0 3px var(--bg);
 }
 
+/* (a class that sets display – .btn – must never undo the hidden attribute) */
+[hidden] {
+  display: none !important;
+}
+
 .sr-only {
   position: absolute !important;
   width: 1px;
@@ -202,13 +207,12 @@ ul {
 }
 .kc {
   display: inline-block;
-  font-weight: calc(var(--kw, 360) - var(--k, 0) * var(--kr, 120));
-  font-variation-settings: 'SOFT' calc(60 + var(--k, 0) * 40);
+  font-weight: calc(var(--kw, 360) - var(--k, 0) * var(--kr, 170));
+  font-variation-settings: 'SOFT' calc(50 + var(--k, 0) * 50);
 }
-em .kc,
-.kc em {
-  --kw: 300;
-  --kr: 50;
+em .kc {
+  --kw: 320;
+  --kr: 140;
 }
 
 /* ───────── buttons ───────── */

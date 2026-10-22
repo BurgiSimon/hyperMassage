@@ -121,7 +121,7 @@
     <div class="loader" data-loader aria-hidden="true">
       <svg class="loader__ridge" data-loader-ridge viewBox="0 0 1000 300" preserveAspectRatio="none"><path /></svg>
       <div class="loader__sun" data-loader-sun></div>
-      <p class="loader__line"><span>Massage Claudia Bürgi</span><span>Kestenholz · 47.28° N</span></p>
+      <p class="loader__line"><span>Massage Claudia Bürgi</span><span>Kestenholz&nbsp;· 47.28°&nbsp;N</span></p>
       <p class="loader__word" data-loader-word>Atme ein</p>
     </div>
 
@@ -144,7 +144,7 @@
         </button>
         <a class="btn btn--solid" href="#kontakt" data-booking-open><span>Termin anfragen</span></a>
         <button class="menu-btn" type="button" data-menu-toggle aria-expanded="false" aria-controls="menu">
-          <span class="menu-btn__lines" aria-hidden="true"><i></i><i></i></span><span data-menu-label>Menü</span>
+          <span class="menu-btn__lines" aria-hidden="true"><i></i><i></i></span><span class="menu-btn__label" data-menu-label>Menü</span>
         </button>
       </div>
     </header>
@@ -158,9 +158,13 @@
             <span class="hero__line" data-hero-line>Zeit</span>
             <span class="hero__line hero__line--2" data-hero-line>für <em>dich.</em></span>
           </h1>
+          <p class="hero__hint" data-sun-hint>
+            <span class="hero__hint-icon" aria-hidden="true"></span><span data-sun-hint-text aria-hidden="true">Zieh die Sonne über den Himmel</span
+            ><button class="hero__now" type="button" data-sun-reset hidden>Zurück zu jetzt</button>
+          </p>
           <div class="hero__card" data-hero-fade>
             <p class="hero__lead">
-              Massage bei Claudia Bürgi – in einer kleinen, ruhigen Praxis am Fuss des Jura. Seit 2004 für dich da.
+              Massage bei Claudia Bürgi – in einer kleinen, ruhigen Praxis am Fuss des Jura. Berufsmasseurin seit 2004.
             </p>
             <div class="hero__ctas">
               <a class="btn btn--solid btn--lg" href="#kontakt" data-booking-open><span>Termin anfragen</span></a>
@@ -178,10 +182,6 @@
           <li data-az="26.2" data-el="3.7" data-dist="9.9">Belchenflue <span>1099 m</span></li>
         </ul>
 
-        <p class="hero__hint" data-sun-hint aria-hidden="true">
-          <span class="hero__hint-icon"></span><span data-sun-hint-text>Zieh die Sonne über den Himmel</span>
-        </p>
-        <a class="hero__down" href="#willkommen" data-scroll-to aria-label="Weiter nach unten"><span></span></a>
       </section>
 
       <!-- the warm inside: everything between the opening and the evening -->
@@ -214,7 +214,7 @@
                 <figcaption>Claudia Bürgi, Berufsmasseurin</figcaption>
               </figure>
               <div class="about__text">
-                <h2 class="display display--md" data-kin>Eine kleine, ruhige Praxis. <em>Ganz für dich.</em></h2>
+                <h2 class="display display--md" data-kin>Eine kleine, ruhige Praxis. <em>Ganz in Ruhe.</em></h2>
                 <p class="about__lead">Ich bin Claudia Bürgi – Berufsmasseurin mit eigener kleiner Praxis in Kestenholz.</p>
                 <p>
                   2004 habe ich meine Ausbildung zur Berufsmasseurin erfolgreich abgeschlossen und bin seither nebenberuflich
@@ -250,11 +250,11 @@
               <div class="bodymap__intro">
                 <h2 class="display" id="bodymap-title" data-kin>Zeig mir, wo&nbsp;es <em>zieht.</em></h2>
                 <p class="lead js-only">
-                  Zeig mir am Körper oder hier unten, wo du Spannung spürst. Ich schlage dir eine passende Behandlung vor – den
-                  Rest besprechen wir in Ruhe zu Beginn deines Termins.
+                  Tippe auf den Körper oder wähle unten, wo es zieht. Ich schlage dir eine passende Behandlung vor – den Rest
+                  besprechen wir in Ruhe zu Beginn deines Termins.
                 </p>
                 <div class="zones">
-                  <p class="label" id="zones-a">Hier spüre ich Spannung</p>
+                  <p class="label" id="zones-a">Wo spürst du Spannung?</p>
                   <div class="zones__list" role="group" aria-labelledby="zones-a">
                     <button type="button" class="chip" data-zone="neck" aria-pressed="false">Kopf &amp; Nacken</button>
                     <button type="button" class="chip" data-zone="shoulders" aria-pressed="false">Schultern</button>
@@ -332,7 +332,7 @@
                   <h3 class="service__name">Nacken-Schulter&shy;massage</h3>
                   <p class="service__tag">Halswirbelsäule</p>
                   <p class="service__text">
-                    Gezielte Behandlung der HWS-Zone – von Nacken und Schultern, dort, wo sich der Alltag gerne festsetzt.
+                    Gezielt für Nacken, Schultern und Halswirbelsäule – dort, wo sich der Alltag gerne festsetzt.
                   </p>
                 </div>
                 <a class="service__cta" href="#kontakt" data-booking-open data-service="Nacken-Schultermassage"><span>Anfragen</span></a>
@@ -366,7 +366,7 @@
                   <h3 class="service__name">Hot-Stone-Massage</h3>
                   <p class="service__tag">Warme Lavasteine · <span class="nowrap">+ CHF&nbsp;15</span></p>
                   <p class="service__text">
-                    Eine äusserst entspannende Ganzkörpermassage, die mit Hilfe von warmen Lavasteinen ausgeführt wird.
+                    Warme Lavasteine und ruhige, fliessende Griffe: eine äusserst entspannende Ganzkörpermassage.
                   </p>
                 </div>
                 <a class="service__cta" href="#kontakt" data-booking-open data-service="Hot-Stone-Massage"><span>Anfragen</span></a>
@@ -383,7 +383,7 @@
                 <p class="sec__num">04</p>
                 <p class="sec__label">Atempause</p>
               </header>
-              <h2 class="display" id="breath-title" data-kin data-breath-title>Eine Minute, <em>nur für dich.</em></h2>
+              <h2 class="display" id="breath-title" data-kin data-breath-title>Eine Minute, <em>nur zum Atmen.</em></h2>
               <p class="lead">
                 Bevor du weiterliest: Atme mit den Steinen. Vier Sekunden ein, kurz halten, sechs Sekunden aus. Fünf Atemzüge
                 lang – so beginnt bei mir jede Behandlung.
@@ -437,8 +437,8 @@
                 <div class="planner__head">
                   <h3 class="planner__title">Dein Wunschtermin</h3>
                   <p class="planner__intro">
-                    Wähle Tag und Dauer und schieb deine Zeit in den Tag. Im Fenster siehst du, wie der Himmel dann über
-                    Kestenholz steht. Ein Wunsch, keine Reservation – ich bestätige dir den Termin persönlich.
+                    Wähle Tag und Dauer und zieh den Termin auf deine Wunschzeit. Im Fenster siehst du, wie der Himmel dann
+                    über Kestenholz steht. Ein Wunsch, keine Reservation – ich bestätige dir den Termin persönlich.
                   </p>
                 </div>
                 <div class="planner__controls">
@@ -699,7 +699,13 @@
                 </div>
               </div>
               <div class="visit__map">
-                <div class="visit__map-host" data-map-host></div>
+                <div class="visit__frame">
+                  <div class="visit__map-host" data-map-host></div>
+                  <a class="visit__cover" href="https://maps.google.com/?q=St.+Peterstrasse+12,+4703+Kestenholz" target="_blank" rel="noopener" tabindex="-1" aria-hidden="true" data-cursor="Route planen"></a>
+                  <a class="visit__pin" href="https://maps.google.com/?q=St.+Peterstrasse+12,+4703+Kestenholz" target="_blank" rel="noopener"
+                    ><span class="visit__pin-dot" aria-hidden="true"></span><span class="visit__pin-label">Praxis · St.&nbsp;Peterstrasse&nbsp;12</span></a
+                  >
+                </div>
                 <p class="visit__credit">Kartendaten © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap-Mitwirkende</a></p>
               </div>
             </div>
@@ -713,7 +719,7 @@
       <div class="footer__sky">
         <p class="footer__kicker">Gute Nacht aus Kestenholz</p>
         <p class="footer__word" data-footer-word aria-hidden="true"><span>Zeit</span> <em>für dich.</em></p>
-        <p class="footer__claim">Nimm dir Zeit. Ich nehme mir Zeit für&nbsp;dich.</p>
+        <p class="footer__claim">Ich freue mich auf&nbsp;dich.</p>
         <a class="btn btn--solid btn--lg" href="#kontakt" data-booking-open><span>Termin anfragen</span></a>
       </div>
       <div class="footer__panel">
@@ -749,6 +755,7 @@
 
     <!-- ───────────────────────────── Menu ───────────────────────────── -->
     <div class="menu" id="menu" data-menu inert>
+      <svg class="menu__ridge" data-menu-ridge viewBox="0 0 1000 300" preserveAspectRatio="none" aria-hidden="true"><path /></svg>
       <div class="menu__inner" data-lenis-prevent>
         <nav aria-label="Hauptmenü">
           <ol class="menu__list">
@@ -808,8 +815,8 @@
           </div>
           <label class="field"><span>Bemerkung (optional)</span><textarea name="note" rows="2" data-booking-note></textarea></label>
           <div class="bform__send">
-            <button class="btn btn--solid btn--lg bform__sms" type="submit" data-send="sms"><span>Per SMS senden</span></button>
-            <button class="btn btn--ghost btn--lg bform__mail" type="submit" data-send="mail"><span>Per E-Mail senden</span></button>
+            <button class="btn btn--solid btn--lg bform__sms" type="submit" data-send="sms"><span>Per SMS<span class="bform__long"> senden</span></span></button>
+            <button class="btn btn--ghost btn--lg bform__mail" type="submit" data-send="mail"><span>Per E-Mail<span class="bform__long"> senden</span></span></button>
           </div>
           <p class="small">
             Deine Nachricht öffnet sich in deinem SMS- bzw. E-Mail-Programm. Kein Mailprogramm eingerichtet? Schreib direkt an

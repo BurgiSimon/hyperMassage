@@ -110,4 +110,9 @@ export function nextWeekday(weekday, today) {
   const d = new Date(base + ((weekday - dow + 7) % 7) * 86400000)
   return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate() }
 }
+/** A date some days later (calendar days, no clock involved). */
+export function addDays(day, n) {
+  const d = new Date(Date.UTC(day.y, day.m - 1, day.d + n))
+  return { y: d.getUTCFullYear(), m: d.getUTCMonth() + 1, d: d.getUTCDate() }
+}
 export const MONTHS = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']

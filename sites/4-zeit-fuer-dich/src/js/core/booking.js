@@ -37,7 +37,7 @@ export function initBooking({ reduced, beforeOpen }) {
     if (pre.dur) check('dur', pre.dur)
     if (pre.when) when.value = pre.when
     // (the body map hands over where it pulls – never over words the visitor typed)
-    if (pre.note && note && (!note.value.trim() || note.value === autoNote)) note.value = autoNote = pre.note
+    if (pre.note !== undefined && note && (!note.value.trim() || note.value === autoNote)) note.value = autoNote = pre.note
     // the page behind the dialog is out of reach while it is open
     behind = qsa('header, main, footer, [data-dock]').map((el) => [el, el.inert])
     behind.forEach(([el]) => (el.inert = true))
@@ -70,7 +70,9 @@ export function initBooking({ reduced, beforeOpen }) {
       gsap.set([backdrop, card], { opacity: 0 })
       done()
     } else tl = gsap.timeline({ onComplete: done }).to(card, { opacity: 0, y: 30, duration: 0.4, ease: 'power2.in' }).to(backdrop, { opacity: 0, duration: 0.35 }, 0.1)
-    lastFocus?.focus?.({ preventScroll: true })
+    // (a link in the menu that has closed meanwhile cannot take focus: the menu button can)
+    const back = lastFocus && !lastFocus.closest('[inert]') && lastFocus.isConnected && lastFocus.getClientRects().length ? lastFocus : qs('[data-menu-toggle]')
+    back?.focus?.({ preventScroll: true })
   }
 
   document.addEventListener('click', (e) => {

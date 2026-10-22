@@ -127,13 +127,19 @@ export class Kinetic {
   }
 
   split() {
+    const h = this.el.offsetHeight
     const { words } = splitText(this.el)
     this.words = words
     this.visual = this.el.querySelector('.kvis')
     const start = this.released === null || this.released === undefined ? this.opts.start : 0
     this.letters = qsa('.kc', this.visual).map((node) => ({ node, k: { v: start, vel: 0 }, cx: 0, cy: 0, last: null }))
-    this.letters.forEach((l) => this.paint(l))
+    // line breaks are measured at the heaviest the letters get (their waiting tension), the same on every
+    // rebuild: a tense heading never runs wider than its lines, a relaxed one is a little shorter
+    const heaviest = Math.min(this.opts.start, 0)
+    this.letters.forEach((l) => l.node.style.setProperty('--k', heaviest))
     freezeLines(this.visual, this.words)
+    this.letters.forEach((l) => this.paint(l))
+    if (this.el.offsetHeight !== h) this.el.dispatchEvent(new CustomEvent('kinetic:resize', { bubbles: true }))
   }
 
   /** after a width change: measure the line breaks again */

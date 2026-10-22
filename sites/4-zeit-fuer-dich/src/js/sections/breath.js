@@ -38,8 +38,12 @@ export function initBreath({ reduced, title }) {
   }
   paint()
 
+  // (compared with the text that is due, not the one on screen: a fade may still be running)
+  let due = label.textContent
   const setLabel = (text) => {
-    if (label.textContent === text) return
+    if (due === text) return
+    due = text
+    gsap.killTweensOf(label)
     if (reduced) {
       label.textContent = text
       return
@@ -78,20 +82,6 @@ export function initBreath({ reduced, title }) {
     idle = null
   }
 
-  ScrollTrigger.create({
-    trigger: stage,
-    start: 'top bottom',
-    end: 'bottom top',
-    onToggle: (self) => {
-      onScreen = self.isActive
-      if (session) {
-        if (!self.isActive) end(false)
-        return
-      }
-      self.isActive ? startIdle() : stopIdle()
-    },
-  })
-
   let session = null
   let countTimer = null
   const countdown = (secs) => {
@@ -127,11 +117,17 @@ export function initBreath({ reduced, title }) {
     btnLabel.textContent = 'Beenden'
     progress.textContent = `Atemzug 1 von ${CYCLES}`
     const total = (IN + HOLD + OUT) * CYCLES
+    // the stones settle first, so the first breath in lifts them all the way
+    const LEAD = breath.v > 0.15 ? 1.2 : 0
+    if (LEAD) {
+      setLabel('Atme aus')
+      exhale(LEAD)
+    }
     session = gsap.timeline({ onComplete: () => end(true) })
     session.set(arc, { strokeDashoffset: ARC })
-    session.to(arc, { strokeDashoffset: 0, duration: total, ease: 'none' }, 0)
+    session.to(arc, { strokeDashoffset: 0, duration: total, ease: 'none' }, LEAD)
     for (let i = 0; i < CYCLES; i++) {
-      const t0 = i * (IN + HOLD + OUT)
+      const t0 = LEAD + i * (IN + HOLD + OUT)
       session.call(
         () => {
           setLabel('Atme ein')
@@ -145,7 +141,7 @@ export function initBreath({ reduced, title }) {
       )
       session.call(
         () => {
-          setLabel('Halte')
+          setLabel('Halten')
           countdown(HOLD)
         },
         null,
@@ -165,8 +161,25 @@ export function initBreath({ reduced, title }) {
   }
 
   btn?.addEventListener('click', () => (session ? end(false) : start()))
-  // Escape ends the exercise, too
-  document.addEventListener('keydown', (e) => e.key === 'Escape' && session && end(false))
+  // Escape ends the exercise, too – unless it is meant for an open dialog or menu
+  const overlays = new Set()
+  document.addEventListener('overlay', (e) => (e.detail.open ? overlays.add(e.detail.source) : overlays.delete(e.detail.source)))
+  document.addEventListener('keydown', (e) => e.key === 'Escape' && session && !overlays.size && end(false))
+
+  // (created last: on a deep link the stones are on screen at once, and the trigger toggles right away)
+  ScrollTrigger.create({
+    trigger: stage,
+    start: 'top bottom',
+    end: 'bottom top',
+    onToggle: (self) => {
+      onScreen = self.isActive
+      if (session) {
+        if (!self.isActive) end(false)
+        return
+      }
+      self.isActive ? startIdle() : stopIdle()
+    },
+  })
 
   // a hand over the stones warms them (like the hot stones in the practice)
   if (!reduced) {

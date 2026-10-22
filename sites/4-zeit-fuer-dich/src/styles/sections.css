@@ -110,7 +110,18 @@
   font-size: 13px;
   font-weight: 540;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
+}
+.hero__now {
+  margin-left: 4px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  background: var(--sky-ink);
+  color: var(--sky-ground, #f1e9dd);
+  font-size: 12.5px;
+  font-weight: 540;
+  pointer-events: auto;
 }
 .hero__hint-icon {
   position: relative;
@@ -128,47 +139,12 @@
     transform: translateX(6px);
   }
 }
-.hero__down {
-  position: absolute;
-  left: 50%;
-  bottom: clamp(24px, 5vh, 52px);
-  z-index: 3;
-  width: 44px;
-  height: 64px;
-  margin-left: -22px;
-  border-radius: 99px;
-  border: 1.5px solid currentColor;
-  opacity: 0.7;
-}
-.hero__down span {
-  position: absolute;
-  left: 50%;
-  top: 14px;
-  width: 4px;
-  height: 10px;
-  margin-left: -2px;
-  border-radius: 4px;
-  background: currentColor;
-  animation: down 2.2s var(--ease-in-out) infinite;
-}
-@keyframes down {
-  0% {
-    transform: translateY(0);
-    opacity: 0;
-  }
-  30% {
-    opacity: 1;
-  }
-  80%,
-  100% {
-    transform: translateY(26px);
-    opacity: 0;
-  }
-}
 /* the sun can be dragged sideways; pages still scroll and pinch-zoom */
 .js .hero.can-drag {
   cursor: grab;
   touch-action: pan-y pinch-zoom;
+  -webkit-user-select: none;
+  user-select: none;
 }
 .js .hero.is-dragging {
   cursor: grabbing;
@@ -223,11 +199,6 @@
 .peaks.is-ready li.is-on {
   display: block;
 }
-@media (max-width: 900px) {
-  .hero__down {
-    display: none;
-  }
-}
 @media (max-width: 640px) {
   .peaks li span {
     display: none;
@@ -256,10 +227,13 @@
   .hero__inner {
     padding-bottom: calc(16px + env(safe-area-inset-bottom));
   }
+  /* phones: the hint sits right above the card, out of the header's way */
   .hero__hint {
-    bottom: auto;
-    top: calc(var(--header-h) + 8px);
-    right: var(--m);
+    position: static;
+    margin: auto 0 10px;
+  }
+  .hero__card {
+    margin-top: 0;
   }
 }
 
@@ -282,7 +256,7 @@
 }
 .sec {
   position: relative;
-  padding: var(--section-y) 0;
+  padding: var(--section-y) 0 calc(var(--section-y) * 0.55);
 }
 .sec + .sec {
   padding-top: calc(var(--section-y) * 0.7);
@@ -414,9 +388,13 @@
   text-transform: uppercase;
   color: var(--fg-soft);
 }
+.facts > div:last-child dd {
+  font-size: clamp(30px, 3.1vw, 50px);
+  padding-top: 0.2em;
+}
 .facts dd {
   font-family: var(--f-serif);
-  font-size: clamp(40px, 5vw, 80px);
+  font-size: clamp(40px, 4.6vw, 76px);
   font-weight: 300;
   line-height: 1;
   letter-spacing: -0.03em;
@@ -431,8 +409,11 @@
     grid-column: 6 / -1;
   }
   .facts {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 28px var(--m);
+  }
+  .facts > div:last-child {
+    grid-column: 1 / -1;
   }
 }
 @media (max-width: 680px) {
@@ -443,12 +424,14 @@
   .about__portrait {
     max-width: 300px;
   }
-  .facts dd {
-    font-size: 44px;
+  .facts {
+    column-gap: 14px;
   }
-  /* (the place name needs the whole row) */
-  .facts > div:last-child {
-    grid-column: 1 / -1;
+  .facts dd {
+    font-size: clamp(34px, 10vw, 44px);
+  }
+  .facts > div:last-child dd {
+    font-size: clamp(30px, 9vw, 40px);
   }
 }
 
@@ -519,8 +502,12 @@
 }
 .bodymap__hint {
   position: absolute;
-  left: 22px;
-  bottom: 18px;
+  left: 18px;
+  bottom: 16px;
+  padding: 6px 12px;
+  border-radius: 99px;
+  background: var(--linen);
+  box-shadow: 0 0 0 1px var(--line);
   font-family: var(--f-mono);
   font-size: var(--fs-label);
   letter-spacing: 0.14em;
@@ -1162,9 +1149,9 @@
   top: 18px;
   bottom: 2px;
   /* (a short slot keeps a finger-sized width – and stays inside the track) */
-  left: min(calc(var(--s, 0.2) * 100%), calc(100% - max(var(--w, 0.0833) * 100%, 34px)));
+  left: min(calc(var(--s, 0.2) * 100%), calc(100% - max(var(--w, 0.0833) * 100%, 44px)));
   width: calc(var(--w, 0.0833) * 100%);
-  min-width: 34px;
+  min-width: 44px;
   border-radius: 16px;
   background: linear-gradient(160deg, #bf5a2f, var(--clay-deep));
   box-shadow: 0 12px 30px -12px rgb(168 71 31 / 0.8);
@@ -1763,12 +1750,80 @@
   flex-wrap: wrap;
   gap: 10px;
 }
-.visit__map-host {
+.visit__frame {
   position: relative;
   aspect-ratio: 16 / 11;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--sand);
+}
+.visit__map-host {
+  position: absolute;
+  inset: 0;
+}
+.visit__cover {
+  position: absolute;
+  inset: 0;
+}
+/* the practice: a pin you cannot miss, with its address */
+.visit__pin {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transform: translate(-11px, -50%);
+  text-decoration: none;
+}
+.visit__pin-dot {
+  position: relative;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--clay);
+  box-shadow:
+    0 0 0 4px #fffaf2,
+    0 6px 16px -4px rgb(60 25 10 / 0.5);
+}
+.visit__pin-dot::before,
+.visit__pin-dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid var(--clay);
+  animation: ring 3s var(--ease-out) infinite;
+  animation-play-state: paused;
+}
+.visit__pin-dot::after {
+  animation-delay: 1.5s;
+}
+.visit__frame.is-on .visit__pin-dot::before,
+.visit__frame.is-on .visit__pin-dot::after {
+  animation-play-state: running;
+}
+.visit__pin-label {
+  padding: 7px 13px;
+  border-radius: 99px;
+  background: var(--ink);
+  color: var(--linen);
+  font-size: 13.5px;
+  font-weight: 540;
+  white-space: nowrap;
+  box-shadow: 0 8px 20px -10px rgb(0 0 0 / 0.5);
+}
+@media (hover: hover) {
+  .visit__pin:hover .visit__pin-label {
+    background: var(--clay);
+  }
+}
+.map .m-pin {
+  display: none;
+}
+.no-js .visit__frame {
+  display: none;
 }
 .visit__map-host svg {
   position: absolute;
@@ -1864,6 +1919,17 @@
 @media (max-width: 860px) {
   .visit__grid {
     grid-template-columns: 1fr;
+  }
+  .visit__frame {
+    aspect-ratio: 4 / 3.4;
+  }
+}
+/* narrow maps: the address under the pin, so it never runs off the edge */
+@media (max-width: 560px) {
+  .visit__pin {
+    flex-direction: column;
+    gap: 12px;
+    transform: translate(-50%, -11px);
   }
 }
 

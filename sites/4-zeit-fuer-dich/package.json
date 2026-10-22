@@ -2,7 +2,7 @@
   "name": "massage-buergi-zeit-fuer-dich",
   "private": true,
   "version": "1.0.0",
-  "description": "Massagepraxis Claudia Bürgi, Kestenholz – «Ein Tag», a day at the foot of the Jura",
+  "description": "Massagepraxis Claudia Bürgi, Kestenholz – «Zeit für dich», the best of the first three sites in one",
   "type": "module",
   "scripts": {
     "dev": "vite",
