@@ -11,6 +11,8 @@ export function prepareHero() {
   const chars = words.flatMap((w) => splitChars(w, 'hero__char'))
   gsap.set(chars, { yPercent: 118, rotate: 6 })
   gsap.set('[data-hero-fade]', { autoAlpha: 0, y: 24 })
+  // the lead stays painted (it is the page's largest text) and only rises into place
+  gsap.set('[data-hero-rise]', { y: 28 })
   gsap.set('[data-hero-hint]', { autoAlpha: 0 })
   return chars
 }
@@ -18,6 +20,7 @@ export function prepareHero() {
 export function playHeroIntro(chars) {
   const tl = gsap.timeline({ defaults: { ease: 'expo.out' } })
   tl.to(chars, { yPercent: 0, rotate: 0, duration: 1.8, stagger: 0.06 })
+    .to('[data-hero-rise]', { y: 0, duration: 1.6 }, 0.4)
     .to('[data-hero-fade]', { autoAlpha: 1, y: 0, duration: 1.4, stagger: 0.1 }, 0.5)
     .to('[data-hero-hint]', { autoAlpha: 1, duration: 1.2 }, 1.4)
   return tl
@@ -54,7 +57,7 @@ export function initHeroScroll() {
     .to(title, { yPercent: 18, ease: 'none' }, 0)
     .to(qs('.hero__line--1', hero), { xPercent: -6, ease: 'none' }, 0)
     .to(qs('.hero__line--2', hero), { xPercent: 6, ease: 'none' }, 0)
-    .to(['.hero__meta', '.hero__foot'], { autoAlpha: 0, y: -40, ease: 'none' }, 0)
+    .to(['.hero__meta', '.hero__foot'], { opacity: 0, yPercent: -30, ease: 'none' }, 0)
 }
 
 /* ───────────── About ───────────── */

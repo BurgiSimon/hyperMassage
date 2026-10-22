@@ -11,6 +11,7 @@ export function initReveals() {
     SplitText.create(el, {
       type: 'lines',
       mask: 'lines',
+      aria: 'none',
       linesClass: 'split-line',
       autoSplit: true,
       onSplit: (self) =>
@@ -43,7 +44,7 @@ export function initReveals() {
   // Statement text that lights up word by word as you read
   qsa('[data-scrub-words]').forEach((el) => {
     const words = splitWords(el)
-    gsap.to(words, {
+    gsap.fromTo(words, { opacity: 0.2 }, {
       opacity: 1,
       stagger: 0.1,
       ease: 'none',

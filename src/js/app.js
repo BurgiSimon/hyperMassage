@@ -44,7 +44,7 @@ export function initApp() {
   soundBtn?.addEventListener('click', async () => {
     const on = await ambient.toggle()
     soundBtn.setAttribute('aria-pressed', String(on))
-    soundBtn.setAttribute('aria-label', on ? 'Umgebungsklang ausschalten' : 'Umgebungsklang einschalten')
+    soundBtn.setAttribute('aria-label', on ? 'Klang ausschalten' : 'Klang einschalten')
   })
   document.addEventListener('visibilitychange', () => (document.hidden ? ambient.pause() : ambient.resume()))
 
@@ -85,6 +85,7 @@ export function initApp() {
         },
       })
       if (!stones) document.body.classList.add('no-webgl')
+      return stones?.ready
     })
     .catch(() => document.body.classList.add('no-webgl'))
 

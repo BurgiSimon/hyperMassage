@@ -28,7 +28,7 @@ export function runLoader({ ready, reduced }) {
     })
   }
 
-  const minDuration = revisit ? 0.9 : 2.6
+  const minDuration = revisit ? 0.9 : 2.2
   const progress = { value: 0 }
   const state = { loaded: false }
   ready.then(() => (state.loaded = true))

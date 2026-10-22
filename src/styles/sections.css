@@ -282,7 +282,7 @@ footer[data-theme] {
   text-indent: 0;
 }
 .js.motion [data-scrub-words] .word {
-  opacity: 0.16;
+  opacity: 0.2;
 }
 .pill {
   position: relative;

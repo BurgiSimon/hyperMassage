@@ -386,11 +386,13 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
   io.observe(canvas)
   document.addEventListener('visibilitychange', () => (document.hidden ? stop() : state.visible && start()))
 
-  // first frame, so the loader can reveal a finished scene
-  renderer.compile(scene, camera)
-  renderer.render(scene, camera)
+  // compile shaders off the main thread where supported, then draw a first frame
+  const ready = (renderer.compileAsync ? renderer.compileAsync(scene, camera) : Promise.resolve())
+    .catch(() => {})
+    .then(() => renderer.render(scene, camera))
 
   return {
+    ready,
     playIntro,
     setScroll(p) {
       state.scroll = p
