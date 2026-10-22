@@ -109,7 +109,8 @@ export function initServices({ reduced }) {
       btn.setAttribute('aria-expanded', String(open))
       // on touch screens the treatment moves once when you open it
       if (open && !hover && !reduced) play(2200)
-      body.addEventListener('transitionend', () => ScrollTrigger.refresh(), { once: true })
+      clearTimeout(row._r)
+      row._r = setTimeout(() => ScrollTrigger.refresh(), 750)
     })
   })
 }

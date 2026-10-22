@@ -35,18 +35,24 @@ export function splitKinetic(el) {
   visual.className = 'kvis'
   visual.setAttribute('aria-hidden', 'true')
   el.appendChild(visual)
-  const words = text.split(' ').map((word, i, all) => {
-    const w = document.createElement('span')
-    w.className = 'kw'
-    Array.from(word).forEach((ch) => {
-      const c = document.createElement('span')
-      c.className = 'kc'
-      c.textContent = ch
-      w.appendChild(c)
+  // words, and compound words split after their hyphens so they can break there
+  const words = []
+  text.split(' ').forEach((word, i, all) => {
+    const parts = word.split(/(?<=-)(?=.)/)
+    parts.forEach((part, j) => {
+      const w = document.createElement('span')
+      w.className = 'kw'
+      if (j < parts.length - 1) w.dataset.join = ''
+      Array.from(part).forEach((ch) => {
+        const c = document.createElement('span')
+        c.className = 'kc'
+        c.textContent = ch
+        w.appendChild(c)
+      })
+      visual.appendChild(w)
+      words.push(w)
     })
-    visual.appendChild(w)
     if (i < all.length - 1) visual.appendChild(document.createTextNode(' '))
-    return w
   })
   lockLines(visual, words)
   return qsa('.kc', el)
@@ -69,7 +75,7 @@ export function lockLines(container, items) {
     line.className = 'kline'
     words.forEach((w, i) => {
       line.appendChild(w)
-      if (i < words.length - 1) line.appendChild(document.createTextNode(' '))
+      if (i < words.length - 1 && !(w.dataset && 'join' in w.dataset)) line.appendChild(document.createTextNode(' '))
     })
     container.appendChild(line)
   })

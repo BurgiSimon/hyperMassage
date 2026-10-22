@@ -40,6 +40,16 @@
 .sec__label {
   grid-column: 2 / span 5;
 }
+@media (max-width: 760px) {
+  .sec__head {
+    grid-template-columns: 56px 1fr;
+  }
+  .sec__num,
+  .sec__label {
+    grid-column: auto;
+    white-space: nowrap;
+  }
+}
 
 .grid12 {
   display: grid;
@@ -81,6 +91,7 @@
   height: 100svh;
   min-height: 560px;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto minmax(0, 1fr) auto;
   padding: calc(var(--header-h) + 14px) var(--m) calc(var(--m) * 0.9);
   overflow: hidden;
@@ -716,20 +727,25 @@
 }
 @media (max-width: 560px) {
   .srow__btn {
-    grid-template-columns: 28px 1fr 40px;
+    grid-template-columns: 28px minmax(0, 1fr) 40px;
   }
   .srow__num {
     grid-column: 1;
   }
   .srow__name {
     grid-column: 2;
-    font-size: clamp(26px, 8.4vw, 40px);
+    font-size: clamp(25px, 7.8vw, 40px);
   }
   .srow__plus {
     grid-column: 3;
   }
   .srow__inner {
-    grid-template-columns: 28px 1fr;
+    grid-template-columns: 28px minmax(0, 1fr);
+  }
+  .srow__inner .btn {
+    white-space: normal;
+    text-align: center;
+    max-width: 100%;
   }
   .srow__inner > * {
     grid-column: 2 / -1 !important;
@@ -927,6 +943,7 @@
 .stretch__track {
   position: relative;
   height: 64px;
+  margin-inline: 17px;
   touch-action: none;
   cursor: grab;
 }
@@ -1767,6 +1784,13 @@
 }
 
 /* ───────────────────────── reduced motion / no-js fallbacks ───────────────────────── */
+
+.no-js .bodymap__stage,
+.no-js .pmr__stage,
+.no-js .visit__map-host,
+.no-js .poster-wrap {
+  display: none;
+}
 
 .no-js .hero,
 .reduced .hero {
