@@ -25,7 +25,7 @@ The whole site is built around three ideas from the practice itself: **touch, wa
 | Hero | A floating cairn of oiled basalt stones (the hot stones of the practice) rendered live in WebGL. The stack slowly breathes; **touching a stone warms it** to an ember glow — and the cursor stays warm for a moment afterwards. Warm motes drift up like steam; a soft light follows the hand. |
 | Ankommen | The welcome sentence lights up word by word as you read it. |
 | Über mich | Claudia's portrait in an arch frame, her story in her own words, animated facts. |
-| Angebot | A pinned horizontal journey through the five treatments. Each has its own generative line drawing: tension lines that release under the cursor, the seven cervical vertebrae, a single pressure point, gentle oscillation, rising heat over warm stones. |
+| Angebot | A pinned horizontal journey through the five treatments. Each has its own generative line drawing: tension lines that release under the cursor, the seven cervical vertebrae, a single pressure point, gentle oscillation, rising heat over warm stones. Every treatment can be requested straight from its card. |
 | Atempause | A guided one-minute breathing exercise (4 s in · 2 s hold · 6 s out). While it runs, the rest of the interface steps back. |
 | Preise | A clock face: the arc *is* the length of your treatment. Toggle Hot Stone and the arc turns to ember. |
 | Gutschein | Build a voucher live — names, gift and value appear on a tilting card with a foil sheen. The request opens as a prepared e-mail (or SMS on phones). |

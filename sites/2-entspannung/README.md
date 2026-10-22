@@ -39,7 +39,7 @@ The page goes the same way. It starts tense in signal red and gets calmer the fu
 | Footer | «Entspannung.» in fully relaxed letters and «Spannung: 0 %», plus the contact details. |
 
 The booking sheet is a fill-in sentence (*«Hallo Claudia, ich hätte gerne einen Termin für eine … von …»*). It composes an e-mail or an SMS.
-The site also includes a custom cursor, smooth scrolling, a mobile action dock, `prefers-reduced-motion` support, print styles, view transitions and a 404 page.
+The site also includes a custom cursor, smooth scrolling, a mobile action dock (on computers, a request pill appears while the header is away), `prefers-reduced-motion` support, print styles, view transitions and a 404 page.
 
 ## Business-first details
 
