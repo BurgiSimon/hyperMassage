@@ -218,17 +218,19 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
     const portrait = w / h < 0.9
     camera.fov = portrait ? 34 : 30
     camera.updateProjectionMatrix()
-    // fit cairn: wider on landscape, narrower on portrait
-    const fitHeight = 5.6
-    const fitWidth = 4.3
+    // frame the cairn: share of screen height + vertical centre, per layout
+    const STACK_H = 3.7
+    const STACK_W = 3.1
+    const heightShare = portrait ? 0.28 : 0.55
+    const centreY = portrait ? 0.39 : 0.475
     const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
-    const distH = fitHeight / (2 * tan)
-    const distW = fitWidth / (2 * tan * camera.aspect)
-    const dist = Math.max(distH, distW) * (portrait ? 1.05 : 1.12)
+    let visibleH = STACK_H / heightShare
+    visibleH = Math.max(visibleH, STACK_W / (0.62 * camera.aspect))
+    const dist = visibleH / (2 * tan)
     camera.position.z = dist
     camera.position.y = dist * 0.08
     camera.lookAt(0, 0, 0)
-    root.position.y = portrait ? 0.35 : 0.05
+    root.position.y = (0.5 - centreY) * visibleH
   }
   layout()
   window.addEventListener('resize', layout)
@@ -308,7 +310,9 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
   const render = (now) => {
     rafId = requestAnimationFrame(render)
     if (!state.visible) return
-    const dt = Math.min(0.05, (now - last) / 1000)
+    const rawDt = (now - last) / 1000
+    const dt = Math.min(0.05, rawDt)
+    const heatDt = Math.min(0.25, rawDt) // warmth follows wall-clock time, even on slow frames
     last = now
     time.value += dt
 
@@ -344,8 +348,8 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
 
       // heat: warms fast under the hand, cools slowly like real stone
       const want = i === hovered ? 1 : 0
-      if (want) s.heat += (1 - s.heat) * Math.min(1, dt * 2.4)
-      else if (state.introDone || reduced) s.heat += (0 - s.heat) * Math.min(1, dt * 0.45)
+      if (want) s.heat += (1 - s.heat) * Math.min(1, heatDt * 2.4)
+      else if (state.introDone || reduced) s.heat += (0 - s.heat) * Math.min(1, heatDt * 0.45)
       s.mesh.material.userData.heat.value = s.heat
       heatSum += s.heat
     })

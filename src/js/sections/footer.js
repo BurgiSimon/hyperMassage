@@ -12,11 +12,16 @@ export function initWordmark({ reduced }) {
 
   // fit the wordmark edge to edge
   const fit = () => {
-    el.style.fontSize = '100px'
-    const natural = chars[chars.length - 1].getBoundingClientRect().right - chars[0].getBoundingClientRect().left
     const cs = getComputedStyle(el)
-    const target = (el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) * 0.99
-    if (natural > 0) el.style.fontSize = `${(100 * target) / natural}px`
+    const target = (el.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight)) * 0.985
+    let size = 100
+    for (let pass = 0; pass < 3; pass++) {
+      el.style.fontSize = `${size}px`
+      const natural = chars[chars.length - 1].getBoundingClientRect().right - chars[0].getBoundingClientRect().left
+      if (natural <= 0) return
+      size *= target / natural
+    }
+    el.style.fontSize = `${size}px`
   }
   fit()
   window.addEventListener('resize', fit)
@@ -47,7 +52,7 @@ export function initWordmark({ reduced }) {
 
   const apply = (i) => {
     const { w, y } = weights[i]
-    chars[i].style.fontVariationSettings = `"wght" ${w.toFixed(0)}, "SOFT" 100, "WONK" ${w > 480 ? 1 : 0}`
+    chars[i].style.fontVariationSettings = `"wght" ${w.toFixed(0)}, "SOFT" 100, "WONK" ${w > 480 ? 1 : 0}, "opsz" 144`
     chars[i].style.transform = `translateY(${y.toFixed(2)}%)`
   }
 
