@@ -1,3 +1,13 @@
+/* ───────────────────────── Page transitions (cross-document) ───────────────────────── */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.6s;
+  animation-timing-function: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
 /* ───────────────────────── Reset ───────────────────────── */
 *,
 *::before,
@@ -595,5 +605,46 @@ button:hover .roll__b {
   }
   :root {
     transition: none;
+  }
+}
+
+/* ───────────────────────── Print ───────────────────────── */
+@media print {
+  .loader,
+  .cursor,
+  .grain,
+  .header,
+  .dock,
+  .booking,
+  .menu,
+  .marquee,
+  .hero__stage,
+  .hero__hint,
+  .location__map,
+  .breath__stage,
+  .dial,
+  .voucher__stage,
+  .footer__wordmark {
+    display: none !important;
+  }
+  :root,
+  body {
+    --bg: #fff;
+    --fg: #000;
+    --fg-soft: #333;
+    --line: #ccc;
+    --accent: #000;
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .js.motion [data-reveal-fade],
+  .word {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  section {
+    padding-block: 2rem !important;
+    min-height: 0 !important;
+    break-inside: avoid;
   }
 }

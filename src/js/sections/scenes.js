@@ -26,6 +26,23 @@ export function playHeroIntro(chars) {
 export function initHeroScroll() {
   const hero = qs('#start')
   if (!hero) return
+
+  // the hand brings warmth: a soft ember light follows the pointer
+  const glow = qs('.hero__glow', hero)
+  if (glow && window.matchMedia('(hover: hover)').matches) {
+    const pos = { x: 58, y: 50 }
+    const xTo = gsap.quickTo(pos, 'x', { duration: 1.4, ease: 'power3.out' })
+    const yTo = gsap.quickTo(pos, 'y', { duration: 1.4, ease: 'power3.out' })
+    hero.addEventListener('pointermove', (e) => {
+      const r = hero.getBoundingClientRect()
+      xTo(((e.clientX - r.left) / r.width) * 100)
+      yTo(((e.clientY - r.top) / r.height) * 100)
+    })
+    gsap.ticker.add(() => {
+      glow.style.setProperty('--cx', `${pos.x.toFixed(2)}%`)
+      glow.style.setProperty('--cy', `${pos.y.toFixed(2)}%`)
+    })
+  }
   const title = qs('.hero__title', hero)
   gsap
     .timeline({

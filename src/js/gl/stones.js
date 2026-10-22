@@ -221,8 +221,10 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
     // frame the cairn: share of screen height + vertical centre, per layout
     const STACK_H = 3.7
     const STACK_W = 3.1
-    const heightShare = portrait ? 0.28 : 0.55
-    const centreY = portrait ? 0.39 : 0.475
+    const aspect = w / h
+    const phone = aspect < 0.62
+    const heightShare = phone ? 0.28 : portrait ? 0.36 : 0.55
+    const centreY = phone ? 0.39 : portrait ? 0.43 : 0.475
     const tan = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
     let visibleH = STACK_H / heightShare
     visibleH = Math.max(visibleH, STACK_W / (0.62 * camera.aspect))

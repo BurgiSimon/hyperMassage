@@ -27,7 +27,7 @@ function classic(ctx, w, h, t, p, c, s) {
   const pad = h * 0.14
   const step = (h - pad * 2) / (lines - 1)
   const tension = 0.2 + 0.8 * Math.pow(Math.sin(t * 0.22) * 0.5 + 0.5, 1.6)
-  ctx.lineWidth = s.dpr * (s.mini ? 1.4 : 1)
+  ctx.lineWidth = s.dpr * (s.mini ? 1.4 : 1.15)
   for (let i = 0; i < lines; i++) {
     const y0 = pad + i * step
     ctx.beginPath()
@@ -56,7 +56,7 @@ function neck(ctx, w, h, t, p, c, s) {
   const oy = (h - S * 0.8) / 2 - S * 0.04
   const X = (v) => ox + v * S
   const Y = (v) => oy + v * S
-  ctx.lineWidth = 1.25 * s.dpr
+  ctx.lineWidth = 1.5 * s.dpr
   ctx.strokeStyle = c.fg
   ctx.lineCap = 'round'
 

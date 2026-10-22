@@ -20,10 +20,13 @@ footer[data-theme] {
   isolation: isolate;
 }
 .hero__glow {
+  --cx: 58%;
+  --cy: 50%;
   position: absolute;
   inset: 0;
   z-index: -2;
   background:
+    radial-gradient(22rem 22rem at var(--cx) var(--cy), rgb(227 129 90 / 0.1), transparent 70%),
     radial-gradient(42% 50% at 58% 50%, rgb(227 129 90 / 0.16), transparent 70%),
     radial-gradient(50% 40% at 8% 105%, rgb(176 79 44 / 0.16), transparent 70%),
     radial-gradient(30% 30% at 95% 0%, rgb(239 232 221 / 0.05), transparent 70%);
@@ -75,6 +78,7 @@ footer[data-theme] {
   inset: 0;
   z-index: 1;
 }
+.no-js .hero__stage,
 .no-webgl .hero__stage {
   background: url('/images/stones-poster.webp') 50% 42% / auto 58% no-repeat;
 }
@@ -83,6 +87,7 @@ footer[data-theme] {
   display: none;
 }
 @media (max-width: 560px) {
+  .no-js .hero__stage,
   .no-webgl .hero__stage {
     background-position: 50% 36%;
     background-size: auto 30%;
@@ -219,8 +224,7 @@ footer[data-theme] {
   }
   .hero__hint {
     left: 50%;
-    top: auto;
-    bottom: calc(50svh - 3rem);
+    top: 64%;
     transform: translateX(-50%);
   }
   .hero__foot > span:first-child {
@@ -849,6 +853,7 @@ footer[data-theme] {
 }
 .dial {
   position: relative;
+  touch-action: pan-y;
   width: min(100%, 36rem);
   aspect-ratio: 1;
   justify-self: center;
