@@ -9,6 +9,7 @@ export default defineConfig({
       input: {
         main: resolve(import.meta.dirname, 'index.html'),
         impressum: resolve(import.meta.dirname, 'impressum/index.html'),
+        notFound: resolve(import.meta.dirname, '404.html'),
       },
     },
   },
