@@ -139,7 +139,8 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
     return null
   }
   const isSmall = window.matchMedia('(max-width: 720px)').matches
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, isSmall ? 1.5 : 1.75))
+  const lowEnd = (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 3
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, lowEnd ? 1.25 : isSmall ? 1.5 : 1.75))
   renderer.outputColorSpace = THREE.SRGBColorSpace
   renderer.toneMapping = THREE.ACESFilmicToneMapping
   renderer.toneMappingExposure = 0.95
@@ -170,7 +171,7 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
   root.add(cairn)
   scene.add(root)
 
-  const detail = isSmall ? 26 : 40
+  const detail = lowEnd ? 22 : isSmall ? 26 : 40
   const hitGeo = new THREE.SphereGeometry(1, 16, 12)
   const hitMat = new THREE.MeshBasicMaterial({ visible: false })
 
@@ -362,6 +363,21 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
     return tl
   }
 
+  // adaptive quality: if the first seconds run slow, render fewer pixels
+  const perf = { frames: 0, total: 0, done: false }
+  const adapt = (frameMs) => {
+    if (perf.done) return
+    perf.frames++
+    perf.total += frameMs
+    if (perf.frames < 90) return
+    perf.done = true
+    const avg = perf.total / perf.frames
+    if (avg > 24 && renderer.getPixelRatio() > 1) {
+      renderer.setPixelRatio(1)
+      layout()
+    }
+  }
+
   let rafId = 0
   let last = performance.now()
   let rotY = 0
@@ -371,6 +387,7 @@ export function createStones(canvas, { reduced = false, onHover, onTap } = {}) {
     rafId = requestAnimationFrame(render)
     if (!state.visible) return
     const rawDt = (now - last) / 1000
+    if (state.introDone) adapt(rawDt * 1000)
     const dt = Math.min(0.05, rawDt)
     const heatDt = Math.min(0.25, rawDt) // warmth follows wall-clock time, even on slow frames
     last = now

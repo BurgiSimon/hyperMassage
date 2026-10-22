@@ -6,6 +6,19 @@ const HOVER_SEL = 'a, button, label, input, textarea, [data-cursor], [data-hover
 export const pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2, nx: 0, ny: 0, moved: false }
 
 export function trackPointer() {
+  const needsPermission = typeof window.DeviceOrientationEvent?.requestPermission === 'function'
+  if ('DeviceOrientationEvent' in window && !needsPermission && window.matchMedia('(hover: none)').matches) {
+    window.addEventListener(
+      'deviceorientation',
+      (e) => {
+        if (e.gamma == null || e.beta == null) return
+        pointer.nx = Math.max(-1, Math.min(1, e.gamma / 30))
+        pointer.ny = Math.max(-1, Math.min(1, (45 - e.beta) / 30))
+        pointer.moved = true
+      },
+      { passive: true },
+    )
+  }
   window.addEventListener(
     'pointermove',
     (e) => {

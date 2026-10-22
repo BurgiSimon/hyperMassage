@@ -64,6 +64,32 @@ footer[data-theme] {
 .hero__word {
   display: inline-block;
 }
+/* the words breathe with the stones (9 s cycle) */
+.motion .hero__word {
+  animation: word-breathe 9s var(--ease-in-out) infinite;
+}
+.motion .hero__line--2 .hero__word {
+  animation-name: word-breathe-italic;
+  animation-delay: -0.6s;
+}
+@keyframes word-breathe-italic {
+  0%,
+  100% {
+    font-weight: 235;
+  }
+  50% {
+    font-weight: 290;
+  }
+}
+@keyframes word-breathe {
+  0%,
+  100% {
+    font-weight: 285;
+  }
+  50% {
+    font-weight: 335;
+  }
+}
 .hero__title em {
   color: var(--fg);
   font-weight: 250;
