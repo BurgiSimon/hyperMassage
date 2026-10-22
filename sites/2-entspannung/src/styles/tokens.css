@@ -1,0 +1,100 @@
+@font-face {
+  font-family: 'Anybody';
+  src: url('/fonts/anybody.woff2') format('woff2');
+  font-weight: 100 900;
+  font-stretch: 50% 150%;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Mona Sans';
+  src: url('/fonts/mona-sans.woff2') format('woff2');
+  font-weight: 200 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* metric-matched fallbacks keep the layout still while the web fonts arrive */
+@font-face {
+  font-family: 'Mona Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Helvetica');
+  size-adjust: 103%;
+  ascent-override: 92%;
+  descent-override: 24%;
+}
+
+@property --srel {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+@property --press {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
+:root {
+  /* palette — tension (signal red) relaxes into lavender as you move down the page */
+  --paper: #ece8e1;
+  --paper-2: #e3ded5;
+  --paper-3: #d9d3c8;
+  --ink: #121212;
+  --ink-2: #1d1c1b;
+  --tense: #ff4521;
+  --tense-text: #e83a14; /* the red, deep enough for large text on paper */
+  --calm: #b3a8ff;
+  --calm-deep: #5544d0;
+
+  --bg: var(--paper);
+  --fg: var(--ink);
+  --fg-soft: rgb(18 18 18 / 0.66);
+  --line: rgb(18 18 18 / 0.15);
+  --line-strong: rgb(18 18 18 / 0.85);
+
+  --f-display: 'Anybody', 'Arial Narrow', 'Helvetica Neue', sans-serif;
+  --f-text: 'Mona Sans', 'Mona Fallback', 'Helvetica Neue', Arial, sans-serif;
+
+  --m: max(clamp(16px, 2.8vw, 40px), env(safe-area-inset-left), env(safe-area-inset-right));
+  --gap: clamp(12px, 1.6vw, 24px);
+  --header-h: 64px;
+  --radius: 999px;
+
+  --fs-body: clamp(16px, 0.92rem + 0.22vw, 18.5px);
+  --fs-lead: clamp(19px, 1.05rem + 0.6vw, 27px);
+  --fs-small: 13px;
+  --fs-label: 11.5px;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* the page relaxes as you move down: every section carries its own --srel */
+  --accent: color-mix(in oklab, var(--tense), var(--calm) calc(var(--srel) * 100%));
+  --accent-ink: color-mix(in oklab, #d42d0b, var(--calm-deep) calc(var(--srel) * 100%));
+}
+
+.sec,
+.footer,
+.hero {
+  --accent: color-mix(in oklab, var(--tense), var(--calm) calc(var(--srel) * 100%));
+  --accent-ink: color-mix(in oklab, #d42d0b, var(--calm-deep) calc(var(--srel) * 100%));
+}
+
+[data-theme='ink'] {
+  --bg: var(--ink);
+  --fg: var(--paper);
+  --fg-soft: rgb(236 232 225 / 0.68);
+  --line: rgb(236 232 225 / 0.17);
+  --line-strong: rgb(236 232 225 / 0.85);
+  --accent-ink: var(--accent);
+}
+
+[data-theme='calm'] {
+  --bg: var(--calm);
+  --fg: var(--ink);
+  --fg-soft: rgb(18 18 18 / 0.72);
+  --line: rgb(18 18 18 / 0.2);
+}

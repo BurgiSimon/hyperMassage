@@ -1,0 +1,150 @@
+import gsap from 'gsap'
+import { qs, qsa, prefersReducedMotion } from '../utils/helpers.js'
+
+const HOVER_SEL = 'a, button, label, input, textarea, [data-cursor], [data-hover]'
+
+export const pointer = { x: window.innerWidth / 2, y: window.innerHeight / 2, nx: 0, ny: 0, moved: false }
+
+export function trackPointer() {
+  const needsPermission = typeof window.DeviceOrientationEvent?.requestPermission === 'function'
+  const useTilt =
+    'DeviceOrientationEvent' in window &&
+    !needsPermission &&
+    !prefersReducedMotion() &&
+    window.matchMedia('(hover: none)').matches
+  if (useTilt) {
+    const clamp1 = (v) => Math.max(-1, Math.min(1, v))
+    window.addEventListener(
+      'deviceorientation',
+      (e) => {
+        if (e.gamma == null || e.beta == null) return
+        // beta/gamma are in the device's natural frame – rotate them into screen space
+        const angle = ((screen.orientation?.angle ?? window.orientation ?? 0) + 360) % 360
+        let x = e.gamma
+        let y = e.beta
+        if (angle === 90) [x, y] = [e.beta, -e.gamma]
+        else if (angle === 180) [x, y] = [-e.gamma, -e.beta]
+        else if (angle === 270) [x, y] = [-e.beta, e.gamma]
+        pointer.nx = clamp1(x / 30)
+        pointer.ny = clamp1((45 - y) / 30)
+        pointer.moved = true
+      },
+      { passive: true },
+    )
+  }
+  window.addEventListener(
+    'pointermove',
+    (e) => {
+      pointer.x = e.clientX
+      pointer.y = e.clientY
+      pointer.nx = (e.clientX / window.innerWidth) * 2 - 1
+      pointer.ny = -((e.clientY / window.innerHeight) * 2 - 1)
+      pointer.moved = true
+    },
+    { passive: true },
+  )
+}
+
+let api = null
+
+export function initCursor() {
+  const el = qs('[data-cursor-el]')
+  if (!el || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return null
+
+  const ring = qs('.cursor__ring', el)
+  const dot = qs('.cursor__dot', el)
+  const label = qs('[data-cursor-label]', el)
+
+  const ringX = gsap.quickTo(ring, 'x', { duration: 0.55, ease: 'power3.out' })
+  const ringY = gsap.quickTo(ring, 'y', { duration: 0.55, ease: 'power3.out' })
+  const dotX = gsap.quickTo(dot, 'x', { duration: 0.12, ease: 'power3.out' })
+  const dotY = gsap.quickTo(dot, 'y', { duration: 0.12, ease: 'power3.out' })
+
+  el.classList.add('is-hidden')
+
+  let forcedLabel = null
+
+  const setLabel = (text) => {
+    if (text) {
+      label.textContent = text
+      el.classList.add('has-label')
+    } else {
+      el.classList.remove('has-label')
+    }
+  }
+
+  window.addEventListener(
+    'pointermove',
+    (e) => {
+      el.classList.remove('is-hidden')
+      ringX(e.clientX)
+      ringY(e.clientY)
+      dotX(e.clientX)
+      dotY(e.clientY)
+    },
+    { passive: true },
+  )
+  document.addEventListener('pointerleave', () => el.classList.add('is-hidden'))
+  document.addEventListener('pointerdown', () => el.classList.add('is-down'))
+  document.addEventListener('pointerup', () => el.classList.remove('is-down'))
+
+  document.addEventListener('pointerover', (e) => {
+    if (forcedLabel) return
+    const target = e.target.closest?.(HOVER_SEL)
+    if (!target) {
+      el.classList.remove('is-hover')
+      setLabel(null)
+      return
+    }
+    const text = target.getAttribute('data-cursor')
+    el.classList.add('is-hover')
+    setLabel(text)
+  })
+
+  // after touching the hot stones the hand stays warm for a little while
+  const warmth = { v: 0 }
+  gsap.ticker.add((_, dt) => {
+    if (warmth.v <= 0.001) return
+    warmth.v = Math.max(0, warmth.v - dt / 9000)
+    el.style.setProperty('--warm', warmth.v.toFixed(3))
+  })
+
+  api = {
+    warm(amount = 0.02) {
+      warmth.v = Math.min(1, warmth.v + amount)
+    },
+    /** Force a label (e.g. while hovering a WebGL object). */
+    label(text) {
+      forcedLabel = text
+      if (text) {
+        el.classList.add('is-hover')
+        setLabel(text)
+      } else {
+        el.classList.remove('is-hover')
+        setLabel(null)
+      }
+    },
+  }
+  return api
+}
+
+export const cursor = () => api
+
+/** Elements that gently follow the pointer. */
+export function initMagnetic() {
+  if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) return
+  qsa('[data-magnetic]').forEach((el) => {
+    // a calm pull, no bounce – calm hands
+    const xTo = gsap.quickTo(el, 'x', { duration: 0.9, ease: 'power3.out' })
+    const yTo = gsap.quickTo(el, 'y', { duration: 0.9, ease: 'power3.out' })
+    el.addEventListener('pointermove', (e) => {
+      const r = el.getBoundingClientRect()
+      xTo((e.clientX - (r.left + r.width / 2)) * 0.16)
+      yTo((e.clientY - (r.top + r.height / 2)) * 0.2)
+    })
+    el.addEventListener('pointerleave', () => {
+      xTo(0)
+      yTo(0)
+    })
+  })
+}

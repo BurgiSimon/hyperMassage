@@ -1,0 +1,90 @@
+@font-face {
+  font-family: 'Cormorant';
+  src: url('/fonts/cormorant.woff2') format('woff2');
+  font-weight: 300 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Cormorant';
+  src: url('/fonts/cormorant-italic.woff2') format('woff2');
+  font-weight: 300 700;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Instrument Sans';
+  src: url('/fonts/instrument-sans.woff2') format('woff2');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Serif Fallback';
+  src: local('Georgia'), local('Times New Roman');
+  size-adjust: 88%;
+  ascent-override: 98%;
+}
+
+@property --sky-ink {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #1c1e24;
+}
+@property --chrome-bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgb(246 241 231 / 0.62);
+}
+
+:root {
+  --paper: #f6f1e7;
+  --paper-2: #efe8db;
+  --ink: #1c1e24;
+  --ink-soft: rgb(28 30 36 / 0.68);
+  --line: rgb(28 30 36 / 0.14);
+  --sun: #b04a26; /* Abendrot – the one accent colour (white text on it ≥ 4.5:1) */
+  --sun-deep: #8f3a1c;
+  --sun-ink: #a3421f; /* the accent as small text on paper */
+  --night: #141a2a;
+  --night-2: #1d2539;
+  --star: #f3e9d4;
+
+  /* set live by the scene: text colour that reads on the current sky */
+  --sky-ink: #1c1e24;
+  --sky-ink-soft: rgb(28 30 36 / 0.7);
+  --chrome-bg: rgb(246 241 231 / 0.62);
+
+  --f-display: 'Cormorant', 'Serif Fallback', Georgia, serif;
+  --f-text: 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+
+  --m: max(clamp(16px, 3vw, 44px), env(safe-area-inset-left), env(safe-area-inset-right));
+  --radius: 30px;
+  --header-h: 72px;
+  --card-w: 1180px;
+
+  --fs-body: clamp(16px, 0.95rem + 0.2vw, 18px);
+  --fs-lead: clamp(19px, 1.1rem + 0.5vw, 25px);
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* dusk and night cards */
+.page--dusk {
+  --paper: #f3e7da;
+  --paper-2: #ead9c8;
+}
+.page--night,
+.footer {
+  --paper: #182036;
+  --paper-2: #222b44;
+  --ink: #efe7d6;
+  --ink-soft: rgb(239 231 214 / 0.7);
+  --line: rgb(239 231 214 / 0.16);
+  --sun: #e59a6c;
+  --sun-deep: #f0b089;
+  --sun-ink: #e59a6c;
+  --on-sun: #161b2b; /* light accent at night: dark text on it */
+  --ok: #8fdcae;
+}

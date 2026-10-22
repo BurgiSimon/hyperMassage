@@ -1,0 +1,305 @@
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { qs, qsa, clamp, smoothstep, openStatus, partOfDay, fmtTime, canHover, zurichNow, HOURS, fontsReady } from '../utils/helpers.js'
+import { look, mixLook } from '../gl/scene.js'
+import { nowHour, zurichDay, STORY_DAY } from '../gl/sun.js'
+
+gsap.registerPlugin(ScrollTrigger)
+
+const INK_DARK = [28, 30, 36]
+const INK_LIGHT = [244, 236, 220]
+
+/**
+ * The day as you scroll: the hero shows the real sky over Kestenholz right now,
+ * every section further down is an hour of a quiet October day.
+ */
+export function initDay({ scene, reduced }) {
+  const html = document.documentElement
+  const anchors = qsa('[data-hour]').map((el) => ({ el, hour: el.dataset.hour === 'now' ? null : parseFloat(el.dataset.hour), y: 0 }))
+  const clockTime = qs('[data-clock-time]')
+  const clockLabel = qs('[data-clock-label]')
+  const clock = qs('[data-scene-clock]')
+  const hero = qs('.hero')
+  let today = zurichDay()
+
+  const live = { hour: nowHour(), override: null }
+  let heroLook = look(live.hour, today)
+  const storyLooks = new Map()
+  const storyLook = (h) => {
+    const k = Math.round(h * 60)
+    if (!storyLooks.has(k)) storyLooks.set(k, look(k / 60, STORY_DAY))
+    return storyLooks.get(k)
+  }
+
+  const measure = () => {
+    const vh = window.innerHeight
+    const max = Math.max(1, document.documentElement.scrollHeight - vh)
+    anchors.forEach((a, i) => {
+      const r = a.el.getBoundingClientRect()
+      const top = r.top + window.scrollY
+      a.y = i === 0 ? 0 : i === anchors.length - 1 ? max : clamp(top + r.height / 2 - vh / 2, 0, max)
+    })
+  }
+
+  // CSS colours that read well on the current sky
+  let lastInk = ''
+  let lastBg = ''
+  const fallback = qs('[data-scene-fallback]')
+  const rgb = (c) => `rgb(${c.map((v) => Math.round(v * 255)).join(' ')})`
+  const paintFallbackSky = (L) => {
+    // (only while there is no live scene – the layer sits behind the canvas otherwise)
+    if (!fallback || (scene && !scene.lost)) return
+    const k = 0.2 + 0.8 * L.amb
+    const land = [0.2, 0.27, 0.19].map((v, i) => v * k * 0.75 + L.fog[i] * 0.25 * k)
+    fallback.style.setProperty('--fb-zen', rgb(L.zen))
+    fallback.style.setProperty('--fb-hor', rgb(L.hor))
+    fallback.style.setProperty('--fb-land', rgb(land))
+  }
+  const paintChrome = (L) => {
+    paintFallbackSky(L)
+    // page background and browser bar follow the sky (a plain property on <html>: no restyle cascade)
+    const zen = `rgb(${L.zen.map((v) => Math.round(v * 31) * 8).join(',')})`
+    if (zen !== lastBg) {
+      lastBg = zen
+      html.style.backgroundColor = zen
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', zen)
+    }
+    // dark or light ink – never a grey in between (CSS cross-fades the switch)
+    const t = L.skyLum > 0.5 ? 1 : 0
+    const c = t ? INK_DARK : INK_LIGHT
+    const ink = `rgb(${c.join(' ')})`
+    if (ink !== lastInk) {
+      lastInk = ink
+      html.style.setProperty('--sky-ink', ink)
+      html.style.setProperty('--sky-ink-soft', `rgb(${c.join(' ')} / 0.72)`)
+      // (dark pills stay dense: light cards scroll under the header in the evening)
+      html.style.setProperty('--chrome-bg', t ? 'rgb(246 241 231 / 0.62)' : 'rgb(16 21 36 / 0.8)')
+    }
+  }
+
+  let shownMinute = -1
+  const paintClock = (hour, isLive) => {
+    const minute = Math.round((((hour % 24) + 24) % 24) * 60)
+    if (minute === shownMinute) return
+    shownMinute = minute
+    clockTime.textContent = fmtTime(minute / 60, true)
+    const now = isLive && live.override === null
+    clockLabel.textContent = now ? `${partOfDay(hour)} · jetzt` : partOfDay(hour)
+    // the story day is a Thursday; a dragged sun is today at that hour
+    const span = isLive ? HOURS[zurichNow().day] : HOURS[4]
+    const open = now ? openStatus().open : !!span && hour >= span[0] && hour < span[1]
+    clock.classList.toggle('is-open', open)
+  }
+
+  const update = () => {
+    const y = window.scrollY
+    let i = 0
+    while (i < anchors.length - 2 && y > anchors[i + 1].y) i++
+    const a = anchors[i]
+    const b = anchors[i + 1]
+    const t = clamp((y - a.y) / Math.max(1, b.y - a.y))
+    let L
+    let hour
+    if (a.hour === null) {
+      // from the real «now» into the story day
+      const e = smoothstep(0.05, 0.95, t)
+      const h = live.override ?? live.hour
+      L = e <= 0 ? heroLook : mixLook(heroLook, storyLook(b.hour), e)
+      hour = e < 0.5 ? h : b.hour
+      paintClock(e < 0.5 ? h : b.hour, e < 0.5)
+    } else {
+      hour = a.hour + (b.hour - a.hour) * t
+      L = storyLook(hour)
+      paintClock(hour, false)
+    }
+    scene?.setLook(L, hour)
+    paintChrome(L)
+    current.look = L
+    current.hour = hour
+  }
+  const current = { look: heroLook, hour: live.hour }
+
+  measure()
+  update()
+  ScrollTrigger.addEventListener('refresh', () => {
+    measure()
+    update()
+  })
+  window.addEventListener('scroll', update, { passive: true })
+  // greeting and opening status in the hero
+  const greet = qs('[data-greeting]')
+  const statusText = qs('[data-status-text]')
+  const status = qs('.hero__status')
+  const paintStatus = () => {
+    const n = zurichNow()
+    const h = n.decimal
+    // (no «Gute Nacht» – that is a goodbye)
+    if (greet) greet.textContent = h >= 5 && h < 11 ? 'Guten Morgen aus Kestenholz' : h < 17 && h >= 11 ? 'Guten Tag aus Kestenholz' : h >= 17 ? 'Guten Abend aus Kestenholz' : 'Spät noch wach? Grüsse aus Kestenholz'
+    const st = openStatus(n)
+    if (statusText) statusText.textContent = st.text
+    status?.classList.toggle('is-open', st.open)
+  }
+  paintStatus()
+
+  // keep «now» current (also across midnight)
+  setInterval(() => {
+    live.hour = nowHour()
+    today = zurichDay()
+    paintStatus()
+    shownMinute = -1
+    if (live.override === null) heroLook = look(live.hour, today)
+    update()
+  }, 60000)
+
+  // panorama labels on the real summits
+  const peaks = qs('[data-peaks]')
+  const blockers = qsa('.hero__line > span, .hero__card, .hero__greet, .hero__hint')
+  // the hero lines may still be mid-rise: take x from the words, y from their (unmoved) line
+  const boxOf = (b) => {
+    const r = b.getBoundingClientRect()
+    if (!b.parentElement.matches('.hero__line')) return r
+    const l = b.parentElement.getBoundingClientRect()
+    return { left: r.left, right: r.right, top: l.top, bottom: l.bottom }
+  }
+  const placePeaks = () => {
+    if (!scene || !peaks) return
+    const W = window.innerWidth
+    const items = qsa('li', peaks)
+    peaks.classList.add('is-ready') // (labels must be displayable to be measured)
+    // everything in page coordinates (the labels live in the hero)
+    const sy = window.scrollY
+    const pad = 12
+    const taken = blockers.map(boxOf).map((r) => ({ l: r.left - pad, r: r.right + pad, t: r.top + sy - pad, b: r.bottom + sy + pad }))
+    const clash = (a) => taken.some((r) => a.l < r.r && a.r > r.l && a.t < r.b && a.b > r.t)
+    items.forEach((li) => {
+      li.classList.remove('is-on')
+      const p = scene.project(parseFloat(li.dataset.az), parseFloat(li.dataset.el))
+      if (!p || p.x < 8 || p.x > W - 8 || p.y < window.innerHeight * 0.25) return
+      // measure the label, then try it centred over its summit, then nudged to either side
+      li.classList.add('is-on')
+      const lw = li.offsetWidth
+      const lh = li.offsetHeight
+      const bottom = p.y - 16
+      const box = (left) => ({ l: left, r: left + lw, t: bottom - lh, b: p.y })
+      const lo = 8
+      const hi = W - lw - 8
+      const tries = [p.x - lw / 2, p.x - 18, p.x - lw + 18].map((x) => Math.min(hi, Math.max(lo, x)))
+      const left = tries.find((x) => !clash(box(x)))
+      if (left === undefined) {
+        li.classList.remove('is-on')
+        return
+      }
+      taken.push(box(left))
+      li.style.left = `${left}px`
+      li.style.top = `${bottom}px`
+      // the leader line still points at the summit
+      li.style.setProperty('--lx', `${(p.x - left).toFixed(1)}px`)
+    })
+  }
+  if (scene) {
+    placePeaks()
+    // (after the scene has measured its new size – not on the window's resize event)
+    document.addEventListener('scene:resize', placePeaks)
+    fontsReady().then(placePeaks)
+  }
+
+  // drag the sun across the sky (hero only)
+  const hint = qs('[data-sun-hint]')
+  const hintText = qs('[data-sun-hint-text]')
+  if (scene && hero && !reduced) {
+    let dragging = false
+    const isInteractive = (el) => el.closest('a, button, input, label, .peaks li')
+    const setFromX = (x) => {
+      // (the sun is drawn for today: search today's path, not the story day's)
+      const hr = scene.hourFromX(x, live.override ?? live.hour, today)
+      live.override = hr
+      heroLook = look(hr, today)
+      shownMinute = -1
+      update()
+      const dayOpen = HOURS[zurichNow().day]
+      const isOpen = dayOpen && hr >= dayOpen[0] && hr < dayOpen[1]
+      hintText.textContent = `${fmtTime(hr)} Uhr${dayOpen ? (isOpen ? ' · Praxis offen' : ' · Praxis geschlossen') : ''}`
+    }
+    // the sun moves once the pointer does: a stray click changes nothing, and a finger
+    // only takes the sun when it moves sideways (a vertical swipe just scrolls)
+    let start = null
+    hero.addEventListener('pointerdown', (e) => {
+      if (e.button > 0 || isInteractive(e.target) || window.scrollY > 40) return
+      start = { x: e.clientX, y: e.clientY, mouse: e.pointerType === 'mouse' }
+    })
+    hero.addEventListener('pointermove', (e) => {
+      if (!dragging && start) {
+        const dx = Math.abs(e.clientX - start.x)
+        if (start.mouse ? Math.hypot(dx, e.clientY - start.y) < 4 : dx < 8 || dx < Math.abs(e.clientY - start.y)) return
+        dragging = true
+        hero.classList.add('is-dragging')
+        hero.setPointerCapture(e.pointerId)
+      }
+      if (dragging) setFromX(e.clientX)
+    })
+    const end = () => {
+      start = null
+      if (!dragging) return
+      dragging = false
+      hero.classList.remove('is-dragging')
+    }
+    hero.addEventListener('pointerup', end)
+    hero.addEventListener('pointercancel', end)
+    // back to the real «now»
+    hero.addEventListener('dblclick', (e) => {
+      if (isInteractive(e.target) || live.override === null) return
+      live.override = null
+      heroLook = look(live.hour, today)
+      shownMinute = -1
+      update()
+      hintText.textContent = 'Zieh die Sonne über den Himmel'
+    })
+    hero.classList.add('can-drag')
+    // the cursor offers the sun only where it can be dragged
+    if (canHover()) {
+      const offer = () => (window.scrollY > 40 ? hero.removeAttribute('data-cursor') : hero.setAttribute('data-cursor', 'Sonne ziehen'))
+      offer()
+      window.addEventListener('scroll', offer, { passive: true })
+    }
+  }
+  const canDrag = !!(scene && hero && !reduced)
+
+  return {
+    /** after the loader: offer the sun to drag */
+    showHint() {
+      if (!hint || !canDrag) return
+      // only where it has room: never over the hero card or its buttons
+      const h = hint.getBoundingClientRect()
+      const c = qs('.hero__card')?.getBoundingClientRect()
+      if (c && h.top < c.bottom + 8 && h.bottom > c.top - 8 && h.left < c.right && h.right > c.left) return
+      gsap.to(hint, { opacity: 1, duration: 1, delay: 1.6 })
+      // once the visitor scrolls on, the hint has done its job
+      const onScroll = () => {
+        if (window.scrollY < 120) return
+        gsap.to(hint, { opacity: 0, duration: 0.6, overwrite: true })
+        window.removeEventListener('scroll', onScroll)
+      }
+      window.addEventListener('scroll', onScroll, { passive: true })
+    },
+    get look() {
+      return current.look
+    },
+    get hour() {
+      return current.hour
+    },
+    /** temporarily show a given hour of the story day (e.g. while planning an appointment) */
+    preview(hour) {
+      if (!scene) return
+      if (hour === null) return update()
+      const L = storyLook(hour)
+      scene.setLook(L, hour)
+      paintChrome(L)
+      paintClock(hour, false)
+    },
+    refresh: () => {
+      measure()
+      update()
+      placePeaks()
+    },
+  }
+}

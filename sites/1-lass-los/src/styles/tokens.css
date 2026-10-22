@@ -1,0 +1,187 @@
+/* ───────────────────────── Fonts (self-hosted, OFL) ───────────────────────── */
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('/fonts/fraunces.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Fraunces';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('/fonts/fraunces-italic.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Geist';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('/fonts/geist.woff2') format('woff2-variations');
+}
+@font-face {
+  font-family: 'Geist Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('/fonts/geist-mono.woff2') format('woff2-variations');
+}
+
+/* ───────────────────────── Animatable theme colours ───────────────────────── */
+@property --bg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #15120f;
+}
+@property --fg {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #efe8dd;
+}
+@property --fg-soft {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgb(239 232 221 / 0.64);
+}
+@property --line {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgb(239 232 221 / 0.16);
+}
+@property --accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #e3815a;
+}
+@property --accent-ink {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: #e3815a;
+}
+@property --surface {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: rgb(239 232 221 / 0.05);
+}
+
+:root {
+  /* palette */
+  --basalt: #15120f;
+  --basalt-2: #1f1b17;
+  --basalt-3: #2a2520;
+  --linen: #efe8dd;
+  --linen-2: #e6dccd;
+  --sand: #d6c5ad;
+  --ink: #1b1815;
+  --ink-soft: #5d534a;
+  --clay: #b04f2c;
+  --clay-deep: #8f3d20;
+  --clay-bg: #a24727;
+  --clay-glow: #e3815a;
+  --ember: #ff9d5c;
+  --moss: #1d2620;
+  --moss-2: #2a372d;
+  --sage: #b7c2a5;
+
+  /* type */
+  --font-serif: 'Fraunces', 'Iowan Old Style', 'Palatino Linotype', Georgia, serif;
+  --font-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
+
+  --fs-hero: clamp(6.5rem, 23vw, 25rem);
+  --fs-display: clamp(2.9rem, 7vw, 8.25rem);
+  --fs-h3: clamp(1.9rem, 2.7vw, 2.9rem);
+  --fs-lead: clamp(1.3rem, 1.9vw, 1.85rem);
+  --fs-body: clamp(1rem, 0.94rem + 0.22vw, 1.125rem);
+  --fs-small: 0.9rem;
+  --fs-mono: 0.72rem;
+
+  /* space */
+  --gutter: clamp(1.15rem, 3.2vw, 3.25rem);
+  --section-y: clamp(6.5rem, 13vw, 12.5rem);
+  --header-h: 5.25rem;
+  --radius: 1.25rem;
+  --radius-lg: 2rem;
+  --max: 1680px;
+
+  /* motion */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-soft: cubic-bezier(0.33, 1, 0.68, 1);
+
+  /* theme defaults (dark) */
+  --bg: var(--basalt);
+  --fg: var(--linen);
+  --fg-soft: rgb(239 232 221 / 0.64);
+  --line: rgb(239 232 221 / 0.16);
+  --accent: var(--clay-glow);
+  --accent-ink: var(--clay-glow);
+  --surface: rgb(239 232 221 / 0.05);
+
+  transition:
+    --accent-ink 0.9s var(--ease-in-out),
+    --bg 0.9s var(--ease-in-out),
+    --fg 0.9s var(--ease-in-out),
+    --fg-soft 0.9s var(--ease-in-out),
+    --line 0.9s var(--ease-in-out),
+    --accent 0.9s var(--ease-in-out),
+    --surface 0.9s var(--ease-in-out);
+}
+
+/* Theme definitions.
+   Without JS each section paints its own theme; with JS the active theme is
+   lifted to :root so every colour cross-fades as you scroll. */
+.theme-dark,
+:root[data-active-theme='dark'],
+.no-js [data-theme='dark'],
+[data-theme-fixed='dark'] {
+  --bg: var(--basalt);
+  --fg: var(--linen);
+  --fg-soft: rgb(239 232 221 / 0.64);
+  --line: rgb(239 232 221 / 0.16);
+  --accent: var(--clay-glow);
+  --accent-ink: var(--clay-glow);
+  --surface: rgb(239 232 221 / 0.05);
+}
+
+:root[data-active-theme='light'],
+.no-js [data-theme='light'],
+[data-theme-fixed='light'] {
+  --bg: var(--linen);
+  --fg: var(--ink);
+  --fg-soft: rgb(27 24 21 / 0.68);
+  --line: rgb(27 24 21 / 0.14);
+  --accent: var(--clay);
+  --accent-ink: var(--clay-deep);
+  --surface: rgb(27 24 21 / 0.04);
+}
+
+:root[data-active-theme='moss'],
+.no-js [data-theme='moss'] {
+  --bg: var(--moss);
+  --fg: #ebe7da;
+  --fg-soft: rgb(235 231 218 / 0.66);
+  --line: rgb(235 231 218 / 0.14);
+  --accent: var(--sage);
+  --accent-ink: var(--sage);
+  --surface: rgb(235 231 218 / 0.05);
+}
+
+:root[data-active-theme='clay'],
+.no-js [data-theme='clay'] {
+  --bg: var(--clay-bg);
+  --fg: #fbf3ea;
+  --fg-soft: rgb(251 243 234 / 0.9);
+  --line: rgb(251 243 234 / 0.3);
+  --accent: var(--ink);
+  --accent-ink: #fbf3ea;
+  --surface: rgb(251 243 234 / 0.08);
+}
+
+@media (max-width: 720px) {
+  :root {
+    --header-h: 4.25rem;
+    --radius-lg: 1.4rem;
+  }
+}
