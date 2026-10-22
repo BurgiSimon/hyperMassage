@@ -524,9 +524,7 @@ button:hover .roll__b {
     margin: -3px 0 0 -3px;
     border-radius: 50%;
     background: color-mix(in srgb, var(--clay-glow) calc(var(--warm) * 100%), var(--fg));
-    transition:
-      opacity 0.3s,
-      transform 0.4s var(--ease-out);
+    transition: opacity 0.3s;
   }
   .cursor {
     --warm: 0;
@@ -570,7 +568,7 @@ button:hover .roll__b {
     border-color: var(--fg);
   }
   .cursor.is-hover .cursor__dot {
-    transform: scale(0);
+    opacity: 0; /* (GSAP owns its transform) */
   }
   .cursor.has-label .cursor__ring {
     width: 96px;
@@ -584,7 +582,7 @@ button:hover .roll__b {
     transform: none;
   }
   .cursor.has-label .cursor__dot {
-    transform: scale(0);
+    opacity: 0; /* (GSAP owns its transform) */
   }
   .cursor.is-hidden .cursor__ring,
   .cursor.is-hidden .cursor__dot {
@@ -660,4 +658,16 @@ button:hover .roll__b {
     min-height: 0 !important;
     break-inside: avoid;
   }
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+/* no lonely last words */
+p,
+li,
+dd,
+summary {
+  text-wrap: pretty;
 }

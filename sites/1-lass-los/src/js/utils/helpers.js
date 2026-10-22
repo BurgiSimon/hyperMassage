@@ -126,3 +126,10 @@ export function zurichNow() {
   const minute = parseInt(parts.minute, 10)
   return { day: days[parts.weekday], hour, minute, decimal: hour + minute / 60 }
 }
+
+/** After a mailto:/sms: hand-over: the address and number, in case no app opened. */
+export function sentHint(el, via) {
+  if (!el) return
+  const app = via === 'sms' ? 'Deine SMS-App' : 'Dein E-Mail-Programm'
+  el.innerHTML = `${app} öffnet sich. Nichts passiert? Schreib an <a href="mailto:massage_buergi@ggs.ch">massage_buergi@ggs.ch</a> oder ruf an: <a href="tel:+41782249197">078&nbsp;224&nbsp;91&nbsp;97</a>.`
+}

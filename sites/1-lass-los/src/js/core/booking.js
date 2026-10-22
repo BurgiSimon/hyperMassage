@@ -1,5 +1,5 @@
 import gsap from 'gsap'
-import { qs, qsa } from '../utils/helpers.js'
+import { qs, qsa, sentHint } from '../utils/helpers.js'
 import { startScroll, stopScroll } from './scroll.js'
 
 const PHONE = '+41782249197'
@@ -137,6 +137,7 @@ export function initBooking({ reduced, emit, onOpen }) {
       const subject = `Terminanfrage${name ? ` – ${name}` : ''}`
       window.location.href = `mailto:${EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
     }
+    sentHint(qs('[data-send-hint]', form), via)
     emit?.('ui:send')
   })
 

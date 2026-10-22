@@ -1,5 +1,5 @@
 import gsap from 'gsap'
-import { qs, onVisibility } from '../utils/helpers.js'
+import { qs, onVisibility, sentHint } from '../utils/helpers.js'
 
 const EMAIL = 'massage_buergi@ggs.ch'
 const PHONE = '+41782249197'
@@ -21,7 +21,8 @@ export function initVoucher({ reduced, emit }) {
   const gift = qs('[data-v-gift]', card)
   const value = qs('[data-v-value]', card)
   const no = qs('[data-v-no]', card)
-  no.textContent = `Nº ${String(new Date().getFullYear()).slice(2)}${String(Math.floor(Math.random() * 900) + 100)}`
+  // a preview, not a voucher: no serial number
+  no.textContent = 'Muster'
 
   const update = () => {
     const data = new FormData(form)
@@ -31,7 +32,7 @@ export function initVoucher({ reduced, emit }) {
     if (gift.dataset.key !== data.get('gift')) {
       gift.dataset.key = data.get('gift')
       gsap.fromTo(gift, { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.7, ease: 'expo.out' })
-      if (!reduced) gsap.fromTo(card, { rotateZ: -2 }, { rotateZ: 0, duration: 1.2, ease: 'elastic.out(1, 0.4)' })
+      if (!reduced) gsap.fromTo(card, { rotation: -1.6 }, { rotation: 0, duration: 1.1, ease: 'expo.out' })
     }
     gift.innerHTML = g.html
     value.textContent = g.value
@@ -75,14 +76,15 @@ export function initVoucher({ reduced, emit }) {
       window.location.href = `mailto:${EMAIL}?subject=${encodeURIComponent('Anfrage Massagegutschein')}&body=${encodeURIComponent(body)}`
     }
     if (!reduced) gsap.fromTo(card, { y: 0 }, { y: -18, duration: 0.35, yoyo: true, repeat: 1, ease: 'power2.out' })
+    sentHint(qs('[data-send-hint]', form), e.submitter?.dataset.send === 'sms' ? 'sms' : 'mail')
   })
 
   // tilt + light
   if (reduced || !window.matchMedia('(hover: hover)').matches) {
     if (!reduced) {
       const sway = gsap.to(card, {
-        '--ry': '8deg',
-        '--rx': '-4deg',
+        rotationY: 8,
+        rotationX: -4,
         duration: 4,
         yoyo: true,
         repeat: -1,
@@ -93,8 +95,8 @@ export function initVoucher({ reduced, emit }) {
     }
     return
   }
-  const rx = gsap.quickTo(card, '--rx', { duration: 0.6, ease: 'power3.out', unit: 'deg' })
-  const ry = gsap.quickTo(card, '--ry', { duration: 0.6, ease: 'power3.out', unit: 'deg' })
+  const rx = gsap.quickTo(card, 'rotationX', { duration: 0.6, ease: 'power3.out' })
+  const ry = gsap.quickTo(card, 'rotationY', { duration: 0.6, ease: 'power3.out' })
   stage.addEventListener('pointermove', (e) => {
     const r = card.getBoundingClientRect()
     const x = (e.clientX - r.left) / r.width

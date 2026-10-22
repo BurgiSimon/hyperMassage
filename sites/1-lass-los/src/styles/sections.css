@@ -392,7 +392,8 @@ footer[data-theme] {
 }
 .portrait {
   position: relative;
-  max-width: 27rem;
+  /* (the photo is small: show it no larger than it stays sharp) */
+  max-width: 23rem;
 }
 .portrait__frame {
   position: relative;
@@ -403,7 +404,7 @@ footer[data-theme] {
 }
 .portrait__img {
   width: 100%;
-  height: 112%;
+  height: 104%;
   object-fit: cover;
   object-position: 50% 30%;
   filter: saturate(0.92) contrast(1.02) sepia(0.06);
@@ -440,8 +441,9 @@ footer[data-theme] {
 .seal text {
   fill: currentColor;
   font-family: var(--font-mono);
-  font-size: 13.4px;
-  letter-spacing: 0.14em;
+  /* (the whole line fits once around the circle) */
+  font-size: 10.8px;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 .seal__mark {
@@ -641,12 +643,49 @@ footer[data-theme] {
   max-width: 28rem;
   color: var(--fg-soft);
 }
+.service__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem 1rem;
+  margin-top: auto;
+  padding-top: 1.75rem;
+}
 .service__tags {
   display: flex;
   flex-wrap: wrap;
   gap: 0.45rem;
-  margin-top: auto;
-  padding-top: 1.75rem;
+}
+/* each treatment: its own request, the treatment already chosen */
+.service__book {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0 1.1rem 0 1.25rem;
+  border-radius: 999px;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    background-color 0.4s var(--ease-out),
+    gap 0.4s var(--ease-out);
+}
+.service__book svg {
+  width: 1.05rem;
+  height: 1.05rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+}
+@media (hover: hover) {
+  .service__book:hover {
+    background: var(--accent-ink);
+    gap: 0.8rem;
+  }
 }
 .service__tags li {
   padding: 0.45rem 0.8rem;
@@ -709,6 +748,9 @@ footer[data-theme] {
     overflow: hidden;
     /* clip (unlike hidden) cannot be scrolled by focus() – the track moves only by transform */
     overflow: clip;
+    /* soft edges: the cards fade out before the chapter label at the side */
+    -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 var(--gutter), #000 calc(100% - var(--gutter)), transparent);
+    mask-image: linear-gradient(90deg, transparent 0, #000 var(--gutter), #000 calc(100% - var(--gutter)), transparent);
   }
   .services__track {
     display: flex;
@@ -719,7 +761,8 @@ footer[data-theme] {
   .service {
     flex: 0 0 auto;
     width: min(64vw, 60rem);
-    height: min(58vh, 36rem);
+    /* (header, heading and progress bar must fit too – also on 768 px tall laptops) */
+    height: clamp(20rem, calc(100svh - 21rem), 36rem);
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
     gap: clamp(1.5rem, 3vw, 3rem);
   }
@@ -754,6 +797,17 @@ footer[data-theme] {
     background: var(--fg);
     transform-origin: left;
     transform: scaleX(0);
+  }
+}
+@media (min-width: 1024px) and (max-height: 820px) {
+  .services__pin {
+    padding-block: calc(var(--header-h) - 1rem) 1rem;
+  }
+  .services__head {
+    margin-bottom: 1.5rem;
+  }
+  .services__head .display {
+    font-size: clamp(2.6rem, 9vh, 5rem);
   }
 }
 @media (max-width: 1023px) {
@@ -1126,6 +1180,10 @@ footer[data-theme] {
   .prices__grid {
     grid-template-columns: 1fr;
   }
+  /* on phones the prices come first, the dial follows */
+  .prices__panel {
+    order: -1;
+  }
   .dial {
     width: min(100%, 26rem);
   }
@@ -1197,9 +1255,8 @@ footer[data-theme] {
   aspect-ratio: 1.586;
   border-radius: 1.5rem;
   color: var(--ink);
-  transform: rotateX(var(--rx)) rotateY(var(--ry));
+  /* (GSAP owns the transform: tilt, sway and bounce together) */
   transform-style: preserve-3d;
-  transition: transform 0.2s linear;
   will-change: transform;
   box-shadow:
     0 2.5rem 5rem -1rem rgb(60 18 4 / 0.45),
@@ -1612,7 +1669,7 @@ footer[data-theme] {
   border-top: 1px solid var(--line);
   color: var(--fg-soft);
 }
-@media (max-width: 1000px) {
+@media (max-width: 1200px) {
   .contact__grid {
     grid-template-columns: 1fr;
   }
@@ -1826,6 +1883,9 @@ footer[data-theme] {
   gap: 2rem;
   padding-bottom: clamp(3rem, 6vw, 5rem);
 }
+.footer__claim em {
+  display: block;
+}
 .footer__claim {
   max-width: 16ch;
   font-family: var(--font-serif);
@@ -1844,7 +1904,7 @@ footer[data-theme] {
   padding-block: 2.5rem;
   border-top: 1px solid var(--line);
 }
-.footer__cols p {
+.footer__cols p:not(.footer__label) {
   font-size: 0.97rem;
 }
 .footer__cols a {
@@ -1859,7 +1919,7 @@ footer[data-theme] {
 }
 .footer__clock {
   font-family: var(--font-serif);
-  font-size: 2.2rem !important;
+  font-size: 2.2rem;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
@@ -1901,6 +1961,11 @@ footer[data-theme] {
   }
   .footer__cols {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .footer__cols {
+    grid-template-columns: 1fr;
   }
 }
 @media (max-width: 720px) {
@@ -2109,5 +2174,17 @@ body.is-breathing .breath::before {
   }
   50% {
     box-shadow: 0 0 0 4px rgb(239 232 221 / 0);
+  }
+}
+
+/* touch: the card sways on its own – nothing to move */
+@media (hover: none) {
+  .voucher__note {
+    display: none;
+  }
+}
+@media (max-width: 520px) {
+  .vcard__long {
+    display: none;
   }
 }

@@ -201,7 +201,7 @@
               <span data-roll>Termin anfragen</span>
               <svg class="btn__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
             </a>
-            <a class="btn btn--line" href="tel:+41782249197" data-cursor="Anrufen">
+            <a class="btn btn--line" href="tel:+41782249197">
               <span data-roll>078&nbsp;224&nbsp;91&nbsp;97</span>
             </a>
           </div>
@@ -209,7 +209,7 @@
 
         <div class="hero__foot">
           <span class="mono hero__coords" data-hero-fade>47.2835° N — 7.7523° E</span>
-          <span class="mono hero__touch" data-hero-fade aria-hidden="true">Tippe die Steine an</span>
+          <span class="mono hero__touch" data-hero-fade aria-hidden="true">Steine antippen</span>
           <span class="hero__scroll mono" aria-hidden="true" data-hero-fade><span class="hero__scroll-line"></span>Scrollen</span>
           <span class="mono" data-hero-fade>Termine nur mit Voranmeldung</span>
         </div>
@@ -222,8 +222,8 @@
           <p class="intro__statement" data-scrub-words>
             Ob zur Lockerung bei muskulären Verspannungen
             <span class="pill pill--wave" aria-hidden="true"><canvas data-signet="wave" data-signet-mini></canvas></span>
-            oder als Auszeit vom Alltag
-            <span class="pill pill--stone" aria-hidden="true"></span>
+            oder als Auszeit vom
+            <span class="nowrap">Alltag <span class="pill pill--stone" aria-hidden="true"></span></span>
             – ich bin gerne für dich&nbsp;da.
           </p>
           <div class="intro__foot">
@@ -279,8 +279,8 @@
                 Ich bin Claudia Bürgi – Berufsmasseurin mit eigener kleiner Praxis in Kestenholz.
               </p>
               <p data-reveal-fade>
-                2004 habe ich meine Ausbildung zur Berufsmasseurin erfolgreich abgeschlossen und bin seither
-                nebenberuflich als Berufsmasseurin tätig. Seit dem Umzug in unser Eigenheim behandle ich meine Kundinnen
+                2004 habe ich meine Ausbildung zur Berufsmasseurin erfolgreich abgeschlossen und arbeite seither
+                nebenberuflich in meinem Beruf. Seit dem Umzug in unser Eigenheim behandle ich meine Kundinnen
                 und Kunden in meiner eigenen kleinen Praxis.
               </p>
               <p data-reveal-fade>
@@ -296,7 +296,7 @@
             <dl class="facts">
               <div class="facts__item" data-reveal-fade>
                 <dt class="mono">Ausbildung abgeschlossen</dt>
-                <dd><span data-count-to="2004" data-count-from="1950">2004</span></dd>
+                <dd><span>2004</span></dd>
               </div>
               <div class="facts__item" data-reveal-fade>
                 <dt class="mono">Jahre Erfahrung</dt>
@@ -349,10 +349,16 @@
                     Die bewährte Ganzkörper- oder Teilmassage: löst Verspannungen, fördert die Durchblutung und lässt dich
                     abschalten.
                   </p>
-                  <ul class="service__tags mono">
-                    <li>Ganz- oder Teilkörper</li>
-                    <li>30 · 45 · 60 Min.</li>
-                  </ul>
+                  <div class="service__foot">
+                    <ul class="service__tags mono">
+                      <li>Ganz- oder Teilkörper</li>
+                      <li>30 · 45 · 60 Min.</li>
+                    </ul>
+                    <a class="service__book" href="#kontakt" data-booking-open data-service="Klassische Massage">
+                      <span>Anfragen</span>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                    </a>
+                  </div>
                 </div>
               </li>
               <li class="service" data-service>
@@ -364,10 +370,16 @@
                     Gezielte Behandlung der HWS-Zone – von Nacken und Schultern, dort, wo sich der Alltag gerne
                     festsetzt.
                   </p>
-                  <ul class="service__tags mono">
-                    <li>Halswirbelsäule</li>
-                    <li>30 · 45 · 60 Min.</li>
-                  </ul>
+                  <div class="service__foot">
+                    <ul class="service__tags mono">
+                      <li>Halswirbelsäule</li>
+                      <li>30 · 45 · 60 Min.</li>
+                    </ul>
+                    <a class="service__book" href="#kontakt" data-booking-open data-service="Nacken-Schultermassage">
+                      <span>Anfragen</span>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                    </a>
+                  </div>
                 </div>
               </li>
               <li class="service" data-service>
@@ -378,10 +390,16 @@
                   <p class="service__text">
                     Punktgenaue Grifftechniken bei muskulären Schmerzen, abgestimmt auf dein Empfinden.
                   </p>
-                  <ul class="service__tags mono">
-                    <li>Gezielte Griffe</li>
-                    <li>30 · 45 · 60 Min.</li>
-                  </ul>
+                  <div class="service__foot">
+                    <ul class="service__tags mono">
+                      <li>Gezielte Griffe</li>
+                      <li>30 · 45 · 60 Min.</li>
+                    </ul>
+                    <a class="service__book" href="#kontakt" data-booking-open data-service="Manuelle Schmerztherapie">
+                      <span>Anfragen</span>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                    </a>
+                  </div>
                 </div>
               </li>
               <li class="service" data-service>
@@ -392,10 +410,16 @@
                   <p class="service__text">
                     Sanfte Schwingungen lockern die tiefliegende Muskulatur und bringen den Körper ins Gleichgewicht.
                   </p>
-                  <ul class="service__tags mono">
-                    <li>Tiefliegende Muskulatur</li>
-                    <li>30 · 45 · 60 Min.</li>
-                  </ul>
+                  <div class="service__foot">
+                    <ul class="service__tags mono">
+                      <li>Tiefliegende Muskulatur</li>
+                      <li>30 · 45 · 60 Min.</li>
+                    </ul>
+                    <a class="service__book" href="#kontakt" data-booking-open data-service="Schwingkissen-Therapie">
+                      <span>Anfragen</span>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                    </a>
+                  </div>
                 </div>
               </li>
               <li class="service" data-service>
@@ -406,10 +430,16 @@
                   <p class="service__text">
                     Eine äusserst entspannende Ganzkörpermassage, die mit Hilfe von warmen Lavasteinen ausgeführt wird.
                   </p>
-                  <ul class="service__tags mono">
-                    <li>Warme Lavasteine</li>
-                    <li>Zuschlag CHF 15</li>
-                  </ul>
+                  <div class="service__foot">
+                    <ul class="service__tags mono">
+                      <li>Warme Lavasteine</li>
+                      <li>Zuschlag CHF 15</li>
+                    </ul>
+                    <a class="service__book" href="#kontakt" data-booking-open data-service="Hot-Stone-Massage">
+                      <span>Anfragen</span>
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                    </a>
+                  </div>
                 </div>
               </li>
               <li class="service service--cta">
@@ -472,7 +502,7 @@
         <div class="container">
           <div class="prices__head">
             <p class="eyebrow" data-reveal-fade><span class="eyebrow__num">(05)</span> Preise</p>
-            <h2 class="display" id="prices-title" data-split-lines>Ein Tarif für alle<sup>*</sup> <em>Angebote.</em></h2>
+            <h2 class="display" id="prices-title" data-split-lines>Ein Tarif für alle <em>Angebote.</em></h2>
           </div>
 
           <div class="prices__grid">
@@ -526,7 +556,7 @@
                 <span class="toggle__text">Als Hot-Stone-Massage <small class="mono">+ CHF 15</small></span>
               </label>
 
-              <p class="footnote" data-reveal-fade>* Zuschlag von CHF 15 bei Hot-Stone-Massage</p>
+              <p class="footnote" data-reveal-fade>Hot-Stone-Massage: Zuschlag CHF&nbsp;15</p>
 
               <ul class="chips" data-reveal-fade>
                 <li class="chip">
@@ -563,7 +593,7 @@
               <div class="vform__row">
                 <label class="field" data-reveal-fade>
                   <span class="field__label mono">Für</span>
-                  <input class="field__input" name="to" type="text" autocomplete="off" maxlength="26" placeholder="Name der beschenkten Person" />
+                  <input class="field__input" name="to" type="text" autocomplete="off" maxlength="40" placeholder="Name" />
                 </label>
                 <label class="field" data-reveal-fade>
                   <span class="field__label mono">Von</span>
@@ -586,7 +616,7 @@
                   <span data-roll>Per SMS</span>
                 </button>
               </div>
-              <p class="vform__hint mono" data-reveal-fade>Öffnet dein E-Mail- bzw. SMS-Programm – nichts wird gespeichert.</p>
+              <p class="vform__hint mono" data-reveal-fade data-send-hint aria-live="polite">Öffnet sich als fertige Nachricht – nichts wird gespeichert.</p>
             </form>
           </div>
 
@@ -595,7 +625,7 @@
               <div class="vcard__face">
                 <div class="vcard__top">
                   <span class="mono">Gutschein</span>
-                  <span class="mono" data-v-no>Nº 0001</span>
+                  <span class="mono" data-v-no>Muster</span>
                 </div>
                 <svg class="vcard__mark" viewBox="0 0 40 40" aria-hidden="true">
                   <path d="M5.5 28.2c0-4.4 6.4-7.3 14.6-7.3 8.1 0 14.4 2.7 14.4 7 0 4.5-6.3 7.6-14.4 7.6S5.5 32.6 5.5 28.2Z" />
@@ -607,7 +637,7 @@
                   <p><span class="mono">Von</span> <span class="vcard__name" data-v-from>…</span></p>
                 </div>
                 <div class="vcard__bottom">
-                  <span class="mono">Claudia Bürgi · Massage · Kestenholz</span>
+                  <span class="mono">Claudia Bürgi<span class="vcard__long"> · Massage</span> · Kestenholz</span>
                   <span class="vcard__value" data-v-value>CHF 85</span>
                 </div>
               </div>
@@ -627,7 +657,7 @@
             <p class="faq__intro" data-reveal-fade>
               Die häufigsten Fragen rund um deinen Besuch. Und wenn deine Frage fehlt: Ruf mich einfach an.
             </p>
-            <a class="btn btn--dark" href="tel:+41782249197" data-cursor="Anrufen" data-magnetic data-reveal-fade>
+            <a class="btn btn--dark" href="tel:+41782249197" data-magnetic data-reveal-fade>
               <span data-roll>078&nbsp;224&nbsp;91&nbsp;97</span>
             </a>
           </div>
@@ -709,9 +739,9 @@
           <div class="contact__grid">
             <div class="contact__main">
               <p class="contact__lead" data-reveal-fade>
-                Termine nur mit Voranmeldung: Ruf mich an oder schreib mir eine E-Mail.
+                Termine nur mit Voranmeldung: Ruf mich an oder schreib mir eine <span class="nowrap">E-Mail</span>.
               </p>
-              <a class="bignum" href="tel:+41782249197" data-cursor="Anrufen" aria-label="Anrufen: 078 224 91 97">
+              <a class="bignum" href="tel:+41782249197" aria-label="Anrufen: 078 224 91 97">
                 <span class="bignum__inner" data-bignum>078&nbsp;224&nbsp;91&nbsp;97</span>
               </a>
               <div class="contact__actions">
@@ -745,7 +775,7 @@
                 <p class="hours__status mono" data-hours-status>Termine nur mit Voranmeldung</p>
               </div>
               <div class="hours__scale mono" aria-hidden="true">
-                <span>07</span><span>10</span><span>13</span><span>16</span><span>19</span>
+                <span>7</span><span>10</span><span>13</span><span>16</span><span>19</span>
               </div>
               <ul class="hours__list">
                 <li class="hours__day" data-day="1" data-open="7.5" data-close="19">
@@ -764,10 +794,10 @@
                   <span class="hours__name">Freitag</span><span class="hours__bar" aria-hidden="true"><i></i></span><span class="hours__time">geschlossen</span>
                 </li>
                 <li class="hours__day is-closed" data-day="6,0">
-                  <span class="hours__name">Samstag – Sonntag</span><span class="hours__bar" aria-hidden="true"><i></i></span><span class="hours__time">geschlossen</span>
+                  <span class="hours__name">Wochenende</span><span class="hours__bar" aria-hidden="true"><i></i></span><span class="hours__time">geschlossen</span>
                 </li>
               </ul>
-              <p class="hours__foot mono">Termine nur mit Voranmeldung</p>
+              <p class="hours__foot mono">Behandle ich gerade? Sprich auf den Beantworter.</p>
             </aside>
           </div>
         </div>
@@ -842,7 +872,7 @@
           </div>
           <div>
             <p class="footer__label mono">Öffnungszeiten</p>
-            <p>Mo, Mi, Do 7:30 – 19:00<br />Di 8:00 – 19:00<br />Fr – So geschlossen</p>
+            <p>Mo, Mi, Do <span class="nowrap">7:30 – 19:00</span><br />Di <span class="nowrap">8:00 – 19:00</span><br />Fr – So geschlossen</p>
           </div>
           <div>
             <p class="footer__label mono">Kestenholz, jetzt</p>
@@ -875,17 +905,21 @@
       <div class="menu__inner" data-lenis-prevent>
         <nav aria-label="Menü">
           <ol class="menu__list">
-            <li><a href="#ueber-mich" data-scroll-to data-menu-link><span class="mono">01</span><span class="menu__text">Über mich</span></a></li>
-            <li><a href="#angebot" data-scroll-to data-menu-link><span class="mono">02</span><span class="menu__text">Angebot</span></a></li>
-            <li><a href="#atempause" data-scroll-to data-menu-link><span class="mono">03</span><span class="menu__text">Atempause</span></a></li>
-            <li><a href="#preise" data-scroll-to data-menu-link><span class="mono">04</span><span class="menu__text">Preise</span></a></li>
-            <li><a href="#gutschein" data-scroll-to data-menu-link><span class="mono">05</span><span class="menu__text">Gutschein</span></a></li>
-            <li><a href="#gut-zu-wissen" data-scroll-to data-menu-link><span class="mono">06</span><span class="menu__text">Gut zu wissen</span></a></li>
-            <li><a href="#kontakt" data-scroll-to data-menu-link><span class="mono">07</span><span class="menu__text">Kontakt</span></a></li>
-            <li><a href="#anfahrt" data-scroll-to data-menu-link><span class="mono">08</span><span class="menu__text">Anfahrt</span></a></li>
+            <li><a href="#ueber-mich" data-scroll-to data-menu-link><span class="mono">02</span><span class="menu__text">Über mich</span></a></li>
+            <li><a href="#angebot" data-scroll-to data-menu-link><span class="mono">03</span><span class="menu__text">Angebot</span></a></li>
+            <li><a href="#atempause" data-scroll-to data-menu-link><span class="mono">04</span><span class="menu__text">Atempause</span></a></li>
+            <li><a href="#preise" data-scroll-to data-menu-link><span class="mono">05</span><span class="menu__text">Preise</span></a></li>
+            <li><a href="#gutschein" data-scroll-to data-menu-link><span class="mono">06</span><span class="menu__text">Gutschein</span></a></li>
+            <li><a href="#gut-zu-wissen" data-scroll-to data-menu-link><span class="mono">07</span><span class="menu__text">Gut zu wissen</span></a></li>
+            <li><a href="#kontakt" data-scroll-to data-menu-link><span class="mono">08</span><span class="menu__text">Kontakt</span></a></li>
+            <li><a href="#anfahrt" data-scroll-to data-menu-link><span class="mono">09</span><span class="menu__text">Anfahrt</span></a></li>
           </ol>
         </nav>
         <div class="menu__aside">
+          <a class="btn btn--light menu__book" href="#kontakt" data-booking-open>
+            <span data-roll>Termin anfragen</span>
+            <svg class="btn__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+          </a>
           <p class="mono">Termine nur mit Voranmeldung</p>
           <a class="menu__phone" href="tel:+41782249197">078&nbsp;224&nbsp;91&nbsp;97</a>
           <a href="mailto:massage_buergi@ggs.ch">massage_buergi@ggs.ch</a>
@@ -976,13 +1010,14 @@
           <div class="bform__send">
             <button class="btn btn--light" type="submit" data-send="mail">
               <span data-roll>Per E-Mail senden</span>
+              <svg class="btn__arrow" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
             </button>
             <button class="btn btn--line" type="submit" data-send="sms">
               <span data-roll>Per SMS senden</span>
             </button>
           </div>
-          <p class="bform__hint mono">
-            Deine Nachricht öffnet sich in deinem E-Mail- bzw. SMS-Programm. Auf dieser Website wird nichts gespeichert.
+          <p class="bform__hint mono" data-send-hint aria-live="polite">
+            Deine Anfrage öffnet sich als fertige Nachricht. Auf dieser Website wird nichts gespeichert.
           </p>
         </form>
       </div>

@@ -113,8 +113,9 @@ export function initMenu({ reduced }) {
         )
         .fromTo(
           items,
-          { yPercent: 60, opacity: 0 },
-          { yPercent: 0, opacity: 1, duration: 0.9, stagger: 0.05, ease: 'expo.out' },
+          // (y as well: closing leaves y: -10 behind)
+          { yPercent: 60, y: 0, opacity: 0 },
+          { yPercent: 0, y: 0, opacity: 1, duration: 0.9, stagger: 0.05, ease: 'expo.out' },
           '-=0.55',
         )
         .fromTo(aside, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.8, ease: 'expo.out' }, '<0.2')

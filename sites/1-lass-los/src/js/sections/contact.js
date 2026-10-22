@@ -49,10 +49,10 @@ export function initHours() {
 
     status.classList.remove('is-open')
     if (hasHours && now.decimal >= open && now.decimal < close) {
-      status.textContent = `Heute bis ${fmt(close)} · nur mit Anmeldung`
+      status.textContent = `Heute bis ${fmt(close)} · auf Voranmeldung`
       status.classList.add('is-open')
     } else if (hasHours && now.decimal < open) {
-      status.textContent = `Heute ab ${fmt(open)} · nur mit Anmeldung`
+      status.textContent = `Heute ab ${fmt(open)} · auf Voranmeldung`
     } else {
       // find next open day
       for (let i = 1; i <= 7; i++) {

@@ -29,8 +29,8 @@
 .header.is-hidden {
   transform: translateY(-110%);
 }
-/* keyboard focus or the open menu always bring the header back */
-.header:focus-within,
+/* keyboard focus or the open menu always bring the header back (a mouse click leaves it free to hide) */
+.header:has(:focus-visible),
 .menu-open .header {
   transform: none;
 }
@@ -142,6 +142,14 @@
   border-radius: 2px;
   background: currentColor;
   transition: height 0.4s var(--ease-out);
+}
+/* at rest the bars still read as a sound wave, not as «more» */
+.sound__bars i:nth-child(2),
+.sound__bars i:nth-child(4) {
+  height: 7px;
+}
+.sound__bars i:nth-child(3) {
+  height: 11px;
 }
 .sound[aria-pressed='true'] .sound__bars i {
   animation: bars 1.2s var(--ease-in-out) infinite alternate;
@@ -417,7 +425,7 @@
 }
 .loader__orb span {
   position: absolute;
-  inset: -28%;
+  inset: -16%; /* (the ring stays clear of «Atme ein»)*/
   border-radius: 50%;
   border: 1px solid rgb(239 232 221 / 0.12);
 }

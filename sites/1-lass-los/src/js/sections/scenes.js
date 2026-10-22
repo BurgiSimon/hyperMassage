@@ -70,7 +70,10 @@ export function initHeroScroll() {
     .to(title, { yPercent: 18, ease: 'none' }, 0)
     .to(qs('.hero__line--1', hero), { xPercent: -6, ease: 'none' }, 0)
     .to(qs('.hero__line--2', hero), { xPercent: 6, ease: 'none' }, 0)
-    .fromTo(['.hero__meta', '.hero__foot'], { opacity: 1, yPercent: 0 }, { opacity: 0, yPercent: -30, ease: 'none' }, 0)
+    .fromTo(['.hero__meta', '.hero__foot'], { opacity: 1, yPercent: 0 }, { opacity: 0, yPercent: -30, duration: 0.17, ease: 'power1.in' }, 0.02)
+    // the stones and the words dissolve before the page turns light (no hard edge, no clash with the header)
+    .to(['.hero__stage', '.hero__glow'], { opacity: 0, duration: 0.15, ease: 'power1.in' }, 0.03)
+    .to(title, { opacity: 0, duration: 0.16, ease: 'power1.in' }, 0.03)
 }
 
 /* ───────────── About ───────────── */
@@ -90,7 +93,7 @@ export function initAbout() {
   )
   gsap.fromTo(
     img,
-    { yPercent: -8, scale: 1.15 },
+    { yPercent: -3, scale: 1.05 },
     {
       yPercent: 0,
       scale: 1,

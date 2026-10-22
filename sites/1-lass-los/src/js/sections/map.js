@@ -40,12 +40,14 @@ export function initMap({ reduced }) {
       const h = host.clientHeight
       const aspect = w / h
       const wide = aspect > 1
-      const vbW = wide ? 1500 : 760
+      const vbW = wide ? 1500 : 640
       const vbH = vbW / aspect
-      const px = wide ? 0.64 : 0.5
+      const px = wide ? 0.64 : 0.36
       const py = wide ? 0.5 : 0.3
       svg.setAttribute('viewBox', `${-vbW * px} ${-vbH * py} ${vbW} ${vbH}`)
       svg.setAttribute('preserveAspectRatio', 'xMidYMid meet')
+      // on a phone the practice's name must stay readable (≈ 12 px)
+      label.setAttribute('transform', wide ? '' : `scale(${Math.max(1, (12 / 13) * (vbW / w)).toFixed(2)})`)
     }
     frame()
     window.addEventListener('resize', frame)
@@ -86,7 +88,7 @@ export function initMap({ reduced }) {
       start: 'top 35%',
       once: true,
       onEnter: () => {
-        gsap.to(pin, { scale: 1, duration: 1.2, ease: 'elastic.out(1, 0.45)' })
+        gsap.to(pin, { scale: 1, duration: 1.2, ease: 'expo.out' })
         gsap.to(label, { autoAlpha: 1, x: 0, duration: 1, ease: 'expo.out', delay: 0.3 })
       },
     })

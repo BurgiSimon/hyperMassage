@@ -90,8 +90,8 @@
 .header.is-hidden {
   transform: translateY(-101%);
 }
-/* keyboard focus or the open menu always bring the header back */
-.header:focus-within,
+/* keyboard focus or the open menu always bring the header back (a mouse click leaves it free to hide) */
+.header:has(:focus-visible),
 .menu-open .header {
   transform: none;
 }
