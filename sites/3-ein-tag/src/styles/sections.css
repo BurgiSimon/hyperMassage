@@ -723,6 +723,17 @@
     display: none;
   }
 }
+/* on a computer the request goes out by e-mail; SMS stays the first choice on phones */
+@media (hover: hover) and (pointer: fine) {
+  .bform__sms {
+    display: none;
+  }
+  .bform__mail {
+    background: var(--sun);
+    border-color: var(--sun);
+    color: #fff;
+  }
+}
 .postcard {
   position: sticky;
   top: 100px;

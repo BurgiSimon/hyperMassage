@@ -23,6 +23,7 @@ export function initBooking({ reduced, beforeOpen }) {
     if (r) r.checked = true
   }
 
+  let behind = []
   const open = (pre = {}) => {
     if (isOpen) return
     isOpen = true
@@ -31,6 +32,9 @@ export function initBooking({ reduced, beforeOpen }) {
     if (pre.service !== undefined) check('service', pre.service)
     if (pre.dur) check('dur', pre.dur)
     if (pre.when) when.value = pre.when
+    // the page behind the dialog is out of reach while it is open
+    behind = qsa('header, main, footer, [data-dock]').map((el) => [el, el.inert])
+    behind.forEach(([el]) => (el.inert = true))
     root.inert = false
     root.classList.add('is-open')
     document.dispatchEvent(new CustomEvent('overlay', { detail: { open: true, source: 'booking' } }))
@@ -50,6 +54,8 @@ export function initBooking({ reduced, beforeOpen }) {
     if (!isOpen) return
     isOpen = false
     root.inert = true
+    behind.forEach(([el, was]) => (el.inert = was))
+    behind = []
     document.dispatchEvent(new CustomEvent('overlay', { detail: { open: false, source: 'booking' } }))
     startScroll('booking')
     tl?.kill()

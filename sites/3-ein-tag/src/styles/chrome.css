@@ -117,6 +117,11 @@
 .header.is-hidden {
   transform: translateY(-110%);
 }
+/* keyboard focus or the open menu always bring the header back */
+.header:focus-within,
+.menu-open .header {
+  transform: none;
+}
 .brand {
   display: grid;
   text-decoration: none;
