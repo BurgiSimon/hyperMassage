@@ -3,7 +3,7 @@ import './styles/legal.css'
 import { qs, qsa } from './js/utils/helpers.js'
 import { initCursor } from './js/core/cursor.js'
 import { paintStill } from './js/gl/scene.js'
-import { nowHour, zurichDay } from './js/gl/sun.js'
+import { nowHour, zurichDay, STORY_DAY } from './js/gl/sun.js'
 
 initCursor()
 qsa('[data-year]').forEach((el) => (el.textContent = new Date().getFullYear()))
@@ -19,7 +19,7 @@ if (sky) {
     c.height = h
     const hour = sky.dataset.hour ? parseFloat(sky.dataset.hour) : nowHour()
     const aspect = w / h
-    if (paintStill(c, hour, { day: zurichDay(), azC: 326, fov: Math.min(130, Math.max(60, aspect * 72)) })) {
+    if (paintStill(c, hour, { day: sky.dataset.hour ? STORY_DAY : zurichDay(), azC: 326, fov: Math.min(130, Math.max(60, aspect * 72)) })) {
       sky.style.backgroundImage = `url(${c.toDataURL('image/jpeg', 0.85)})`
       sky.classList.add('is-painted')
     }

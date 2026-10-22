@@ -25,9 +25,9 @@ export function prepareHero({ reduced }) {
   const title = qs('[data-hero-title]')
   const fades = qsa('[data-hero-fade], .hero__greet, .hero__down')
   if (reduced || !title) return { play() {}, kinetic: null }
-  const lines = qsa('[data-hero-line]', title)
   gsap.set(fades, { opacity: 0, y: 18 })
-  gsap.set(lines, { opacity: 0 })
+  // (the title itself fades: its lines are rebuilt when the letters are split)
+  gsap.set(title, { opacity: 0 })
   let kin = null
   const ready = fontsReady().then(() => {
     kin = new Kinetic(title, { radius: 260, strength: 1, start: -1, stagger: 0.05 })
@@ -49,7 +49,7 @@ export function prepareHero({ reduced }) {
   return {
     play() {
       ready.then(() => {
-        gsap.to(lines, { opacity: 1, duration: 1.4, ease: 'power2.out', stagger: 0.18 })
+        gsap.to(title, { opacity: 1, duration: 1.2, ease: 'power2.out' })
         kin.release(0.25)
         gsap.to(fades, { opacity: 1, y: 0, duration: 1.2, ease: 'expo.out', stagger: 0.08, delay: 0.7, clearProps: 'transform' })
       })

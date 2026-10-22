@@ -72,12 +72,19 @@ export function splitText(el, { letters = true, wordClass = 'kw' } = {}) {
 export function freezeLines(visual, words) {
   visual.classList.remove('is-frozen')
   visual.querySelectorAll('br[data-k]').forEach((br) => br.remove())
-  let lastTop = null
+  // (a word that starts a new block – the hero's second line – breaks anyway)
+  const blockOf = (n) => {
+    let e = n.parentElement
+    while (e && e !== visual && getComputedStyle(e).display.startsWith('inline')) e = e.parentElement
+    return e
+  }
+  let last = null
   const breaks = []
   for (const w of words) {
     const top = w.getBoundingClientRect().top
-    if (lastTop !== null && top > lastTop + 4) breaks.push(w)
-    lastTop = top
+    const block = blockOf(w)
+    if (last && top > last.top + 4 && block === last.block) breaks.push(w)
+    last = { top, block }
   }
   for (const w of breaks) {
     const br = document.createElement('br')

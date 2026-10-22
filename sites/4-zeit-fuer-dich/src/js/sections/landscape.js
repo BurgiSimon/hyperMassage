@@ -137,7 +137,7 @@ export function initLandscape({ scene, reduced }) {
 
   // ───── summit labels on the real peaks ─────
   const peaks = qs('[data-peaks]')
-  const blockers = qsa('.hero__title .kvis, .hero__title, .hero__card, .hero__greet, .hero__hint, .hero__down')
+  const blockers = () => qsa('.hero__title .kw, .hero__card, .hero__greet, .hero__hint, .hero__down')
   const placePeaks = () => {
     if (!scene || !peaks) return
     const W = window.innerWidth
@@ -145,7 +145,7 @@ export function initLandscape({ scene, reduced }) {
     peaks.classList.add('is-ready') // (labels must be displayable to be measured)
     const hr = hero.getBoundingClientRect()
     const pad = 12
-    const taken = blockers
+    const taken = blockers()
       .filter((b) => b.offsetParent !== null)
       .map((b) => b.getBoundingClientRect())
       .map((r) => ({ l: r.left - pad, r: r.right + pad, t: r.top - hr.top - pad, b: r.bottom - hr.top + pad }))

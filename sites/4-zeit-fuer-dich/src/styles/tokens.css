@@ -109,7 +109,7 @@
   --f-sans: 'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --f-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  --fs-hero: clamp(4.4rem, 15.2vw, 16.5rem);
+  --fs-hero: clamp(5.4rem, 13.6vw, 15rem);
   --fs-display: clamp(2.55rem, 5.6vw, 6.3rem);
   --fs-display-md: clamp(2.2rem, 3.7vw, 4.1rem);
   --fs-statement: clamp(1.85rem, 3.9vw, 4.25rem);

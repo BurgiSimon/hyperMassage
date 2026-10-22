@@ -334,7 +334,7 @@
 }
 .about__portrait {
   grid-column: 1 / span 5;
-  max-width: 440px;
+  max-width: 380px;
 }
 .about__frame {
   position: relative;
@@ -440,6 +440,10 @@
   }
   .facts dd {
     font-size: 44px;
+  }
+  /* (the place name needs the whole row) */
+  .facts > div:last-child {
+    grid-column: 1 / -1;
   }
 }
 
@@ -870,8 +874,8 @@
 .cairn {
   position: absolute;
   left: 50%;
-  top: 9%;
-  width: 37%;
+  top: 14%;
+  width: 34%;
   aspect-ratio: 556 / 983;
   transform: translateX(-50%);
 }
