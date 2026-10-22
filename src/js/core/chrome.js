@@ -122,7 +122,21 @@ export function initMenu({ reduced }) {
   }
 
   toggle.addEventListener('click', () => setOpen(!open))
-  document.addEventListener('keydown', (e) => e.key === 'Escape' && open && setOpen(false))
+  document.addEventListener('keydown', (e) => {
+    if (!open) return
+    if (e.key === 'Escape') {
+      setOpen(false)
+      toggle.focus({ preventScroll: true })
+    }
+    if (e.key === 'Tab') {
+      // cycle between the menu links and the close button
+      const focusables = [toggle, ...qsa('a[href]', menu)]
+      const i = focusables.indexOf(document.activeElement)
+      const next = e.shiftKey ? i - 1 : i + 1
+      e.preventDefault()
+      focusables[(next + focusables.length) % focusables.length].focus()
+    }
+  })
 
   return { close: () => setOpen(false) }
 }
