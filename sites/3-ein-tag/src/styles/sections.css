@@ -244,7 +244,8 @@
   line-height: 1.12;
   max-width: 17em;
   text-wrap: balance;
-  text-shadow: 0 0 28px var(--chrome-bg);
+  /* a halo of sky colour keeps the line readable where it crosses the ridge */
+  text-shadow: 0 0 14px var(--chrome-bg), 0 0 32px var(--chrome-bg), 0 0 56px var(--chrome-bg);
 }
 
 /* ───────────────────────── Pages: cards of the day ───────────────────────── */
