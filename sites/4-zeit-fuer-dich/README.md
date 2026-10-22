@@ -50,7 +50,7 @@ Extras: the sheet cross-fades its colours from section to section, and the heade
 - Without WebGL, a painted skyline replaces the live scene and everything else still works. The shader compiles in the background where the browser supports it; on a slow or software-only GPU the scene lowers its resolution, draws only when something changes, and rests whenever the landscape is covered.
 - The site publishes `HealthAndBeautyBusiness` JSON-LD with address, geo coordinates, opening hours, services, price range and payment methods. It also has an Open Graph image, favicons, a web manifest, `sitemap.xml` and `robots.txt`.
 - Fonts are self-hosted and slimmed to what the site uses, and the page makes **no third-party requests**.
-- Lighthouse (production build): accessibility, best practices and SEO 100 on desktop and mobile. Performance was measured with software-rendered WebGL in a container (desktop ~80, mobile ~70); most of the blocking time is the software GPU compiling the landscape shader, which a real GPU does in the background.
+- Lighthouse (production build): accessibility, best practices and SEO 100 on desktop and mobile. Performance was measured with software-rendered WebGL in a container (desktop 82–88, mobile 68–72); most of the blocking time is the software GPU compiling the landscape shader, which browsers with a real GPU can do in the background.
 
 ## Development
 
