@@ -52,7 +52,8 @@
 }
 .brand__text {
   display: grid;
-  line-height: 1.05;
+  gap: 0.2rem;
+  line-height: 1;
 }
 .brand__name {
   font-family: var(--font-serif);
@@ -425,7 +426,7 @@
   font-weight: 300;
   font-variation-settings:
     'SOFT' 100,
-    'WONK' 1;
+    'WONK' 0;
 }
 .loader__word {
   grid-area: 1 / 1;

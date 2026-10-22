@@ -179,6 +179,11 @@ address {
   color: var(--accent);
   font-variation-settings:
     'SOFT' 100,
+    'WONK' 0;
+}
+.hero__title em {
+  font-variation-settings:
+    'SOFT' 100,
     'WONK' 1;
 }
 .display sup {
@@ -281,6 +286,13 @@ address {
 }
 [data-active-theme='clay'] .btn--dark::before {
   background: var(--basalt-3);
+}
+.btn--solid {
+  --btn-bg: var(--fg);
+  --btn-fg: var(--bg);
+}
+.btn--solid::before {
+  background: var(--accent);
 }
 .btn--line {
   border: 1px solid var(--line);
@@ -568,16 +580,9 @@ button:hover .roll__b {
   opacity: 0;
   transform: translateY(1.75rem);
 }
-.js.motion .split-line {
-  display: block;
-  overflow: hidden;
-  padding-bottom: 0.08em;
-  margin-bottom: -0.08em;
-}
-.js.motion .split-line__inner {
-  display: block;
-  transform: translateY(110%);
-  will-change: transform;
+.split-line-mask {
+  padding-bottom: 0.1em;
+  margin-bottom: -0.1em;
 }
 
 @media (prefers-reduced-motion: reduce) {

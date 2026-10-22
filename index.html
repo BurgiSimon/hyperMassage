@@ -33,10 +33,16 @@
     <meta name="robots" content="max-image-preview:large" />
 
     <script>
-      document.documentElement.classList.replace('no-js', 'js')
-      try {
-        if (sessionStorage.getItem('cb-visited')) document.documentElement.classList.add('is-revisit')
-      } catch (e) {}
+      ;(function (d) {
+        d.classList.replace('no-js', 'js')
+        try {
+          if (sessionStorage.getItem('cb-visited')) d.classList.add('is-revisit')
+        } catch (e) {}
+        // safety net: if the app never boots, fall back to the static page
+        setTimeout(function () {
+          if (!d.classList.contains('app-booted')) d.classList.replace('js', 'no-js')
+        }, 7000)
+      })(document.documentElement)
     </script>
 
     <script type="application/ld+json">
@@ -412,7 +418,7 @@
               weiterliest. So fühlt sich der Anfang einer Auszeit an.
             </p>
             <div class="breath__actions" data-reveal-fade>
-              <button class="btn btn--light" type="button" data-breath-start data-magnetic>
+              <button class="btn btn--solid" type="button" data-breath-start data-magnetic>
                 <span data-roll data-breath-btn-label>Atemübung starten</span>
               </button>
               <p class="breath__progress mono" data-breath-progress aria-live="polite"></p>

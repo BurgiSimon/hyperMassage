@@ -81,8 +81,8 @@ footer[data-theme] {
 }
 .hero__hint {
   position: absolute;
-  left: 50%;
-  top: 74%;
+  left: calc(50% + clamp(7rem, 15vw, 15rem));
+  top: 46%;
   z-index: 2;
   display: inline-flex;
   align-items: center;
@@ -98,7 +98,6 @@ footer[data-theme] {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--fg-soft);
-  transform: translateX(-50%);
   pointer-events: none;
   transition: opacity 0.8s;
 }
@@ -205,7 +204,10 @@ footer[data-theme] {
     gap: 1.25rem;
   }
   .hero__hint {
-    top: 58%;
+    left: 50%;
+    top: auto;
+    bottom: calc(50svh - 3rem);
+    transform: translateX(-50%);
   }
   .hero__foot > span:first-child {
     display: none;
@@ -251,6 +253,7 @@ footer[data-theme] {
 .word {
   display: inline-block;
   white-space: pre;
+  text-indent: 0;
 }
 .js.motion [data-scrub-words] .word {
   opacity: 0.16;
@@ -499,7 +502,7 @@ footer[data-theme] {
   letter-spacing: -0.03em;
   font-variation-settings:
     'SOFT' 100,
-    'WONK' 1;
+    'WONK' 0;
   will-change: transform;
 }
 .marquee__track i {
@@ -794,7 +797,7 @@ footer[data-theme] {
   letter-spacing: -0.02em;
   font-variation-settings:
     'SOFT' 100,
-    'WONK' 1;
+    'WONK' 0;
 }
 .breath__count {
   min-height: 1.4em;
@@ -1190,7 +1193,7 @@ footer[data-theme] {
   color: var(--clay);
   font-variation-settings:
     'SOFT' 100,
-    'WONK' 1;
+    'WONK' 0;
 }
 .vcard__people {
   display: grid;
@@ -1216,7 +1219,7 @@ footer[data-theme] {
   white-space: nowrap;
   font-variation-settings:
     'SOFT' 100,
-    'WONK' 1;
+    'WONK' 0;
 }
 .vcard__bottom {
   display: flex;
@@ -1792,7 +1795,8 @@ footer[data-theme] {
   font-variant-numeric: tabular-nums;
 }
 .footer__wordmark {
-  padding-inline: 1vw;
+  overflow: hidden;
+  padding: 0.04em 0.75vw 0;
   font-family: var(--font-serif);
   font-size: 15.6vw;
   font-weight: 300;
