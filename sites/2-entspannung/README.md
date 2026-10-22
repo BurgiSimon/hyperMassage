@@ -47,7 +47,7 @@ The site also includes a custom cursor, smooth scrolling, a mobile action dock, 
 - All real content is semantic HTML. It works without JavaScript; the booking links then lead to the contact section.
 - The site publishes `HealthAndBeautyBusiness` JSON-LD with address, geo coordinates, opening hours, services, price range and payment methods. It also has an Open Graph image, favicons, a web manifest, `sitemap.xml` and `robots.txt`.
 - Fonts are self-hosted, and the page makes **no third-party requests**.
-- Lighthouse (production build): desktop 100 / 100 / 100 / 100, mobile 96 / 100 / 100 / 100.
+- Lighthouse (production build): desktop 100 / 100 / 100 / 100, mobile 97 / 100 / 100 / 100.
 
 ## Development
 
@@ -56,7 +56,7 @@ npm install
 npm run dev       # local dev server
 npm run build     # production build → dist/
 npm run preview   # serve the build on http://localhost:4174
-npm run verify    # (with preview running) 24 browser checks: booking, menu, focus, locks, exercise, sizes, slow fonts, no-JS …
+npm run verify    # (with preview running) 32 browser checks: booking, menu, focus, locks, exercise, sizes, slow fonts, no-JS …
 npm run assets    # (with preview running) favicons and share image
 ```
 
