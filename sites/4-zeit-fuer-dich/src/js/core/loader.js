@@ -35,7 +35,8 @@ export function runLoader({ reduced, revisit }) {
     new Promise((r) => setTimeout(r, 5000)),
   ])
 
-  if (reduced) {
+  // (a second visit in the same session: no ceremony)
+  if (reduced || revisit) {
     return ready.then(
       () =>
         new Promise((resolve) => {
@@ -56,7 +57,7 @@ export function runLoader({ reduced, revisit }) {
   ridge.style.strokeDashoffset = len
 
   return new Promise((resolve) => {
-    const inhale = revisit ? 0.9 : 2
+    const inhale = 1.3
     const tl = gsap.timeline()
     // breathe in: the skyline is drawn, the word fills and sharpens
     tl.to(ridge, { strokeDashoffset: 0, duration: inhale, ease: 'power2.inOut' }, 0)
@@ -74,13 +75,13 @@ export function runLoader({ reduced, revisit }) {
     tl.add(() => {
       word.textContent = 'und aus.'
     })
-    tl.to(word, { fontWeight: 280, fontVariationSettings: "'SOFT' 100", letterSpacing: '-0.035em', duration: 1.5, ease: 'sine.inOut' })
-    tl.to(sun, { opacity: 1, yPercent: -40, scale: 1, duration: 1.5, ease: 'power2.out' }, '<')
+    tl.to(word, { fontWeight: 280, fontVariationSettings: "'SOFT' 100", letterSpacing: '-0.035em', duration: 1.1, ease: 'sine.inOut' })
+    tl.to(sun, { opacity: 1, yPercent: -40, scale: 1, duration: 1.1, ease: 'power2.out' }, '<')
     tl.add(() => {
       el.classList.add('is-done')
       resolve()
-    }, '-=0.4')
-    tl.to([word, qs('.loader__line', el)], { opacity: 0, y: -12, duration: 0.45, ease: 'power2.in' }, '-=0.2')
-    tl.to(el, { autoAlpha: 0, duration: 1.1, ease: 'power2.inOut', onComplete: () => el.remove() }, '-=0.2')
+    }, '-=0.35')
+    tl.to([word, qs('.loader__line', el)], { opacity: 0, y: -12, duration: 0.4, ease: 'power2.in' }, '-=0.2')
+    tl.to(el, { autoAlpha: 0, duration: 0.8, ease: 'power2.inOut', onComplete: () => el.remove() }, '-=0.15')
   })
 }

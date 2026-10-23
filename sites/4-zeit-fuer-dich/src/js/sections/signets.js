@@ -16,7 +16,8 @@ const readColors = (el) => {
     fg: cs.getPropertyValue('--fg').trim() || '#1b1815',
     soft: cs.getPropertyValue('--fg-soft').trim() || 'rgba(27,24,21,.6)',
     line: cs.getPropertyValue('--line').trim() || 'rgba(27,24,21,.14)',
-    accent: cs.getPropertyValue('--accent').trim() || '#b04f2c',
+    accent: cs.getPropertyValue('--accent').trim() || '#a8471f',
+    bg: cs.getPropertyValue('--bg').trim() || '#f1e9dd',
   }
 }
 
@@ -104,13 +105,6 @@ function neck(ctx, w, h, t, p, c, s) {
     ctx.fill()
   }
   ctx.globalAlpha = 1
-  if (!s.mini) {
-    ctx.fillStyle = c.soft
-    ctx.font = `${10 * s.dpr}px "Geist Mono", monospace`
-    ctx.textAlign = 'left'
-    ctx.fillText('C1', X(0.53), Y(0.39))
-    ctx.fillText('C7', X(0.53), Y(0.57))
-  }
 }
 
 /* ───── 03 Manuelle Schmerztherapie: one precise point of pressure ───── */
@@ -206,62 +200,73 @@ function wave(ctx, w, h, t, p, c, s) {
   ctx.globalAlpha = 1
 }
 
-/* ───── 05 Hot Stone: warm basalt, rising heat ───── */
+/* ───── 05 Hot Stone: three warm stones drawn as contour lines, an ember below, heat rising ───── */
 function stone(ctx, w, h, t, p, c, s) {
-  const S = Math.min(w, h * 1.3)
+  const S = Math.min(w, h * 1.4)
   const cx = w / 2
-  const base = h * 0.74
+  const base = h * 0.7
   const near = p.inside ? 1 - Math.min(1, Math.hypot(p.x - cx, p.y - base) / (S * 0.6)) : 0
-  s.warm = (s.warm ?? 0.4) + ((0.45 + near * 0.55) - (s.warm ?? 0.4)) * 0.05
+  s.warm = (s.warm ?? 0.4) + (0.45 + near * 0.55 - (s.warm ?? 0.4)) * 0.05
 
-  // glow
-  const g = ctx.createRadialGradient(cx, base, 0, cx, base, S * 0.55)
-  g.addColorStop(0, `rgba(227,129,90,${0.42 * s.warm})`)
+  // the ember under the stones
+  const g = ctx.createRadialGradient(cx, base + S * 0.05, 0, cx, base + S * 0.05, S * 0.5)
+  g.addColorStop(0, `rgba(227,129,90,${0.34 * s.warm})`)
   g.addColorStop(1, 'rgba(227,129,90,0)')
   ctx.fillStyle = g
   ctx.fillRect(0, 0, w, h)
 
-  // heat shimmer
+  // heat rising from the stones
   ctx.strokeStyle = c.accent
-  ctx.lineWidth = 1.2 * s.dpr
-  const cols = 7
+  ctx.lineWidth = 1.1 * s.dpr
+  const cols = 5
   for (let i = 0; i < cols; i++) {
-    const x0 = cx + (i - (cols - 1) / 2) * S * 0.075
+    const x0 = cx + (i - (cols - 1) / 2) * S * 0.09
+    const top = h * 0.08
+    const from = base - S * 0.2
     ctx.beginPath()
-    for (let y = base - S * 0.12; y > h * 0.06; y -= 3 * s.dpr) {
-      const k = (base - y) / (base - h * 0.06)
-      const x = x0 + Math.sin(y * 0.03 / s.dpr - t * 2.2 + i * 1.3) * S * 0.018 * (0.3 + k) * (0.6 + s.warm)
-      ctx.globalAlpha = Math.max(0, (1 - k) * 0.7 * s.warm)
-      ctx.lineTo(x, y)
+    for (let y = from; y > top; y -= 3 * s.dpr) {
+      const k = (from - y) / (from - top)
+      const x = x0 + Math.sin(y * 0.035 / s.dpr - t * 2 + i * 1.7) * S * 0.016 * (0.3 + k)
+      y === from ? ctx.moveTo(x, y) : ctx.lineTo(x, y)
     }
+    ctx.globalAlpha = 0.25 + 0.45 * s.warm
     ctx.stroke()
   }
-  ctx.globalAlpha = 1
 
-  // stones
+  // stones as nested contour lines (a little relief map of each), the lowest ring glowing
   const stones = [
-    [-0.2, 0.0, 0.17, 0.07, -0.05],
-    [0.13, 0.01, 0.2, 0.08, 0.04],
-    [-0.02, -0.075, 0.13, 0.055, 0.02],
+    [-0.19, 0.03, 0.17, 0.065, -0.05],
+    [0.15, 0.04, 0.19, 0.072, 0.04],
+    [-0.01, -0.06, 0.13, 0.05, 0.02],
   ]
+  const rings = s.mini ? 3 : 6
   stones.forEach(([dx, dy, rx, ry, rot], i) => {
     const x = cx + dx * S
     const y = base + dy * S + Math.sin(t * 0.8 + i) * 0.6 * s.dpr
-    const grd = ctx.createRadialGradient(x - rx * S * 0.35, y - ry * S * 0.6, 0, x, y, rx * S * 1.1)
-    grd.addColorStop(0, '#6b5f55')
-    grd.addColorStop(0.45, '#2c2622')
-    grd.addColorStop(1, '#14110e')
-    ctx.fillStyle = grd
+    // (cover what lies behind, so the stones overlap like stones)
+    ctx.globalAlpha = 1
+    ctx.fillStyle = c.bg
     ctx.beginPath()
     ctx.ellipse(x, y, rx * S, ry * S, rot, 0, TAU)
     ctx.fill()
-    // ember rim
-    ctx.strokeStyle = `rgba(255,140,80,${0.35 + 0.5 * s.warm})`
-    ctx.lineWidth = 1.5 * s.dpr
+    for (let r = 0; r < rings; r++) {
+      const k = 1 - r / rings
+      ctx.beginPath()
+      ctx.ellipse(x - rx * S * 0.12 * (1 - k), y - ry * S * 0.35 * (1 - k), rx * S * k, ry * S * k, rot, 0, TAU)
+      ctx.strokeStyle = c.fg
+      ctx.globalAlpha = 0.25 + 0.5 * k
+      ctx.lineWidth = (r ? 1 : 1.4) * s.dpr
+      ctx.stroke()
+    }
+    // the warm underside
     ctx.beginPath()
-    ctx.ellipse(x, y, rx * S, ry * S, rot, Math.PI * 0.05, Math.PI * 0.95)
+    ctx.ellipse(x, y, rx * S, ry * S, rot, Math.PI * 0.08, Math.PI * 0.92)
+    ctx.strokeStyle = c.accent
+    ctx.globalAlpha = 0.45 + 0.55 * s.warm
+    ctx.lineWidth = 2 * s.dpr
     ctx.stroke()
   })
+  ctx.globalAlpha = 1
 }
 
 const DRAW = { classic, neck, point, wave, stone }

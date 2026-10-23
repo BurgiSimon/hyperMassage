@@ -1,4 +1,4 @@
-import { qs, qsa, clamp, HOURS, DAY_NAMES, MONTHS, fmtTime, nextWeekday, onVisibility } from '../utils/helpers.js'
+import { qs, qsa, clamp, HOURS, DAY_NAMES, MONTHS, fmtTime, nextWeekday, addDays, zurichNow, onVisibility } from '../utils/helpers.js'
 import { paintStill } from '../gl/scene.js'
 import { zurichDay } from '../gl/sun.js'
 
@@ -40,6 +40,20 @@ export function initPlanner({ webgl }) {
   }
 
   const state = { day: 1, dur: 60, start: 10 * 60 }
+  // (a browser may restore the form after going back: start from what is checked)
+  const fromForm = () => {
+    state.day = Number(qs('input[name="p-day"]:checked', root)?.value || 1)
+    state.dur = Number(qs('input[name="p-dur"]:checked', root)?.value || 60)
+  }
+  fromForm()
+  /** the next date on the chosen weekday – next week if today's slot has already begun */
+  const upcoming = () => {
+    const today = zurichDay()
+    const date = nextWeekday(state.day, today)
+    const now = zurichNow()
+    const isToday = date.y === today.y && date.m === today.m && date.d === today.d
+    return isToday && state.start <= now.hour * 60 + now.minute ? addDays(date, 7) : date
+  }
   const range = () => {
     const [o, c] = HOURS[state.day]
     return [o * 60, c * 60 - state.dur]
@@ -58,13 +72,15 @@ export function initPlanner({ webgl }) {
     slotTime.textContent = from
     const isHot = hot.checked
     const price = PRICES[state.dur] + (isHot ? 15 : 0)
-    const text = `${DAY_NAMES[state.day]}, ${from} – ${to} · ${state.dur}\u00a0Minuten${isHot ? ' Hot Stone' : ''} · CHF\u00a0${price}`
+    // (a separator stays with the word before it: never at the start of a line)
+    const text = `${DAY_NAMES[state.day]}, ${from}\u00a0–\u00a0${to}\u00a0· ${state.dur}\u00a0Minuten${isHot ? '\u00a0Hot\u00a0Stone' : ''}\u00a0· CHF\u00a0${price}`
     summary.textContent = text
     slot.setAttribute('aria-valuemin', lo)
     slot.setAttribute('aria-valuemax', hi)
     slot.setAttribute('aria-valuenow', state.start)
     slot.setAttribute('aria-valuetext', `${DAY_NAMES[state.day]} ${from} bis ${to}`)
-    cta.dataset.when = `${DAY_NAMES[state.day]}, ${from} – ${to} Uhr`
+    const date = upcoming()
+    cta.dataset.when = `${DAY_NAMES[state.day]}, ${from} – ${to} Uhr (z. B. am ${date.d}. ${MONTHS[date.m - 1]})`
     cta.dataset.dur = state.dur
     // only Hot Stone changes the treatment; otherwise the visitor's choice stays
     if (isHot) {
@@ -88,10 +104,10 @@ export function initPlanner({ webgl }) {
   const paintSky = () => {
     queued = false
     if (!visible || !sky) return
-    const date = nextWeekday(state.day, zurichDay())
+    const date = upcoming()
     const mid = (state.start + state.dur / 2) / 60
     const key = `${date.y}-${date.m}-${date.d}-${mid}`
-    caption.innerHTML = `Der Himmel über Kestenholz<br />${DAY_NAMES[state.day]}, ${date.d}. ${MONTHS[date.m - 1]}, ${fmtTime(mid)} Uhr`
+    caption.innerHTML = `Der Himmel über Kestenholz<br />${DAY_NAMES[state.day]}, ${date.d}.&nbsp;${MONTHS[date.m - 1]}, ${fmtTime(state.start / 60)}&nbsp;–&nbsp;${fmtTime((state.start + state.dur) / 60)}&nbsp;Uhr`
     if (key === painted) return
     const r = sky.getBoundingClientRect()
     if (!r.width) return
@@ -195,4 +211,9 @@ export function initPlanner({ webgl }) {
   })
   slot.setAttribute('data-cursor', 'Verschieben')
   render()
+  window.addEventListener('pageshow', () => {
+    fromForm()
+    render()
+    preview()
+  })
 }

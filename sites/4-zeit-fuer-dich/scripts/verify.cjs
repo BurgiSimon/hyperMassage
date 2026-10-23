@@ -127,7 +127,8 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
 
     await jump(page, '#atempause', 0)
     await press(page, '[data-breath-start]')
-    await wait(page, 3200)
+    // (the stones settle first, then the first breath in lifts them)
+    await wait(page, 4600)
     const br = await page.evaluate(() => ({
       label: document.querySelector('[data-breath-label]').textContent,
       lift: parseFloat(document.querySelector('[data-breath]').style.getPropertyValue('--lift')),
@@ -138,7 +139,7 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
     await page.keyboard.press('Escape')
     await wait(page, 600)
     const brEnd = await page.evaluate(() => ({ btn: document.querySelector('[data-breath-btn-label]').textContent, focus: document.body.classList.contains('is-breathing') }))
-    ok('breathing pause: the stones lift with the breath in, the headline tenses; Escape ends it', br.label === 'Atme ein' && br.lift > 0.3 && br.btn === 'Beenden' && br.focus && br.k < -0.05 && brEnd.btn === 'Atemübung starten' && !brEnd.focus, JSON.stringify({ br, brEnd }))
+    ok('breathing pause: the stones lift with the breath in, the headline tenses; Escape ends it', ['Atme ein', 'Halten'].includes(br.label) && br.lift > 0.3 && br.btn === 'Beenden' && br.focus && br.k < -0.05 && brEnd.btn === 'Atemübung starten' && !brEnd.focus, JSON.stringify({ br, brEnd }))
     await ctx.close()
   }
 
@@ -170,7 +171,7 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
         return hi - lo > 120
       })(),
     }))
-    ok('planner: Tuesday starts at 8:00, arrows move by 15 min, the window shows that sky', /Dienstag, 8:00 – 9:00/.test(home) && /8:30 – 9:30/.test(moved.sum) && /Dienstag, \d+\. \w+, 9:00 Uhr/.test(moved.caption) && moved.painted, JSON.stringify({ home, ...moved }))
+    ok('planner: Tuesday starts at 8:00, arrows move by 15 min, the window shows that sky', /Dienstag, 8:00\s–\s9:00/.test(home) && /8:30\s–\s9:30/.test(moved.sum) && /Dienstag, \d+\.\s\S+, 8:30\s–\s9:30\sUhr/.test(moved.caption) && moved.painted, JSON.stringify({ home, ...moved }))
     await page.click('[data-from-planner]')
     await wait(page, 1100)
     const pre = await page.evaluate(() => ({
@@ -178,7 +179,7 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
       focus: document.querySelector('.booking__card').contains(document.activeElement),
       locked: document.documentElement.style.overflow === 'hidden',
     }))
-    ok('planner fills in the request; dialog takes focus and locks the page', /Dienstag, 8:30/.test(pre.when) && pre.focus && pre.locked, JSON.stringify(pre))
+    ok('planner fills in the request (with a date); dialog takes focus and locks the page', /^Dienstag, 8:30 – 9:30 Uhr \(z\. B\. am \d+\. \S+\)$/.test(pre.when) && pre.focus && pre.locked, JSON.stringify(pre))
     for (let i = 0; i < 30; i++) await page.keyboard.press('Tab')
     ok('focus stays inside the dialog', await page.evaluate(() => document.querySelector('.booking__card').contains(document.activeElement)))
     await page.keyboard.press('Escape')
@@ -323,7 +324,7 @@ const GL = ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-
     await page.mouse.up()
     await wait(page, 300)
     const sum = await page.evaluate(() => document.querySelector('[data-p-summary]').textContent)
-    ok('planner: nudging the last short slot keeps its time', /18:30 – 19:00/.test(sum), `(${sum})`)
+    ok('planner: nudging the last short slot keeps its time', /18:30\s–\s19:00/.test(sum), `(${sum})`)
     await ctx.close()
   }
 

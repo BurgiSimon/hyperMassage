@@ -67,6 +67,7 @@ export function initLandscape({ scene, reduced }) {
     html.style.setProperty('--sky-ink-soft', light ? 'rgb(29 25 22 / 0.72)' : 'rgb(243 234 217 / 0.78)')
     html.style.setProperty('--chrome-sky', light ? 'rgb(241 233 221 / 0.62)' : 'rgb(23 19 15 / 0.42)')
     html.style.setProperty('--sky-halo', light ? 'rgb(255 250 240 / 0.35)' : 'rgb(10 8 6 / 0.35)')
+    html.style.setProperty('--sky-ground', light ? '#f1e9dd' : '#17130f')
     document.dispatchEvent(new CustomEvent('sky:tone', { detail: sky }))
   }
 
@@ -189,16 +190,28 @@ export function initLandscape({ scene, reduced }) {
   // ───── drag the sun across the sky ─────
   const hint = qs('[data-sun-hint]')
   const hintText = qs('[data-sun-hint-text]')
+  const reset = qs('[data-sun-reset]')
+  const HINT = 'Zieh die Sonne über den Himmel'
+  // back to the real «now»
+  const toNow = () => {
+    live.override = null
+    heroLook = look(live.hour, today)
+    update()
+    hintText.textContent = HINT
+    if (reset) reset.hidden = true
+  }
+  reset?.addEventListener('click', toNow)
   const canDrag = !!(scene && hero && !reduced)
   if (canDrag) {
     let dragging = false
-    const isInteractive = (el) => el.closest('a, button, input, label, .peaks li, .hero__card')
+    const isInteractive = (el) => el.closest('a, button, input, label, .peaks li, .hero__card, .hero__hint')
     const setFromX = (x) => {
       // (the sun is drawn for today: search today's path)
       const hr = scene.hourFromX(x, live.override ?? live.hour, today)
       live.override = hr
       heroLook = look(hr, today)
       update()
+      if (reset) reset.hidden = false
       const dayOpen = HOURS[zurichNow().day]
       const isOpen = dayOpen && hr >= dayOpen[0] && hr < dayOpen[1]
       hintText.textContent = `${fmtTime(hr)} Uhr${dayOpen ? (isOpen ? ' · Praxis offen' : ' · Praxis geschlossen') : ''}`
@@ -209,6 +222,8 @@ export function initLandscape({ scene, reduced }) {
     hero.addEventListener('pointerdown', (e) => {
       if (e.button > 0 || isInteractive(e.target) || window.scrollY > 40) return
       start = { x: e.clientX, y: e.clientY, mouse: e.pointerType === 'mouse' }
+      // (a mouse drag across the title must not select it)
+      if (start.mouse) e.preventDefault()
     })
     hero.addEventListener('pointermove', (e) => {
       if (!dragging && start) {
@@ -217,7 +232,7 @@ export function initLandscape({ scene, reduced }) {
         dragging = true
         hero.classList.add('is-dragging')
         hero.setPointerCapture(e.pointerId)
-        gsap.to(hint, { opacity: 1, duration: 0.4, overwrite: true })
+        gsap.to(hint, { autoAlpha: 1, duration: 0.4, overwrite: true })
       }
       if (dragging) setFromX(e.clientX)
     })
@@ -232,10 +247,7 @@ export function initLandscape({ scene, reduced }) {
     // back to the real «now»
     hero.addEventListener('dblclick', (e) => {
       if (isInteractive(e.target) || live.override === null) return
-      live.override = null
-      heroLook = look(live.hour, today)
-      update()
-      hintText.textContent = 'Zieh die Sonne über den Himmel'
+      toNow()
     })
     hero.classList.add('can-drag')
     // the cursor offers the sun only where it can be dragged
@@ -250,11 +262,11 @@ export function initLandscape({ scene, reduced }) {
     /** after the loader: offer the sun to drag */
     showHint() {
       if (!hint || !canDrag) return
-      gsap.to(hint, { opacity: 1, duration: 1, delay: 2.2 })
+      gsap.to(hint, { autoAlpha: 1, duration: 1, delay: 3 })
       // once the visitor scrolls on, the hint has done its job
       const onScroll = () => {
         if (window.scrollY < 120) return
-        gsap.to(hint, { opacity: 0, duration: 0.6, overwrite: true })
+        gsap.to(hint, { autoAlpha: 0, duration: 0.6, overwrite: true })
         window.removeEventListener('scroll', onScroll)
       }
       window.addEventListener('scroll', onScroll, { passive: true })
